@@ -15,6 +15,14 @@ let padawanUserId: string;
 let otherUserId: string;
 
 beforeAll(async () => {
+  // Clean up any potential dirty state from previous failed runs
+  await pool.query(`
+    DELETE FROM matching 
+    WHERE padawan_id IN (SELECT perfil_id FROM perfil_aprendiz pa JOIN usuario u ON pa.usuario_id = u.usuario_id WHERE u.email LIKE '%@test.com')
+       OR mentor_id IN (SELECT mentor_id FROM mentor m JOIN usuario u ON m.usuario_id = u.usuario_id WHERE u.email LIKE '%@test.com')
+  `);
+  await pool.query(`DELETE FROM usuario WHERE email IN ('padawan@test.com', 'other@test.com', 'mentor@test.com')`);
+
   // Create test users
   const hash = await bcrypt.hash('Test1234!', 12);
 
@@ -93,6 +101,11 @@ beforeAll(async () => {
 afterAll(async () => {
   // Clean up test data
   await pool.query(`DELETE FROM okr_historial WHERE usuario_id IN ($1, $2)`, [padawanUserId, otherUserId]);
+  await pool.query(`
+    DELETE FROM matching 
+    WHERE padawan_id IN (SELECT perfil_id FROM perfil_aprendiz pa JOIN usuario u ON pa.usuario_id = u.usuario_id WHERE u.email LIKE '%@test.com')
+       OR mentor_id IN (SELECT mentor_id FROM mentor m JOIN usuario u ON m.usuario_id = u.usuario_id WHERE u.email LIKE '%@test.com')
+  `);
   await pool.query(`DELETE FROM usuario WHERE email IN ('padawan@test.com', 'other@test.com', 'mentor@test.com')`);
   await pool.end();
 });
