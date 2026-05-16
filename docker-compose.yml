@@ -1,34 +1,13 @@
-
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: nexus_user
-      POSTGRES_PASSWORD: nexus_pass
-      POSTGRES_DB: nexus_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./backend/src/db/migrations:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nexus_user -d nexus_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     build: ./backend
     ports:
       - "3001:3001"
     environment:
-      DATABASE_URL: postgresql://nexus_user:nexus_pass@db:5432/nexus_db
-      JWT_SECRET: nexus_dev_secret_change_in_prod
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
       PORT: 3001
       NODE_ENV: development
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -44,6 +23,3 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-
-volumes:
-  postgres_data:
