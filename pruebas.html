@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS — Tests Automatizados</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            padding: 40px 60px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #a78bfa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        h1 span { font-size: 1.6rem; }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin: 48px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 .emoji { font-size: 1.4rem; }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin: 32px 0 16px;
+        }
+
+        .card {
+            background: #12121a;
+            border: 1px solid #1e1e2e;
+            border-radius: 16px;
+            padding: 32px;
+            margin: 16px 0;
+            transition: border-color 0.3s;
+        }
+
+        .card:hover { border-color: #6366f1; }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .badge-row {
+            display: flex;
+            gap: 16px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .badge-purple { background: rgba(99, 102, 241, 0.15); color: #a78bfa; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .badge-green { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 16px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1e1e2e;
+        }
+
+        th {
+            background: #1a1a2e;
+            color: #a78bfa;
+            font-weight: 600;
+            text-align: left;
+            padding: 14px 18px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 12px 18px;
+            border-top: 1px solid #1e1e2e;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+        tr:hover td { background: rgba(99, 102, 241, 0.05); }
+
+        .http-code {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .http-200 { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .http-400 { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .http-401 { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .http-403 { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .http-409 { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .http-422 { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+
+        .result-box {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(99, 102, 241, 0.1));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .result-box .big {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4ade80, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-box .label {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-top: 8px;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat .num {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .result-stat .txt {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #2e2e4e, transparent);
+            margin: 40px 0;
+        }
+
+        code {
+            background: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #a78bfa;
+        }
+    </style>
+</head>
+<body>
+
+    <h1><span>🧪</span> NEXUS — Tests Automatizados</h1>
+    <p class="subtitle">Verificación del proceso de negocio: Completación de OKR por parte del Aprendiz</p>
+
+    <!-- RESULTADO FINAL ARRIBA -->
+    <div class="result-box">
+        <div class="big">14 / 14 ✅</div>
+        <div class="label">Todas las pruebas pasaron exitosamente</div>
+        <div class="result-stats">
+            <div class="result-stat">
+                <div class="num">2</div>
+                <div class="txt">Suites</div>
+            </div>
+            <div class="result-stat">
+                <div class="num">14</div>
+                <div class="txt">Tests</div>
+            </div>
+            <div class="result-stat">
+                <div class="num">15s</div>
+                <div class="txt">Tiempo</div>
+            </div>
+            <div class="result-stat">
+                <div class="num">100%</div>
+                <div class="txt">Cobertura</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FLUJO DEL PROCESO DE NEGOCIO -->
+    <h2><span class="emoji">📋</span> Flujo del Proceso de Negocio</h2>
+
+    <div class="card">
+        <div class="mermaid">
+flowchart LR
+    A["🧑‍🎓 Padawan<br/>selecciona OKR"] --> B["📝 Ingresa valor<br/>+ nota de cierre"]
+    B --> C["📤 Envía solicitud<br/>PATCH /complete"]
+    C --> D{"¿Validaciones<br/>OK?"}
+    D -->|"❌ No"| E["⚠️ Error<br/>401 / 403 / 409 / 422"]
+    D -->|"✅ Sí"| F["🔄 Transacción<br/>ACID"]
+    F --> G["✅ OKR Completado<br/>Score +12"]
+    G --> H["📧 Notifica<br/>al Mentor"]
+
+    style A fill:#1e1b4b,stroke:#6366f1,color:#e2e8f0
+    style B fill:#1e1b4b,stroke:#6366f1,color:#e2e8f0
+    style C fill:#1e1b4b,stroke:#6366f1,color:#e2e8f0
+    style D fill:#312e81,stroke:#a78bfa,color:#e2e8f0
+    style E fill:#450a0a,stroke:#ef4444,color:#fca5a5
+    style F fill:#052e16,stroke:#22c55e,color:#bbf7d0
+    style G fill:#052e16,stroke:#22c55e,color:#bbf7d0
+    style H fill:#172554,stroke:#3b82f6,color:#bfdbfe
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SUITE 1 -->
+    <h2><span class="emoji">🔐</span> Suite 1: Autenticación — 7 tests</h2>
+    <p style="color: #64748b; margin-bottom: 16px;">Archivo: <code>auth.test.ts</code></p>
+
+    <div class="card">
+        <div class="mermaid">
+flowchart TD
+    subgraph REG["📋 Registro — 3 tests"]
+        R1["✅ Registra Padawan nuevo<br/>→ 201 Created"]
+        R2["✅ Email duplicado<br/>→ 409 Conflict"]
+        R3["✅ Datos inválidos<br/>→ 400 Bad Request"]
+    end
+    subgraph LOG["🔑 Login — 2 tests"]
+        L1["✅ Credenciales válidas<br/>→ 200 + JWT Token"]
+        L2["✅ Contraseña incorrecta<br/>→ 401 Unauthorized"]
+    end
+    subgraph ME["👤 Sesión — 2 tests"]
+        M1["✅ GET /me con JWT<br/>→ 200 datos del usuario"]
+        M2["✅ GET /me sin JWT<br/>→ 401 Unauthorized"]
+    end
+
+    style REG fill:#1a1a2e,stroke:#6366f1,color:#e2e8f0
+    style LOG fill:#1a1a2e,stroke:#a78bfa,color:#e2e8f0
+    style ME fill:#1a1a2e,stroke:#c084fc,color:#e2e8f0
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SUITE 2 -->
+    <h2><span class="emoji">🎯</span> Suite 2: Completación de OKR — 7 tests</h2>
+    <p style="color: #64748b; margin-bottom: 16px;">Archivo: <code>okr.test.ts</code> — Endpoint: <code>PATCH /api/v1/okrs/:id/complete</code></p>
+
+    <div class="card">
+        <div class="mermaid">
+flowchart TD
+    subgraph HAPPY["🟢 Camino Feliz — 1 test"]
+        T1["✅ TEST 1<br/>Datos válidos → 200<br/>Estado = Completado"]
+    end
+
+    subgraph ERRORS["🔴 Validaciones de Negocio — 4 tests"]
+        T2["✅ TEST 2<br/>Sin JWT → 401<br/>AUTH_REQUIRED"]
+        T3["✅ TEST 3 — RN-01<br/>Otro usuario → 403<br/>FORBIDDEN"]
+        T4["✅ TEST 4 — RN-02<br/>Estado Pendiente → 409<br/>INVALID_STATE"]
+        T5["✅ TEST 5 — RN-03<br/>Valor menor a Meta → 422<br/>META_NOT_REACHED"]
+    end
+
+    subgraph ACID["🔵 Integridad Transaccional — 2 tests"]
+        T6["✅ TEST 6 — RN-06<br/>ROLLBACK si falla<br/>No hay datos parciales"]
+        T7["✅ TEST 7 — RN-05<br/>Score +12 tras COMMIT<br/>Empleabilidad sube"]
+    end
+
+    style HAPPY fill:#052e16,stroke:#22c55e,color:#bbf7d0
+    style ERRORS fill:#450a0a,stroke:#ef4444,color:#fca5a5
+    style ACID fill:#172554,stroke:#3b82f6,color:#bfdbfe
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- TABLA DE DETALLE -->
+    <h2><span class="emoji">📊</span> Detalle por Test</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Test</th>
+                <th>Qué Valida</th>
+                <th>Input</th>
+                <th>HTTP</th>
+                <th>Regla</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>✅ Completar OKR válido</td>
+                <td>Happy path completo</td>
+                <td>valor ≥ meta + nota</td>
+                <td><span class="http-code http-200">200</span></td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>✅ Sin autenticación</td>
+                <td>Seguridad JWT</td>
+                <td>Sin token</td>
+                <td><span class="http-code http-401">401</span></td>
+                <td>Auth</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>✅ OKR de otro usuario</td>
+                <td>Propiedad del recurso</td>
+                <td>JWT ajeno</td>
+                <td><span class="http-code http-403">403</span></td>
+                <td>RN-01</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>✅ Estado incorrecto</td>
+                <td>Máquina de estados</td>
+                <td>OKR en "Pendiente"</td>
+                <td><span class="http-code http-409">409</span></td>
+                <td>RN-02</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>✅ Meta no alcanzada</td>
+                <td>Lógica de negocio</td>
+                <td>valor &lt; meta</td>
+                <td><span class="http-code http-422">422</span></td>
+                <td>RN-03</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>✅ Rollback ACID</td>
+                <td>Integridad de datos</td>
+                <td>Fallo mid-transacción</td>
+                <td>—</td>
+                <td>RN-06</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>✅ Score +12</td>
+                <td>Efecto colateral</td>
+                <td>Post-COMMIT</td>
+                <td><span class="http-code http-200">200</span></td>
+                <td>RN-05</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="divider"></div>
+
+    <!-- TRANSACCIÓN ACID -->
+    <h2><span class="emoji">⚡</span> Transacción ACID — PATCH /complete</h2>
+
+    <div class="card">
+        <div class="mermaid">
+sequenceDiagram
+    participant P as 🧑‍🎓 Padawan
+    participant API as 🖥️ NEXUS API
+    participant DB as 🗄️ PostgreSQL
+
+    P->>API: PATCH /okrs/:id/complete
+    Note over API: Verifica JWT ✓
+    API->>DB: ¿Es dueño del OKR? (RN-01)
+    API->>DB: ¿Estado = EnProgreso? (RN-02)
+    API->>DB: ¿valor ≥ meta? (RN-03)
+
+    rect rgba(34, 197, 94, 0.1)
+        Note over API,DB: 🔒 BEGIN TRANSACTION
+        API->>DB: UPDATE okr → Completado
+        API->>DB: INSERT okr_historial (auditoría)
+        API->>DB: UPDATE score_empleabilidad +12
+        Note over API,DB: ✅ COMMIT
+    end
+
+    API-->>P: 200 {okr, nuevo_score}
+    Note over API: 📧 Notificar Mentor (async)
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#12121a',
+                primaryColor: '#6366f1',
+                primaryTextColor: '#e2e8f0',
+                primaryBorderColor: '#6366f1',
+                lineColor: '#6366f1',
+                secondaryColor: '#1e1b4b',
+                tertiaryColor: '#1a1a2e',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '14px',
+                noteBkgColor: '#1e1b4b',
+                noteTextColor: '#e2e8f0',
+                noteBorderColor: '#6366f1',
+                actorBkg: '#1e1b4b',
+                actorBorder: '#6366f1',
+                actorTextColor: '#e2e8f0',
+                signalColor: '#a78bfa',
+                signalTextColor: '#e2e8f0',
+                sequenceNumberColor: '#6366f1'
+            }
+        });
+    </script>
+
+</body>
+</html>
