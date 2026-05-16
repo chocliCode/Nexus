@@ -58,7 +58,7 @@ const OKRPage = () => {
 
   const openCompleteModal = (okr: OKR) => {
     setSelectedOkr(okr);
-    setCompleteForm({ valor_actual: okr.valor_meta, nota_cierre: '' });
+    setCompleteForm({ valor_actual: Number(okr.valor_meta), nota_cierre: '' });
     setError('');
     setSuccessMsg('');
     setShowCompleteModal(true);
