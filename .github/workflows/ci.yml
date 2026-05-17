@@ -17,7 +17,11 @@ jobs:
           POSTGRES_USER: nexus_user
           POSTGRES_PASSWORD: nexus_pass
           POSTGRES_DB: nexus_test
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432:5432
     steps:
