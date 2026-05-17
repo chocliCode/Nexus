@@ -316,12 +316,105 @@
 
 ## 🎓 Mentoría
 
-| ID | Caso de Uso | Estado |
-|----|-------------|--------|
-| UC-12 | Programar sesión de mentoría | ⏳ Pendiente |
-| UC-13 | Realizar sesión de mentoría | ⏳ Pendiente |
-| UC-14 | Cancelar sesión programada | ⏳ Pendiente |
-| UC-15 | Ver historial de sesiones | ⏳ Pendiente |
+### ✅ UC-12 — Programar sesión de mentoría
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | Agendar una nueva sesión con fecha, hora y duración. |
+| **Actores** | 🧑‍🎓 Padawan · 🧙‍♂️ Mentor Jedi |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Frontend | `frontend/src/pages/SessionsPage.tsx` | Modal de creación con formulario |
+| Backend | `backend/src/controllers/session.controller.ts` | `createSession()` |
+| Backend | `backend/src/routes/session.routes.ts` | `POST /api/v1/matchings/:matchingId/sessions` |
+| Backend | `backend/src/schemas/session.schema.ts` | Validación con Zod |
+
+**Flujo:**
+1. Usuario hace clic en "+ Nueva sesión"
+2. Llena título, fecha, duración y notas opcionales
+3. Frontend envía `POST /api/v1/matchings/:matchingId/sessions`
+4. Backend verifica que el matching esté activo y el usuario pertenezca
+5. Crea la sesión con estado `Programada`
+
+---
+
+### ✅ UC-13 — Realizar sesión de mentoría
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | Ejecutar la sesión y marcarla como Realizada, agregando notas y feedback. |
+| **Actores** | 🧙‍♂️ Mentor Jedi |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Frontend | `frontend/src/pages/SessionsPage.tsx` | Botón "Completar" + modal con notas |
+| Backend | `backend/src/controllers/session.controller.ts` | `updateSession()` con `estado: Realizada` |
+| Backend | `backend/src/routes/session.routes.ts` | `PUT /api/v1/sessions/:sesionId` |
+
+**Flujo:**
+1. Mentor Jedi ve sesiones programadas
+2. Hace clic en "✓ Completar" → se abre modal
+3. Agrega notas y feedback de la sesión
+4. Backend actualiza estado a `Realizada` y guarda notas
+
+---
+
+### ✅ UC-14 — Cancelar sesión programada
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | Cancelar una sesión antes de que ocurra. |
+| **Actores** | 🧑‍🎓 Padawan · 🧙‍♂️ Mentor Jedi |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Frontend | `frontend/src/pages/SessionsPage.tsx` | Botón "✕ Cancelar" en sesiones programadas |
+| Backend | `backend/src/controllers/session.controller.ts` | `deleteSession()` — soft delete |
+| Backend | `backend/src/routes/session.routes.ts` | `DELETE /api/v1/sessions/:sesionId` |
+
+**Flujo:**
+1. Usuario ve una sesión con estado `Programada`
+2. Hace clic en "✕ Cancelar"
+3. Backend cambia estado a `Cancelada` (soft delete, no borra datos)
+
+---
+
+### ✅ UC-15 — Ver historial de sesiones
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | Consultar sesiones pasadas con sus notas, OKRs y feedback asociados. |
+| **Actores** | 🧑‍🎓 Padawan · 🧙‍♂️ Mentor Jedi |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Frontend | `frontend/src/pages/SessionsPage.tsx` | Tabs (Todas/Programadas/Realizadas/Canceladas) |
+| Frontend | `frontend/src/services/api.ts` | `sessionService.getMySessions()` |
+| Backend | `backend/src/controllers/session.controller.ts` | `getMySessions()` |
+| Backend | `backend/src/routes/session.routes.ts` | `GET /api/v1/sessions/my-sessions` |
+
+**Flujo:**
+1. Usuario accede a la sección "Sesiones"
+2. Ve todas las sesiones con filtros por estado (tabs)
+3. Cada tarjeta muestra: título, fecha, mentor/padawan, notas, conteo de OKRs
+4. Puede navegar a los OKRs de cada sesión con "Ver OKRs →"
 
 ## 🎯 OKRs
 
@@ -366,10 +459,10 @@
 | Métrica | Valor |
 |---------|-------|
 | **Total Casos de Uso** | 26 |
-| **Implementados** | 11 (UC-01 a UC-11) |
+| **Implementados** | 15 (UC-01 a UC-15) |
 | **En progreso** | 0 |
-| **Pendientes** | 15 |
-| **Avance** | 42% |
+| **Pendientes** | 11 |
+| **Avance** | 58% |
 
 ---
 
