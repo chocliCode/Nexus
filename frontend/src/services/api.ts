@@ -117,3 +117,17 @@ export const profileService = {
   getUserProfile: (userId: string) =>
     api.get(`/profile/user/${userId}`),
 };
+
+// ============ IA Service ============
+export const iaService = {
+  getRiesgoAbandono: () => api.get('/ia/riesgo-abandono'),
+  listarRiesgos: () => api.get('/ia/riesgo-abandono/all'),
+};
+
+// ============ Notification Service ============
+export const notificationService = {
+  list: () => api.get('/notifications'),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markAsRead: (notificationId: string) => api.patch(`/notifications/${notificationId}/read`),
+  markAllAsRead: () => api.patch('/notifications/read-all'),
+};

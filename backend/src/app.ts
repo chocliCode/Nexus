@@ -14,6 +14,8 @@ import profileRoutes from './routes/profile.routes';
 import onboardingRoutes from './routes/onboarding.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import matchingRoutes from './routes/matching.routes';
+import iaRoutes from './routes/ia.routes';
+import notificationRoutes from './routes/notification.routes';
 
 const app = express();
 
@@ -49,6 +51,8 @@ app.use('/api/v1', profileRoutes);
 app.use('/api/v1', onboardingRoutes);
 app.use('/api/v1', dashboardRoutes);
 app.use('/api/v1', matchingRoutes);
+app.use('/api/v1', iaRoutes);
+app.use('/api/v1', notificationRoutes);
 
 // ============================================================
 // 404 Handler

@@ -606,22 +606,126 @@
 
 ---
 
-| ID | Caso de Uso | Estado |
-|----|-------------|--------|
-| UC-23 | Postularse a una vacante | ⏳ Pendiente |
-| UC-24 | Gestionar vacantes publicadas | ⏳ Pendiente |
+### ✅ UC-23 — Postularse a una vacante
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | El Padawan aplica a una oferta, enviando su perfil dinámico a la empresa. |
+| **Actores** | 🧑‍🎓 Padawan |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Frontend | `frontend/src/pages/VacanciesPage.tsx` | Botón "Postularme" + modal con mensaje |
+| Frontend | `frontend/src/services/api.ts` | `vacancyService.apply()` |
+| Backend | `backend/src/controllers/vacancy.controller.ts` | `applyToVacancy()` |
+| Backend | `backend/src/routes/vacancy.routes.ts` | `POST /api/v1/vacancies/:vacancyId/apply` |
+
+**Flujo:**
+1. Padawan navega las vacantes y hace clic en "Postularme"
+2. Escribe un mensaje opcional de presentación
+3. Frontend envía `POST /api/v1/vacancies/:vacancyId/apply`
+4. Backend verifica que no haya postulación previa (evita duplicados)
+5. Crea registro en `postulacion` → la tarjeta cambia a "✓ Postulado"
+
+---
+
+### ✅ UC-24 — Gestionar vacantes publicadas
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | La Empresa puede editar, activar o desactivar sus ofertas laborales. |
+| **Actores** | 🏢 Empresa |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Backend | `backend/src/controllers/vacancy.controller.ts` | `updateVacancy()` |
+| Backend | `backend/src/routes/vacancy.routes.ts` | `PUT /api/v1/vacancies/:vacancyId` (rol Admin) |
+| Backend | `backend/src/schemas/vacancy.schema.ts` | `updateVacancySchema` — incluye campo `activa` |
+
+**Flujo:**
+1. Admin/Empresa envía `PUT /api/v1/vacancies/:vacancyId`
+2. Puede actualizar título, descripción, salario, modalidad
+3. Puede activar o desactivar con el campo `activa: true/false`
+4. Vacantes desactivadas dejan de aparecer en la lista pública
+
+---
 
 ## 🤖 Inteligencia Artificial
 
-| ID | Caso de Uso | Estado |
-|----|-------------|--------|
-| UC-25 | Detectar riesgo de abandono (IA) | ⏳ Pendiente |
+### ✅ UC-25 — Detectar riesgo de abandono (IA)
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | El motor de IA monitorea la actividad y alerta cuando un Padawan muestra señales de abandono. |
+| **Actores** | 🤖 Sistema / IA |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Backend | `backend/src/controllers/ia.controller.ts` | `detectarRiesgoAbandono()`, `listarRiesgosAbandono()` |
+| Backend | `backend/src/routes/ia.routes.ts` | `GET /api/v1/ia/riesgo-abandono` |
+| Frontend | `frontend/src/services/api.ts` | `iaService.getRiesgoAbandono()` |
+
+**Algoritmo de scoring (0–100):**
+- **+25–30 pts**: Sin sesiones en >14 días o sin sesiones nunca
+- **+10–25 pts**: OKRs estancados (sin progreso en >7 días)
+- **+10–20 pts**: Ratio de cancelación de sesiones >25%
+- **+20 pts**: Score de empleabilidad <20 después de 14 días
+
+**Niveles:** bajo (<20), medio (20–44), alto (45–69), crítico (≥70)
+
+**Flujo:**
+1. Backend analiza: días sin sesión, OKRs sin avance, ratio de cancelación, score
+2. Calcula un score de riesgo con 4 factores ponderados
+3. Retorna nivel, alertas descriptivas y factores detallados
+4. Endpoint admin/Jedi permite ver todos los padawans en riesgo
+
+---
 
 ## 🔔 Notificaciones
 
-| ID | Caso de Uso | Estado |
-|----|-------------|--------|
-| UC-26 | Recibir notificaciones | ⏳ Pendiente |
+### ✅ UC-26 — Recibir notificaciones
+
+| Campo | Detalle |
+|-------|--------|
+| **Descripción** | Alertas de nuevas sesiones, OKRs completados, matchings y mensajes del mentor. |
+| **Actores** | 🧑‍🎓 Padawan · 🧙‍♂️ Mentor Jedi · 🏢 Empresa |
+| **Estado** | ✅ Implementado |
+| **Fecha** | 2026-05-17 |
+
+**Archivos clave:**
+
+| Capa | Archivo | Responsabilidad |
+|------|---------|----------------|
+| Frontend | `frontend/src/components/layout/Layout.tsx` | Campana 🔔 con badge y dropdown |
+| Frontend | `frontend/src/services/api.ts` | `notificationService` (list, unread, markRead) |
+| Backend | `backend/src/controllers/notification.controller.ts` | CRUD de notificaciones |
+| Backend | `backend/src/routes/notification.routes.ts` | Rutas GET/PATCH |
+| DB | `backend/src/db/migrations/003_notifications.sql` | Tabla `notificacion` |
+
+**Endpoints:**
+- `GET /api/v1/notifications` — listar últimas 50
+- `GET /api/v1/notifications/unread-count` — conteo de no leídas
+- `PATCH /api/v1/notifications/:id/read` — marcar como leída
+- `PATCH /api/v1/notifications/read-all` — marcar todas como leídas
+
+**Flujo:**
+1. Layout muestra campana 🔔 con badge de no leídas
+2. Polling cada 30 segundos para actualizar conteo
+3. Clic en campana → dropdown con lista de notificaciones
+4. Clic en notificación → se marca como leída
+5. Botón "Marcar todas leídas" para limpiar
 
 ---
 
@@ -630,10 +734,10 @@
 | Métrica | Valor |
 |---------|-------|
 | **Total Casos de Uso** | 26 |
-| **Implementados** | 22 (UC-01 a UC-22) |
+| **Implementados** | 26 (UC-01 a UC-26) |
 | **En progreso** | 0 |
-| **Pendientes** | 4 |
-| **Avance** | 85% |
+| **Pendientes** | 0 |
+| **Avance** | **100%** ✅ |
 
 ---
 

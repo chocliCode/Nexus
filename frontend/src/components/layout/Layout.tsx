@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { notificationService } from '../../services/api';
 
 const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -12,11 +13,54 @@ const NAV_ITEMS = [
   { path: '/vacancies', label: 'Vacantes', icon: '💼' },
 ];
 
+interface Notification {
+  notificacion_id: string;
+  tipo: string;
+  titulo: string;
+  mensaje: string;
+  leida: boolean;
+  fecha_creacion: string;
+}
+
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000); // poll every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      const [listRes, countRes] = await Promise.all([
+        notificationService.list(),
+        notificationService.getUnreadCount(),
+      ]);
+      setNotifications(listRes.data.data);
+      setUnreadCount(countRes.data.data.unread);
+    } catch { /* silent */ }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      loadNotifications();
+    } catch { /* silent */ }
+  };
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await notificationService.markAsRead(id);
+      loadNotifications();
+    } catch { /* silent */ }
+  };
 
   const handleLogout = () => {
     logout();
@@ -27,6 +71,14 @@ export const Layout = ({ children }: { children: ReactNode }) => {
     backgroundColor: active ? 'var(--color-primary-800)' : 'transparent',
     color: active ? 'var(--color-primary-200)' : 'var(--color-neutral-400)',
   });
+
+  const TIPO_ICONS: Record<string, string> = {
+    nueva_sesion: '🎯', sesion_cancelada: '❌', sesion_realizada: '✅',
+    okr_creado: '📈', okr_completado: '🏆', okr_feedback: '💬',
+    matching_nuevo: '🔗', matching_aceptado: '✅', matching_rechazado: '❌',
+    riesgo_abandono: '⚠️', vacante_nueva: '💼', postulacion_recibida: '📩',
+    sistema: '🔔',
+  };
 
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: 'var(--surface-page)' }}>
@@ -93,9 +145,20 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             </svg>
           </button>
           <span className="font-display font-bold text-lg">NEXUS</span>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-               style={{ backgroundColor: 'var(--color-primary-500)' }}>
-            {user?.nombres?.charAt(0)}{user?.apellidos?.charAt(0)}
+          <div className="flex items-center gap-2">
+            <button onClick={() => setNotifOpen(!notifOpen)} className="relative p-1">
+              <span className="text-lg">🔔</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: 'var(--color-danger)' }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                 style={{ backgroundColor: 'var(--color-primary-500)' }}>
+              {user?.nombres?.charAt(0)}{user?.apellidos?.charAt(0)}
+            </div>
           </div>
         </div>
       </div>
@@ -129,7 +192,73 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-16 lg:pt-0">
+      <main className="flex-1 overflow-auto pt-16 lg:pt-0 relative">
+        {/* Desktop notification bell */}
+        <div className="hidden lg:flex items-center justify-end p-4 pb-0">
+          <button onClick={() => setNotifOpen(!notifOpen)} className="relative p-2 rounded-lg transition-colors"
+                  style={{ backgroundColor: notifOpen ? 'var(--color-primary-100)' : 'transparent' }}>
+            <span className="text-lg">🔔</span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full text-[10px] flex items-center justify-center text-white font-bold"
+                    style={{ backgroundColor: 'var(--color-danger)' }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Notification dropdown */}
+        {notifOpen && (
+          <div className="absolute right-4 top-14 lg:top-12 w-80 z-50 rounded-lg overflow-hidden animate-fade-in"
+               style={{ backgroundColor: 'var(--surface-card)', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border-light)' }}>
+            <div className="flex items-center justify-between p-3" style={{ borderBottom: '1px solid var(--border-light)' }}>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Notificaciones</h3>
+              {unreadCount > 0 && (
+                <button onClick={handleMarkAllRead} className="text-xs font-medium" style={{ color: 'var(--color-primary-500)' }}>
+                  Marcar todas leídas
+                </button>
+              )}
+            </div>
+            <div className="max-h-80 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-6 text-center">
+                  <p className="text-2xl mb-2">🔔</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sin notificaciones</p>
+                </div>
+              ) : (
+                notifications.slice(0, 10).map((n) => (
+                  <div key={n.notificacion_id}
+                       onClick={() => { if (!n.leida) handleMarkRead(n.notificacion_id); }}
+                       className="flex items-start gap-3 p-3 transition-colors cursor-pointer"
+                       style={{
+                         backgroundColor: n.leida ? 'transparent' : 'var(--color-primary-50)',
+                         borderBottom: '1px solid var(--border-light)',
+                       }}>
+                    <span className="text-base mt-0.5">{TIPO_ICONS[n.tipo] || '🔔'}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{n.titulo}</p>
+                      {n.mensaje && (
+                        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>{n.mensaje}</p>
+                      )}
+                      <p className="text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                        {new Date(n.fecha_creacion).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    {!n.leida && (
+                      <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: 'var(--color-primary-500)' }} />
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Click outside to close notifs */}
+        {notifOpen && (
+          <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+        )}
+
         <div className="p-6 lg:p-8 max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
