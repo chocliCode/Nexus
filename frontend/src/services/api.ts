@@ -72,10 +72,10 @@ export const okrService = {
   delete: (okrId: string) => api.delete(`/okrs/${okrId}`),
 
   complete: (okrId: string, data: { valor_actual: number; nota_cierre: string }) =>
-    api.patch(`/okrs/${okrId}/complete`, data),
+    api.post(`/okrs/${okrId}/complete`, data),
 
   feedback: (okrId: string, data: { accion: 'aprobar' | 'revisar'; comentario?: string }) =>
-    api.patch(`/okrs/${okrId}/feedback`, data),
+    api.post(`/okrs/${okrId}/feedback`, data),
 };
 
 // ============ Vacancies Service ============
@@ -130,4 +130,27 @@ export const notificationService = {
   getUnreadCount: () => api.get('/notifications/unread-count'),
   markAsRead: (notificationId: string) => api.patch(`/notifications/${notificationId}/read`),
   markAllAsRead: () => api.patch('/notifications/read-all'),
+};
+
+// ============ Classroom Service ============
+export const classroomService = {
+  getFeed: (matchingId: string) => api.get(`/classroom/${matchingId}/feed`),
+  createPost: (matchingId: string, data: { tipo: string; titulo?: string; contenido: string; url_enlace?: string }) =>
+    api.post(`/classroom/${matchingId}/posts`, data),
+  deletePost: (postId: string) => api.delete(`/classroom/posts/${postId}`),
+  togglePin: (postId: string) => api.patch(`/classroom/posts/${postId}/pin`),
+  addComment: (postId: string, contenido: string) =>
+    api.post(`/classroom/posts/${postId}/comments`, { contenido }),
+  deleteComment: (commentId: string) => api.delete(`/classroom/comments/${commentId}`),
+  addResource: (postId: string, data: { nombre: string; url: string; tipo?: string }) =>
+    api.post(`/classroom/posts/${postId}/resources`, data),
+  getPeople: (matchingId: string) => api.get(`/classroom/${matchingId}/people`),
+};
+
+// ============ Chat Service ============
+export const chatService = {
+  getMessages: (matchingId: string) => api.get(`/chat/${matchingId}/messages`),
+  sendMessage: (matchingId: string, contenido: string) =>
+    api.post(`/chat/${matchingId}/messages`, { contenido }),
+  getUnreadCount: (matchingId: string) => api.get(`/chat/${matchingId}/unread`),
 };

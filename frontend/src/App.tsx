@@ -12,6 +12,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import MatchingPage from './pages/MatchingPage';
 import SessionsPage from './pages/SessionsPage';
 import OKRPage from './pages/OKRPage';
+import ClassroomPage from './pages/ClassroomPage';
 import VacanciesPage from './pages/VacanciesPage';
 import type { ReactNode } from 'react';
 import './index.css';
@@ -48,6 +49,7 @@ const AppRoutes = () => (
     <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
     <Route path="/matching" element={<ProtectedRoute><MatchingPage /></ProtectedRoute>} />
     <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
+    <Route path="/classroom/:matchingId" element={<ProtectedRoute><ClassroomPage /></ProtectedRoute>} />
     <Route path="/sessions/:sesionId/okrs" element={<ProtectedRoute><OKRPage /></ProtectedRoute>} />
 
     <Route path="/" element={<Navigate to="/dashboard" replace />} />
