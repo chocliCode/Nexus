@@ -16,6 +16,8 @@ import dashboardRoutes from './routes/dashboard.routes';
 import matchingRoutes from './routes/matching.routes';
 import iaRoutes from './routes/ia.routes';
 import notificationRoutes from './routes/notification.routes';
+import classroomRoutes from './routes/classroom.routes';
+import chatRoutes from './routes/chat.routes';
 
 const app = express();
 
@@ -54,6 +56,8 @@ app.use('/api/v1', dashboardRoutes);
 app.use('/api/v1', matchingRoutes);
 app.use('/api/v1', iaRoutes);
 app.use('/api/v1', notificationRoutes);
+app.use('/api/v1', classroomRoutes);
+app.use('/api/v1', chatRoutes);
 
 // ============================================================
 // 404 Handler
