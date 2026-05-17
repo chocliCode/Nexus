@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const isLocalDB = process.env.DATABASE_URL?.includes('localhost');
+const isLocalDB = process.env.DATABASE_URL?.includes('localhost')
+  || process.env.DATABASE_URL?.includes('db:');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
