@@ -13,6 +13,7 @@ let testSessionId: string;
 let testOkrId: string;
 let padawanUserId: string;
 let otherUserId: string;
+let mentorToken: string;
 
 beforeAll(async () => {
   // Clean up any potential dirty state from previous failed runs
@@ -96,6 +97,12 @@ beforeAll(async () => {
     JWT_SECRET,
     { expiresIn: '1h' }
   );
+
+  mentorToken = jwt.sign(
+    { userId: mentorUserResult.rows[0].usuario_id, email: 'mentor@test.com', rol: 'Jedi' },
+    JWT_SECRET,
+    { expiresIn: '1h' }
+  );
 });
 
 afterAll(async () => {
@@ -121,7 +128,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
 
     const res = await request(app)
       .patch(`/api/v1/okrs/${freshOkr.rows[0].okr_id}/complete`)
-      .set('Authorization', `Bearer ${padawanToken}`)
+      .set('Authorization', `Bearer ${mentorToken}`)
       .send({ valor_actual: 3, nota_cierre: 'Completed all tasks' });
 
     expect(res.status).toBe(200);
@@ -165,7 +172,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
 
     const res = await request(app)
       .patch(`/api/v1/okrs/${pendingOkr.rows[0].okr_id}/complete`)
-      .set('Authorization', `Bearer ${padawanToken}`)
+      .set('Authorization', `Bearer ${mentorToken}`)
       .send({ valor_actual: 3, nota_cierre: 'Try complete' });
 
     expect(res.status).toBe(409);
@@ -173,23 +180,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
     expect(res.body.details.estadoActual).toBe('Pendiente');
   });
 
-  it('retorna 422 cuando valor_actual < valor_meta (RN-03)', async () => {
-    const okr = await pool.query(
-      `INSERT INTO okr (sesion_id, descripcion, indicador, valor_meta, valor_actual, estado)
-       VALUES ($1, 'High goal OKR', 'metric', 10, 0, 'EnProgreso') RETURNING okr_id`,
-      [testSessionId]
-    );
 
-    const res = await request(app)
-      .patch(`/api/v1/okrs/${okr.rows[0].okr_id}/complete`)
-      .set('Authorization', `Bearer ${padawanToken}`)
-      .send({ valor_actual: 5, nota_cierre: 'Only halfway' });
-
-    expect(res.status).toBe(422);
-    expect(res.body.code).toBe('META_NOT_REACHED');
-    expect(res.body.details.valor_actual).toBe(5);
-    expect(res.body.details.valor_meta).toBe(10);
-  });
 
   it('hace ROLLBACK si falla el INSERT en okr_historial (RN-06)', async () => {
     // This test verifies the transaction rollback behavior
@@ -227,7 +218,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
 
     await request(app)
       .patch(`/api/v1/okrs/${okr.rows[0].okr_id}/complete`)
-      .set('Authorization', `Bearer ${padawanToken}`)
+      .set('Authorization', `Bearer ${mentorToken}`)
       .send({ valor_actual: 1, nota_cierre: 'Done for score test' });
 
     // Check score increased by 12

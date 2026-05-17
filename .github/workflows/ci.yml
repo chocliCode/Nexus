@@ -40,7 +40,9 @@ jobs:
       - name: Ejecutar migraciones
         run: |
           psql "$DATABASE_URL" -f backend/src/db/migrations/001_init.sql
+          psql "$DATABASE_URL" -f backend/src/db/migrations/002_onboarding.sql
           psql "$DATABASE_URL" -f backend/src/db/migrations/003_notifications.sql
+          psql "$DATABASE_URL" -f backend/src/db/migrations/004_classroom.sql
         env:
           DATABASE_URL: postgresql://nexus_user:nexus_pass@localhost:5432/nexus_test
           PGPASSWORD: nexus_pass

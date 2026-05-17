@@ -63,7 +63,7 @@ describe('UC-12: POST /api/v1/matchings/:matchingId/sessions', () => {
   it('crea una sesión correctamente', async () => {
     const res = await request(app)
       .post(`/api/v1/matchings/${matchingId}/sessions`)
-      .set('Authorization', `Bearer ${padawanToken}`)
+      .set('Authorization', `Bearer ${jediToken}`)
       .send({ titulo: 'Sesión de prueba', fecha_sesion: new Date(Date.now() + 86400000).toISOString(), duracion_min: 60 });
 
     expect(res.status).toBe(201);
@@ -98,12 +98,12 @@ describe('UC-14: DELETE /api/v1/sessions/:sesionId (cancelar)', () => {
     // Crear nueva sesión para cancelar
     const create = await request(app)
       .post(`/api/v1/matchings/${matchingId}/sessions`)
-      .set('Authorization', `Bearer ${padawanToken}`)
+      .set('Authorization', `Bearer ${jediToken}`)
       .send({ titulo: 'Para cancelar', fecha_sesion: new Date(Date.now() + 86400000).toISOString() });
 
     const res = await request(app)
       .delete(`/api/v1/sessions/${create.body.data.sesion_id}`)
-      .set('Authorization', `Bearer ${padawanToken}`);
+      .set('Authorization', `Bearer ${jediToken}`);
 
     expect(res.status).toBe(200);
     expect(res.body.data.estado).toBe('Cancelada');
