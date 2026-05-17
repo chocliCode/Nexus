@@ -192,7 +192,7 @@ export const completeOKR = async (req: AuthRequest, res: Response, next: NextFun
        SET score_empleabilidad = LEAST(100, score_empleabilidad + 12),
            fecha_actualizacion = NOW()
        WHERE usuario_id = $1`,
-      [userId]
+      [okr.padawan_usuario_id]
     );
 
     // RN-06: COMMIT

@@ -17,6 +17,7 @@ let mentorToken: string;
 
 beforeAll(async () => {
   // Clean up any potential dirty state from previous failed runs
+  await pool.query(`DELETE FROM okr_historial`);
   await pool.query(`
     DELETE FROM matching 
     WHERE padawan_id IN (SELECT perfil_id FROM perfil_aprendiz pa JOIN usuario u ON pa.usuario_id = u.usuario_id WHERE u.email LIKE '%@test.com')
@@ -106,8 +107,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // Clean up test data
-  await pool.query(`DELETE FROM okr_historial WHERE usuario_id IN ($1, $2)`, [padawanUserId, otherUserId]);
+  await pool.query(`DELETE FROM okr_historial`);
   await pool.query(`
     DELETE FROM matching 
     WHERE padawan_id IN (SELECT perfil_id FROM perfil_aprendiz pa JOIN usuario u ON pa.usuario_id = u.usuario_id WHERE u.email LIKE '%@test.com')
@@ -117,7 +117,7 @@ afterAll(async () => {
   await pool.end();
 });
 
-describe('PATCH /api/v1/okrs/:id/complete', () => {
+describe('POST /api/v1/okrs/:id/complete', () => {
   it('retorna 200 y actualiza el OKR cuando todos los datos son válidos', async () => {
     // First create a fresh OKR in EnProgreso for this test
     const freshOkr = await pool.query(
@@ -127,7 +127,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
     );
 
     const res = await request(app)
-      .patch(`/api/v1/okrs/${freshOkr.rows[0].okr_id}/complete`)
+      .post(`/api/v1/okrs/${freshOkr.rows[0].okr_id}/complete`)
       .set('Authorization', `Bearer ${mentorToken}`)
       .send({ valor_actual: 3, nota_cierre: 'Completed all tasks' });
 
@@ -139,7 +139,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
 
   it('retorna 401 cuando no se envía JWT', async () => {
     const res = await request(app)
-      .patch(`/api/v1/okrs/${testOkrId}/complete`)
+      .post(`/api/v1/okrs/${testOkrId}/complete`)
       .send({ valor_actual: 3, nota_cierre: 'Test' });
 
     expect(res.status).toBe(401);
@@ -155,7 +155,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
     );
 
     const res = await request(app)
-      .patch(`/api/v1/okrs/${freshOkr.rows[0].okr_id}/complete`)
+      .post(`/api/v1/okrs/${freshOkr.rows[0].okr_id}/complete`)
       .set('Authorization', `Bearer ${otherUserToken}`)
       .send({ valor_actual: 3, nota_cierre: 'Trying to steal credit' });
 
@@ -171,7 +171,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
     );
 
     const res = await request(app)
-      .patch(`/api/v1/okrs/${pendingOkr.rows[0].okr_id}/complete`)
+      .post(`/api/v1/okrs/${pendingOkr.rows[0].okr_id}/complete`)
       .set('Authorization', `Bearer ${mentorToken}`)
       .send({ valor_actual: 3, nota_cierre: 'Try complete' });
 
@@ -217,7 +217,7 @@ describe('PATCH /api/v1/okrs/:id/complete', () => {
     );
 
     await request(app)
-      .patch(`/api/v1/okrs/${okr.rows[0].okr_id}/complete`)
+      .post(`/api/v1/okrs/${okr.rows[0].okr_id}/complete`)
       .set('Authorization', `Bearer ${mentorToken}`)
       .send({ valor_actual: 1, nota_cierre: 'Done for score test' });
 
