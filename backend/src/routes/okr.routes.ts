@@ -13,8 +13,8 @@ router.get('/sessions/:sesionId/okrs', authMiddleware, validate(sesionIdParamSch
 // OKR operations
 router.put('/okrs/:okrId', authMiddleware, validate(okrIdParamSchema, 'params'), validate(updateOKRSchema), updateOKR);
 router.delete('/okrs/:okrId', authMiddleware, validate(okrIdParamSchema, 'params'), deleteOKR);
-router.patch('/okrs/:okrId/complete', authMiddleware, validate(okrIdParamSchema, 'params'), validate(completeOKRSchema), completeOKR);
-router.patch('/okrs/:okrId/feedback', authMiddleware, validate(okrIdParamSchema, 'params'), validate(feedbackOKRSchema), feedbackOKR);
+router.post('/okrs/:okrId/complete', authMiddleware, validate(okrIdParamSchema, 'params'), validate(completeOKRSchema), completeOKR);
+router.post('/okrs/:okrId/feedback', authMiddleware, validate(okrIdParamSchema, 'params'), validate(feedbackOKRSchema), feedbackOKR);
 
 export default router;
 

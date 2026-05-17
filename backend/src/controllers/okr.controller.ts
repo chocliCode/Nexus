@@ -125,13 +125,15 @@ export const completeOKR = async (req: AuthRequest, res: Response, next: NextFun
 
   const client = await pool.connect();
   try {
-    // RN-01: Verify ownership via JOIN chain
+    // RN-01: Verify ownership — now the MENTOR grades
     const ownerCheck = await client.query(
       `SELECT o.okr_id, o.estado, o.valor_meta, o.valor_actual as valor_previo,
+              mt.usuario_id as mentor_usuario_id,
               pa.usuario_id as padawan_usuario_id, pa.perfil_id
        FROM okr o
        JOIN sesion_mentoria sm ON o.sesion_id = sm.sesion_id
        JOIN matching m ON sm.matching_id = m.matching_id
+       JOIN mentor mt ON m.mentor_id = mt.mentor_id
        JOIN perfil_aprendiz pa ON m.padawan_id = pa.perfil_id
        WHERE o.okr_id = $1`,
       [okrId]
@@ -144,33 +146,24 @@ export const completeOKR = async (req: AuthRequest, res: Response, next: NextFun
 
     const okr = ownerCheck.rows[0];
 
-    if (okr.padawan_usuario_id !== userId) {
+    // Allow both mentor and padawan to complete
+    if (okr.mentor_usuario_id !== userId && okr.padawan_usuario_id !== userId) {
       res.status(403).json({
-        error: 'No eres el propietario de este OKR',
+        error: 'No autorizado para calificar este OKR',
         code: 'FORBIDDEN',
       });
       return;
     }
 
-    // RN-02: Verify state is EnProgreso
+    // RN-02: Verify state is EnProgreso (submitted by student)
     if (okr.estado !== 'EnProgreso') {
       res.status(409).json({
-        error: `El OKR no está en estado EnProgreso`,
+        error: `El OKR debe estar entregado (EnProgreso) para poder calificarse`,
         code: 'INVALID_STATE_TRANSITION',
         details: {
           estadoActual: okr.estado,
           transicionesValidas: ['EnProgreso → Completado'],
         },
-      });
-      return;
-    }
-
-    // RN-03: Verify valor_actual >= valor_meta
-    if (valor_actual < parseFloat(okr.valor_meta)) {
-      res.status(422).json({
-        error: 'El valor actual no alcanza la meta',
-        code: 'META_NOT_REACHED',
-        details: { valor_actual, valor_meta: parseFloat(okr.valor_meta) },
       });
       return;
     }
