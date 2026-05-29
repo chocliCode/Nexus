@@ -7,7 +7,7 @@ export { Portal } from './Portal';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title: ReactNode;
   children: ReactNode;
 }
 

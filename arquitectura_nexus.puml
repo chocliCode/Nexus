@@ -1,0 +1,394 @@
+@startuml Arquitectura_Nexus_C4
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+' ================================================================
+'  NIVEL 1: DIAGRAMA DE CONTEXTO DEL SISTEMA
+' ================================================================
+
+LAYOUT_WITH_LEGEND()
+title Nexus — Diagrama de Arquitectura C4 Model
+
+Person(padawan, "Padawan", "Estudiante universitario de tecnologia\nque busca mentoria profesional")
+Person(jedi, "Mentor Jedi", "Profesional en activo que ofrece\nmentoria 1-a-1 a Padawans")
+
+System(nexus, "Nexus Platform", "Plataforma SaaS de mentoria 1-a-1\nque conecta Padawans con Mentores Jedis.\nGestiona perfiles, sesiones, OKRs,\nvacantes y classroom virtual.")
+
+System_Ext(azure, "Azure Cloud", "Azure App Service (Backend)\nAzure Static Web Apps (Frontend)")
+System_Ext(github, "GitHub Actions", "Pipeline CI/CD para\ntesting y despliegue automatico")
+
+Rel(padawan, nexus, "Registra perfil, gestiona habilidades,\ncompleta OKRs, postula a vacantes", "HTTPS")
+Rel(jedi, nexus, "Da mentoria, califica OKRs,\ncrea sesiones, da feedback", "HTTPS")
+Rel(nexus, azure, "Se despliega en", "Docker / HTTPS")
+Rel(github, nexus, "CI/CD Pipeline", "GitHub Actions")
+
+@enduml
+
+
+' ================================================================
+'  NIVEL 2: DIAGRAMA DE CONTENEDORES
+' ================================================================
+
+@startuml Nexus_Contenedores
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+title Nexus — Diagrama de Contenedores (C4 Nivel 2)
+
+Person(padawan, "Padawan", "Estudiante de tecnologia")
+Person(jedi, "Mentor Jedi", "Profesional en activo")
+
+System_Boundary(nexus, "Nexus Platform") {
+
+  Container(spa, "Frontend SPA", "React 18 + TypeScript + Vite\nTailwind CSS v3", "Interfaz web responsive.\nPages, Components, Hooks,\nServices (Axios).")
+
+  Container(api, "Backend API", "Node.js + Express.js\nTypeScript", "API RESTful /api/v1/*\nControllers, Routes,\nMiddleware, Schemas (Zod).")
+
+  ContainerDb(db, "Base de Datos", "PostgreSQL 16", "Almacena usuarios, perfiles,\nhabilidades, matchings, sesiones,\nOKRs, vacantes, notificaciones,\nclassroom, chat.")
+}
+
+System_Ext(azure_app, "Azure App Service", "Hospeda el backend")
+System_Ext(azure_static, "Azure Static Web Apps", "Hospeda el frontend")
+
+Rel(padawan, spa, "Interactua via", "HTTPS / Browser")
+Rel(jedi, spa, "Interactua via", "HTTPS / Browser")
+Rel(spa, api, "Consume API REST", "HTTP / JSON\nJWT Bearer Token")
+Rel(api, db, "Lee y escribe datos", "TCP / pg Pool\nTransacciones ACID")
+Rel(api, azure_app, "Desplegado en")
+Rel(spa, azure_static, "Desplegado en")
+
+@enduml
+
+
+' ================================================================
+'  NIVEL 3: DIAGRAMA DE COMPONENTES — BACKEND (MVC)
+' ================================================================
+
+@startuml Nexus_Componentes_Backend
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title Nexus Backend — Diagrama de Componentes (C4 Nivel 3)\nArquitectura MVC
+
+Container_Boundary(api, "Backend API — Express.js + TypeScript") {
+
+  Component(app, "app.ts", "Express Application", "Configura middleware global,\nmonta rutas, manejo de errores 404.\nPunto de composicion de la aplicacion.")
+
+  Component(server, "server.ts", "Entry Point", "Inicia el servidor HTTP\nen el puerto configurado.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE RUTAS (Router)
+  ' --------------------------------------------------------
+  Component(authRoutes, "auth.routes.ts", "Express Router", "POST /register, POST /login,\nGET /me")
+  Component(profileRoutes, "profile.routes.ts", "Express Router", "GET/PUT /profile/me,\nGET/POST/DELETE /profile/skills")
+  Component(sessionRoutes, "session.routes.ts", "Express Router", "GET /sessions/my-sessions,\nPOST/PUT/DELETE sessions")
+  Component(okrRoutes, "okr.routes.ts", "Express Router", "CRUD OKRs,\nPATCH /okrs/:id/complete,\nPATCH /okrs/:id/feedback")
+  Component(vacancyRoutes, "vacancy.routes.ts", "Express Router", "GET /vacancies,\nPOST /vacancies/:id/apply")
+  Component(matchingRoutes, "matching.routes.ts", "Express Router", "GET /matchings,\nPOST /matchings")
+  Component(classroomRoutes, "classroom.routes.ts", "Express Router", "Feed, posts, comments,\nresources, people")
+  Component(chatRoutes, "chat.routes.ts", "Express Router", "GET/POST messages,\nGET unread count")
+  Component(onboardingRoutes, "onboarding.routes.ts", "Express Router", "POST /onboarding/complete")
+  Component(dashboardRoutes, "dashboard.routes.ts", "Express Router", "GET /dashboard/stats")
+  Component(iaRoutes, "ia.routes.ts", "Express Router", "GET /ia/riesgo-abandono")
+  Component(notifRoutes, "notification.routes.ts", "Express Router", "GET/PATCH notifications")
+
+  ' --------------------------------------------------------
+  '  CAPA DE CONTROLADORES (Controller)
+  ' --------------------------------------------------------
+  Component(authCtrl, "auth.controller.ts", "Controller", "register(), login(), getMe()\nLogica de autenticacion\ncon bcrypt + JWT.")
+  Component(profileCtrl, "profile.controller.ts", "Controller", "getMyProfile(), updateMyProfile(),\nlistSkills(), addSkill(), removeSkill()\nGestion de perfiles y habilidades.")
+  Component(sessionCtrl, "session.controller.ts", "Controller", "CRUD de sesiones de mentoria.\nVerificacion de matchings.")
+  Component(okrCtrl, "okr.controller.ts", "Controller", "createOKR(), listOKRs(), updateOKR(),\ncompleteOKR() [ACID Transaction],\nfeedbackOKR()")
+  Component(vacancyCtrl, "vacancy.controller.ts", "Controller", "Listado, detalle y\npostulacion a vacantes.")
+  Component(matchingCtrl, "matching.controller.ts", "Controller", "Gestion de emparejamientos\nPadawan-Mentor.")
+  Component(classroomCtrl, "classroom.controller.ts", "Controller", "Feed, posts, comentarios,\nrecursos y personas.")
+  Component(chatCtrl, "chat.controller.ts", "Controller", "Mensajeria entre\nPadawan y Mentor.")
+  Component(onboardingCtrl, "onboarding.controller.ts", "Controller", "Flujo de onboarding\npara nuevos usuarios.")
+  Component(dashboardCtrl, "dashboard.controller.ts", "Controller", "Estadisticas del dashboard\npara Padawan y Jedi.")
+  Component(iaCtrl, "ia.controller.ts", "Controller", "Prediccion de riesgo\nde abandono con IA.")
+  Component(notifCtrl, "notification.controller.ts", "Controller", "Listado y marcado\nde notificaciones.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE MIDDLEWARE (Cross-cutting concerns)
+  ' --------------------------------------------------------
+  Component(authMw, "auth.middleware.ts", "Middleware", "authMiddleware(): Verifica JWT.\nrequireRole(): Restriccion por rol.\nTactica de seguridad.")
+  Component(validateMw, "validate.middleware.ts", "Middleware", "validate(): Validacion de input\ncon Zod schemas.\nTactica de integridad de datos.")
+  Component(errorMw, "error.middleware.ts", "Middleware", "errorMiddleware(): Manejo global\nde errores con correlation ID.\nHttpError helper class.\nTactica de disponibilidad.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE ESQUEMAS DE VALIDACION
+  ' --------------------------------------------------------
+  Component(schemas, "schemas/*.ts", "Zod Schemas", "auth.schema, profile.schema,\nsession.schema, okr.schema,\nvacancy.schema.\nContratos de validacion de entrada.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE MODELO (Model / Data Access)
+  ' --------------------------------------------------------
+  Component(pool, "db/pool.ts", "PostgreSQL Pool", "Connection pool con pg.\nmax: 20, SSL condicional,\nhealth monitoring.")
+
+  Component(types, "types/index.ts", "TypeScript Interfaces", "Usuario, PerfilAprendiz, Mentor,\nHabilidad, Matching, SesionMentoria,\nOKR, Vacante, ApiResponse.")
+
+  ContainerDb(db, "PostgreSQL 16", "Database", "Tablas: usuario, perfil_aprendiz,\nmentor, habilidad, perfil_habilidad,\nmatching, sesion_mentoria, okr,\nokr_historial, empresa, vacante,\nnotificacion, classroom_*, chat_*")
+}
+
+' --- Relaciones ---
+
+' Server -> App
+Rel(server, app, "Importa y ejecuta")
+
+' App -> Routes
+Rel(app, authRoutes, "Monta /api/v1/auth")
+Rel(app, profileRoutes, "Monta /api/v1")
+Rel(app, sessionRoutes, "Monta /api/v1")
+Rel(app, okrRoutes, "Monta /api/v1")
+Rel(app, vacancyRoutes, "Monta /api/v1/vacancies")
+Rel(app, matchingRoutes, "Monta /api/v1")
+Rel(app, classroomRoutes, "Monta /api/v1")
+Rel(app, chatRoutes, "Monta /api/v1")
+Rel(app, onboardingRoutes, "Monta /api/v1")
+Rel(app, dashboardRoutes, "Monta /api/v1")
+Rel(app, iaRoutes, "Monta /api/v1")
+Rel(app, notifRoutes, "Monta /api/v1")
+Rel(app, errorMw, "Usa como ultimo middleware")
+
+' Routes -> Middleware -> Controllers
+Rel(authRoutes, validateMw, "Usa para validar input")
+Rel(authRoutes, authCtrl, "Delega a")
+Rel(profileRoutes, authMw, "Protege rutas")
+Rel(profileRoutes, validateMw, "Valida input")
+Rel(profileRoutes, profileCtrl, "Delega a")
+Rel(sessionRoutes, authMw, "Protege rutas")
+Rel(sessionRoutes, sessionCtrl, "Delega a")
+Rel(okrRoutes, authMw, "Protege rutas")
+Rel(okrRoutes, validateMw, "Valida input")
+Rel(okrRoutes, okrCtrl, "Delega a")
+Rel(vacancyRoutes, authMw, "Protege rutas")
+Rel(vacancyRoutes, vacancyCtrl, "Delega a")
+
+' Controllers -> Model/DB
+Rel(authCtrl, pool, "Queries SQL")
+Rel(profileCtrl, pool, "Queries SQL")
+Rel(sessionCtrl, pool, "Queries SQL")
+Rel(okrCtrl, pool, "ACID Transactions")
+Rel(vacancyCtrl, pool, "Queries SQL")
+Rel(matchingCtrl, pool, "Queries SQL")
+Rel(classroomCtrl, pool, "Queries SQL")
+Rel(chatCtrl, pool, "Queries SQL")
+Rel(onboardingCtrl, pool, "Queries SQL")
+Rel(dashboardCtrl, pool, "Queries SQL")
+Rel(iaCtrl, pool, "Queries SQL")
+Rel(notifCtrl, pool, "Queries SQL")
+
+' DB Pool -> Database
+Rel(pool, db, "TCP/IP\npg Pool")
+
+' Middleware -> Schemas
+Rel(validateMw, schemas, "Usa para validar")
+
+' Controllers -> Types
+Rel(authCtrl, types, "Usa interfaces")
+Rel(profileCtrl, types, "Usa interfaces")
+Rel(okrCtrl, types, "Usa interfaces")
+
+@enduml
+
+
+' ================================================================
+'  NIVEL 3: DIAGRAMA DE COMPONENTES — FRONTEND (Vista)
+' ================================================================
+
+@startuml Nexus_Componentes_Frontend
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title Nexus Frontend — Diagrama de Componentes (C4 Nivel 3)\nVista del patron MVC
+
+Container_Boundary(spa, "Frontend SPA — React 18 + TypeScript + Vite") {
+
+  ' --------------------------------------------------------
+  '  CAPA DE ENTRADA / ROUTING
+  ' --------------------------------------------------------
+  Component(appComp, "App.tsx", "Root Component", "BrowserRouter + QueryClientProvider\n+ AuthProvider.\nDefine ProtectedRoute y PublicRoute.\nEnrutamiento principal de la SPA.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE PAGINAS (Views)
+  ' --------------------------------------------------------
+  Component(loginPage, "LoginPage.tsx", "Page / View", "Formulario de inicio de sesion.\nValidacion client-side.")
+  Component(registerPage, "RegisterPage.tsx", "Page / View", "Formulario de registro\ncon seleccion de rol.")
+  Component(dashboardPage, "DashboardPage.tsx", "Page / View", "Panel principal.\nIntegra ProfileSkills,\nstats y acceso rapido.")
+  Component(profilePage, "ProfilePage.tsx", "Page / View", "Edicion de perfil completo\ndel Padawan o Jedi.")
+  Component(sessionsPage, "SessionsPage.tsx", "Page / View", "Listado y gestion\nde sesiones de mentoria.")
+  Component(okrPage, "OKRPage.tsx", "Page / View", "CRUD de OKRs por sesion.\nFlujo de completar y feedback.")
+  Component(vacanciesPage, "VacanciesPage.tsx", "Page / View", "Listado de vacantes\ncon filtros por modalidad.")
+  Component(matchingPage, "MatchingPage.tsx", "Page / View", "Emparejamiento\nPadawan-Mentor.")
+  Component(classroomPage, "ClassroomPage.tsx", "Page / View", "Aula virtual con feed,\nposts y comentarios.")
+  Component(onboardingPage, "OnboardingPage.tsx", "Page / View", "Flujo guiado de\nonboarding para nuevos usuarios.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE COMPONENTES REUTILIZABLES
+  ' --------------------------------------------------------
+  Component(profileSkills, "ProfileSkills.tsx", "Feature Component", "Display de habilidades\ncon grid glassmorphism.\nScore de empleabilidad.")
+  Component(addSkillModal, "AddSkillModal.tsx", "Feature Component", "Modal con form para\nagregar habilidades.\nDropdown + DatePicker.")
+  Component(uiComps, "components/ui/*", "UI Components", "Modal, Dropdown, DatePicker,\nBadge, ProgressBar,\nLoadingSpinner, EmptyState.")
+  Component(layout, "components/layout/*", "Layout Component", "Sidebar + Header + Content.\nNavegacion principal responsive.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE HOOKS (Controller logic)
+  ' --------------------------------------------------------
+  Component(useAuth, "useAuth.tsx", "Custom Hook / Controller", "AuthContext + AuthProvider.\nlogin(), register(), logout(),\nrefreshUser().\nGestion de estado de autenticacion.")
+  Component(useProfileSkills, "useProfileSkills.tsx", "Custom Hook / Controller", "Logica de habilidades:\nfetchSkills(), addSkill(),\nremoveSkill().\nEstado: loading, error, data.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE SERVICIOS (Model / Data Access)
+  ' --------------------------------------------------------
+  Component(apiService, "services/api.ts", "Axios Client + Services", "Instancia Axios con interceptores\nJWT auto-attach, 401 redirect.\nauthService, sessionService,\nokrService, vacancyService,\nprofileService, iaService,\nnotificationService, classroomService,\nchatService.")
+
+  ' --------------------------------------------------------
+  '  CAPA DE TIPOS
+  ' --------------------------------------------------------
+  Component(frontTypes, "types/index.ts", "TypeScript Interfaces", "User, Session, OKR, Vacancy,\nSkill, ProfileData, ClassroomPost,\nChatMessage, ApiResponse, ApiError.")
+}
+
+Container(backendApi, "Backend API", "Express.js", "API RESTful /api/v1/*")
+
+' --- Relaciones ---
+Rel(appComp, loginPage, "Ruta /login")
+Rel(appComp, registerPage, "Ruta /register")
+Rel(appComp, dashboardPage, "Ruta /dashboard")
+Rel(appComp, profilePage, "Ruta /profile")
+Rel(appComp, sessionsPage, "Ruta /sessions")
+Rel(appComp, okrPage, "Ruta /sessions/:id/okrs")
+Rel(appComp, vacanciesPage, "Ruta /vacancies")
+Rel(appComp, matchingPage, "Ruta /matching")
+Rel(appComp, classroomPage, "Ruta /classroom/:id")
+Rel(appComp, onboardingPage, "Ruta /onboarding")
+
+' Pages -> Components
+Rel(dashboardPage, profileSkills, "Integra")
+Rel(dashboardPage, addSkillModal, "Abre modal")
+Rel(dashboardPage, uiComps, "Usa")
+Rel(profilePage, uiComps, "Usa")
+Rel(sessionsPage, uiComps, "Usa")
+Rel(okrPage, uiComps, "Usa")
+
+' Pages -> Hooks
+Rel(loginPage, useAuth, "login()")
+Rel(registerPage, useAuth, "register()")
+Rel(dashboardPage, useAuth, "user, logout()")
+Rel(dashboardPage, useProfileSkills, "skills CRUD")
+
+' Hooks -> Services
+Rel(useAuth, apiService, "authService.*")
+Rel(useProfileSkills, apiService, "profileService.*")
+
+' Pages -> Services (directo para pages simples)
+Rel(sessionsPage, apiService, "sessionService.*")
+Rel(okrPage, apiService, "okrService.*")
+Rel(vacanciesPage, apiService, "vacancyService.*")
+Rel(matchingPage, apiService, "matchingService (inline)")
+Rel(classroomPage, apiService, "classroomService.*")
+
+' Services -> Backend
+Rel(apiService, backendApi, "HTTP / JSON\nBearer Token", "Axios")
+
+' Types
+Rel(apiService, frontTypes, "Usa interfaces")
+Rel(useAuth, frontTypes, "User, AuthResponse")
+
+@enduml
+
+
+' ================================================================
+'  DIAGRAMA DE SECUENCIA: Transaccion ACID — Completar OKR
+' ================================================================
+
+@startuml Nexus_Secuencia_CompletarOKR
+
+title Diagrama de Secuencia — Completar OKR (Transaccion ACID)
+
+actor "Padawan / Mentor" as user
+participant "React SPA\n(OKRPage)" as frontend
+participant "Axios\n(api.ts)" as axios
+participant "Express Router\n(okr.routes.ts)" as router
+participant "authMiddleware" as auth
+participant "okr.controller.ts\ncompleteOKR()" as ctrl
+database "PostgreSQL\n(pg Pool)" as db
+
+user -> frontend : Click "Completar OKR"
+frontend -> axios : okrService.complete(okrId, {valor_actual, nota_cierre})
+axios -> router : PATCH /api/v1/okrs/:okrId/complete\n[Authorization: Bearer <JWT>]
+
+router -> auth : authMiddleware
+auth -> auth : jwt.verify(token)
+auth -> router : req.user = {userId, email, rol}
+
+router -> ctrl : completeOKR(req, res, next)
+
+ctrl -> db : SELECT okr + matching + mentor + padawan\n(Verificar propiedad)
+
+alt OKR no encontrado
+  ctrl -> frontend : 404 OKR_NOT_FOUND
+else Estado != EnProgreso
+  ctrl -> frontend : 409 INVALID_STATE_TRANSITION
+else Todo valido
+  ctrl -> db : BEGIN TRANSACTION
+  ctrl -> db : UPDATE okr SET estado='Completado'
+  ctrl -> db : INSERT okr_historial (audit trail)
+  ctrl -> db : UPDATE perfil_aprendiz\nSET score += 12 (cap 100)
+  ctrl -> db : COMMIT
+
+  ctrl -> ctrl : setImmediate() → Notificacion asincrona
+
+  ctrl -> db : SELECT okr + nuevo_score
+  ctrl -> frontend : 200 {success: true, okr: {...}}
+end
+
+frontend -> user : Actualiza UI con\nnuevo estado y score
+
+@enduml
+
+
+' ================================================================
+'  DIAGRAMA DE DESPLIEGUE
+' ================================================================
+
+@startuml Nexus_Despliegue
+
+title Nexus — Diagrama de Despliegue
+
+node "Maquina de Desarrollo" {
+  component "Docker Compose" as dc {
+    artifact "Frontend Container\nReact + Vite\nPuerto: 5174" as frontC
+    artifact "Backend Container\nNode.js + Express\nPuerto: 3001" as backC
+    artifact "PostgreSQL Container\nPostgres 16 Alpine\nPuerto: 5432" as dbC
+  }
+}
+
+cloud "Azure Cloud" {
+  node "Azure Static Web Apps" as azStatic {
+    artifact "Frontend Build\n(React SPA)" as azFront
+  }
+  node "Azure App Service" as azApp {
+    artifact "Backend API\n(Docker)" as azBack
+  }
+  database "Azure PostgreSQL\n(Produccion)" as azDB
+}
+
+cloud "GitHub" {
+  artifact "GitHub Actions\nCI/CD Pipeline" as ghActions
+}
+
+frontC --> backC : HTTP :3001
+backC --> dbC : TCP :5432
+
+ghActions --> azStatic : Deploy frontend
+ghActions --> azApp : Deploy backend
+
+azFront --> azBack : HTTPS /api/v1
+azBack --> azDB : TCP/SSL
+
+@enduml
