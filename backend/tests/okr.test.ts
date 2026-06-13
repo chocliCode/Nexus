@@ -114,7 +114,6 @@ afterAll(async () => {
        OR mentor_id IN (SELECT mentor_id FROM mentor m JOIN usuario u ON m.usuario_id = u.usuario_id WHERE u.email LIKE '%@test.com')
   `);
   await pool.query(`DELETE FROM usuario WHERE email IN ('padawan@test.com', 'other@test.com', 'mentor@test.com')`);
-  await pool.end();
 });
 
 describe('POST /api/v1/okrs/:id/complete', () => {

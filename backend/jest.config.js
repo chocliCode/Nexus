@@ -8,5 +8,16 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.ts', '!src/server.ts'],
   coverageDirectory: 'coverage',
   verbose: true,
-  setupFilesAfterEnv: [],
+
+  // Load .env.test before each test suite
+  setupFiles: ['<rootDir>/tests/setup.ts'],
+
+  // Close the DB pool once after ALL suites finish
+  globalTeardown: '<rootDir>/tests/globalTeardown.ts',
+
+  // Run test files serially to avoid pool contention across files
+  maxWorkers: 1,
+
+  // Integration tests hit the DB; give them time to respond
+  testTimeout: 15000,
 };

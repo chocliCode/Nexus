@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import { authRateLimiter, globalRateLimiter } from './middleware/rateLimiter.middleware';
 
 dotenv.config();
 
@@ -32,7 +33,15 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }));
 
-app.use(morgan('dev'));
+// Suppress request logs during automated tests to keep output clean
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
+
+// ============================================================
+// Security: Global rate limiter (200 req / 15 min per IP)
+// ============================================================
+app.use('/api/v1', globalRateLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -46,7 +55,8 @@ app.get('/api/v1/health', (_req, res) => {
 // ============================================================
 // Routes
 // ============================================================
-app.use('/api/v1/auth', authRoutes);
+// Security: Strict rate limiter on auth endpoints (10 req / 15 min per IP)
+app.use('/api/v1/auth', authRateLimiter, authRoutes);
 app.use('/api/v1', sessionRoutes);
 app.use('/api/v1', okrRoutes);
 app.use('/api/v1/vacancies', vacancyRoutes);

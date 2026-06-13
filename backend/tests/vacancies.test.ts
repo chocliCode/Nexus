@@ -49,7 +49,6 @@ afterAll(async () => {
     await pool.query(`DELETE FROM vacante WHERE vacante_id = $1`, [vacancyId]);
   }
   await pool.query(`DELETE FROM usuario WHERE email LIKE '%@vactest.com'`);
-  await pool.end();
 });
 
 describe('UC-21: POST /api/v1/vacancies (publicar vacante)', () => {

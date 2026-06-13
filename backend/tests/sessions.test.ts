@@ -56,7 +56,6 @@ afterAll(async () => {
     WHERE padawan_id IN (SELECT perfil_id FROM perfil_aprendiz pa JOIN usuario u ON pa.usuario_id = u.usuario_id WHERE u.email LIKE '%@sessiontest.com')
   `);
   await pool.query(`DELETE FROM usuario WHERE email LIKE '%@sessiontest.com'`);
-  await pool.end();
 });
 
 describe('UC-12: POST /api/v1/matchings/:matchingId/sessions', () => {

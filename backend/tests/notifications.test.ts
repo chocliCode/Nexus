@@ -48,7 +48,6 @@ beforeAll(async () => {
 afterAll(async () => {
   await pool.query(`DELETE FROM notificacion WHERE usuario_id = $1`, [userId]);
   await pool.query(`DELETE FROM usuario WHERE email LIKE '%@notiftest.com'`);
-  await pool.end();
 });
 
 describe('UC-26: GET /api/v1/notifications', () => {

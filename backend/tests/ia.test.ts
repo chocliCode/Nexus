@@ -35,7 +35,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await pool.query(`DELETE FROM usuario WHERE email LIKE '%@iatest.com'`);
-  await pool.end();
 });
 
 describe('UC-25: GET /api/v1/ia/riesgo-abandono', () => {

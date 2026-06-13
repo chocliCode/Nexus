@@ -4,7 +4,6 @@ import pool from '../src/db/pool';
 
 afterAll(async () => {
   await pool.query(`DELETE FROM usuario WHERE email LIKE '%@authtest.com'`);
-  await pool.end();
 });
 
 describe('POST /api/v1/auth/register', () => {
