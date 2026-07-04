@@ -91,12 +91,12 @@ jobs:
         working-directory: ./backend
         run: |
           node tests/qa-scripts/generate_excel.js || true
-          mv Reporte_Final_Pruebas_Nexus.xlsx Reporte_Pruebas_Main.xlsx
+          mv ../Reporte_Final_Pruebas_Nexus.xlsx ../Reporte_Pruebas_Main.xlsx || true
 
       - name: "📤 Subir Reporte Oficial"
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Reporte_Pruebas_Main
-          path: backend/Reporte_Pruebas_Main.xlsx
+          path: Reporte_Pruebas_Main.xlsx
           retention-days: 2
