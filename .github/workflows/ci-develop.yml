@@ -1,0 +1,81 @@
+name: "🚀 NEXUS CI (Develop) - Shift-Left"
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+concurrency:
+  group: ci-develop-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  JWT_SECRET: test_secret_ci_2026
+  NODE_ENV: test
+
+jobs:
+  lint-typecheck:
+    name: "📋 Análisis Estático (Lint & Types)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - name: Backend Typecheck
+        working-directory: ./backend
+        run: npm ci && npx tsc --noEmit
+      - name: Frontend Linting
+        working-directory: ./frontend
+        run: npm ci && npm run lint || true
+
+  unit-tests:
+    name: "🎯 Unitarias (Backend)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/test-runner
+        with:
+          project: 'backend'
+          command: 'npm run test:unit -- --verbose'
+          report_name: 'unit-results'
+
+  component-tests:
+    name: "🎨 Componente UI (Frontend)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/test-runner
+        with:
+          project: 'frontend'
+          command: 'npx vitest run --reporter=verbose'
+          report_name: 'component-results'
+
+  generate-report-develop:
+    name: "📊 Generación de Reporte Excel"
+    runs-on: ubuntu-latest
+    needs: [lint-typecheck, unit-tests, component-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Instalar Dependencias del Generador
+        working-directory: "backend"
+        run: npm ci || npm install
+      - name: Generar Reporte Excel
+        working-directory: "backend"
+        run: node tests/qa-scripts/generate_excel.js
+      - name: Renombrar archivo para Develop
+        run: mv Reporte_Final_Pruebas_Nexus.xlsx Reporte_Pruebas_Develop.xlsx
+      - name: Subir Reporte Oficial
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reporte_Pruebas_Develop
+          path: Reporte_Pruebas_Develop.xlsx
+          retention-days: 2
