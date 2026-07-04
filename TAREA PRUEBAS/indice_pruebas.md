@@ -8,14 +8,14 @@
 |---|---|---|---|
 | **Integracion** | 36 | Existentes, documentadas | [`pruebas_integracion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_integracion.md) |
 | **Unitarias** | 160 | Implementadas, documentadas | [`pruebas_unitarias.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_unitarias.md) |
-| Componente (UI) | 3 | Existentes, sin doc nueva | -- |
+| **Componente (UI)** | 15 | Implementadas, documentadas | [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md) |
 | E2E | 0 | Pendiente | -- |
 | Carga | 0 | Pendiente | -- |
 | Estres | 0 | Pendiente | -- |
 | Seguridad | Parcial | Pendiente | -- |
 | Humo | 0 | Pendiente | -- |
 | Aceptacion | 0 | Pendiente | -- |
-| **Total** | **199** | | |
+| **Total** | **211** | | |
 
 ---
 
@@ -60,21 +60,41 @@
 
 ---
 
+### 3. Pruebas de Componente (UI)
+
+- **Archivo:** [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md)
+- **Total:** 15 pruebas
+- **Tecnologia:** Vitest + React Testing Library + jsdom (sin navegador real)
+- **Estado:** Implementadas (expandidas de 3 a 15) y documentadas.
+
+| Categoria | Tests | IDs |
+|---|---|---|
+| Renderizado de estructura | 5 | COMP-LOGIN-01 a 05 |
+| Atributos y tipos de input | 3 | COMP-LOGIN-06 a 08 |
+| Boton submit | 2 | COMP-LOGIN-09 a 10 |
+| Validacion del formulario | 2 | COMP-LOGIN-11 a 12 |
+| Interaccion con login | 3 | COMP-LOGIN-13 a 15 |
+
+---
+
 ## Comandos de Ejecucion
 
 ```bash
 # Ejecutar pruebas de integracion (requiere PostgreSQL corriendo)
-npm test
+cd backend && npm test
 
 # Ejecutar pruebas unitarias (no requiere DB)
-npm run test:unit
+cd backend && npm run test:unit
+
+# Ejecutar pruebas de componente (frontend, no requiere DB)
+cd frontend && npm test
 
 # Ejecutar unitarias con cobertura
-npm run test:unit -- --coverage
+cd backend && npm run test:unit -- --coverage
 
 # Ejecutar un archivo de prueba especifico
-npm run test:unit -- --testPathPattern=auth.schema
-npm test -- --testPathPattern=auth.test
+cd backend && npm run test:unit -- --testPathPattern=auth.schema
+cd backend && npm test -- --testPathPattern=auth.test
 ```
 
 ---
@@ -82,17 +102,19 @@ npm test -- --testPathPattern=auth.test
 ## Piramide de Testing Actual
 
 ```
-          /\
-         /  \
-        / 0  \          E2E (pendiente)
-       /------\
-      /   36   \         Integracion (documentadas)
-     /----------\
-    /    160     \       Unitarias (nuevas)
-   /______________\
+            /\
+           /  \
+          / 0  \            E2E (pendiente)
+         /------\
+        /  15    \           Componente UI (LoginPage)
+       /----------\
+      /    36      \         Integracion (API + DB)
+     /--------------\
+    /      160       \       Unitarias (schemas, middleware, types)
+   /__________________\
 ```
 
-La piramide esta ahora mejor balanceada con 160 pruebas unitarias como base, 36 de integracion como capa intermedia, y E2E pendiente.
+La piramide tiene 160 pruebas unitarias como base, 36 de integracion, 15 de componente, y E2E pendiente. Total: **211 pruebas**.
 
 ---
 
