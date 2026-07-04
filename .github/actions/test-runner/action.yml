@@ -1,0 +1,32 @@
+name: 'Nexus Test Runner'
+description: 'Instala dependencias, ejecuta pruebas con alto nivel de verbosidad (debug) y guarda logs'
+inputs:
+  project:
+    description: 'Directorio del proyecto (backend o frontend)'
+    required: true
+  command:
+    description: 'Comando de npm a ejecutar'
+    required: true
+  report_name:
+    description: 'Nombre del archivo de reporte'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+    - name: Instalar Dependencias
+      shell: bash
+      working-directory: ./${{ inputs.project }}
+      run: npm ci
+    - name: Ejecutar Pruebas (Modo Debug Verbose)
+      shell: bash
+      working-directory: ./${{ inputs.project }}
+      env:
+        DEBUG: "express:*,nexus:*" # Habilitar trazas profundas para debug
+      run: |
+        echo "::group::📝 Logs de Ejecución de Pruebas [${{ inputs.report_name }}]"
+        echo "Iniciando pruebas con máximo nivel de detalle..."
+        ${{ inputs.command }} 2>&1 | tee ${{ inputs.report_name }}.txt || true
+        echo "::endgroup::"

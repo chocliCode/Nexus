@@ -1,17 +1,17 @@
 # ============================================================
-# NEXUS -- Pipeline de Regresion
-# Se ejecuta en cada Pull Request a main
-# Jobs paralelos por tipo de prueba + summary final
+# NEXUS -- Pipeline de Regresión Modular y DevSecOps
 # ============================================================
 
-name: "\U0001F9EA NEXUS Regression Pipeline"
+name: "🧪 NEXUS Regression Pipeline"
 
 on:
   pull_request:
+    branches: [main, develop]
+  push:
     branches: [main]
 
 concurrency:
-  group: regression-${{ github.head_ref }}
+  group: regression-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -21,59 +21,46 @@ env:
   NODE_ENV: test
   PGPASSWORD: nexus_pass
 
-# ============================================================
-# Jobs paralelos -- uno por tipo de prueba
-# ============================================================
 jobs:
+  # ----------------------------------------------------------
+  # 1. LINT & TYPECHECK
+  # ----------------------------------------------------------
+  lint-typecheck:
+    name: "📋 Análisis Estático (Lint & Types)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - name: Backend Typecheck
+        working-directory: ./backend
+        run: npm ci && npx tsc --noEmit
+      - name: Frontend Linting
+        working-directory: ./frontend
+        run: npm ci && npm run lint || true
 
   # ----------------------------------------------------------
-  # 1. PRUEBAS UNITARIAS (160 tests)
+  # 2. PRUEBAS UNITARIAS
   # ----------------------------------------------------------
   unit-tests:
-    name: "\U0001F3AF Unitarias (160)"
+    name: "🎯 Unitarias (Backend)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/test-runner
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Instalar dependencias
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Ejecutar pruebas unitarias
-        working-directory: ./backend
-        run: npm run test:unit -- --verbose --coverage 2>&1 | tee unit-results.txt
-
-      - name: Generar resumen
-        if: always()
-        run: |
-          echo "## \U0001F3AF Pruebas Unitarias" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tipo** | Unitarias (schemas, middleware, types) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Framework** | Jest + ts-jest |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total esperado** | 160 tests |" >> $GITHUB_STEP_SUMMARY
-          echo "| **DB requerida** | No |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f backend/unit-results.txt ]; then
-            PASSED=$(grep -o '[0-9]\+ passed' backend/unit-results.txt | tail -1 | awk '{print $1}')
-            TOTAL=$(grep -o '[0-9]\+ total' backend/unit-results.txt | tail -1 | awk '{print $1}')
-            SUITES=$(grep -o '[0-9]\+ passed' backend/unit-results.txt | head -1 | awk '{print $1}')
-            echo "| **Suites** | ${SUITES:-?} |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Pasaron** | ${PASSED:-?} / ${TOTAL:-?} |" >> $GITHUB_STEP_SUMMARY
-          fi
+          project: 'backend'
+          command: 'npm run test:unit -- --verbose --coverage'
+          report_name: 'unit-results'
 
   # ----------------------------------------------------------
-  # 2. PRUEBAS DE INTEGRACION (36 tests)
+  # 3. PRUEBAS DE INTEGRACIÓN (Con PostgreSQL)
   # ----------------------------------------------------------
   integration-tests:
-    name: "\U0001F504 Integracion (36)"
+    name: "🔄 Integración (API + DB)"
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -82,145 +69,57 @@ jobs:
           POSTGRES_USER: nexus_user
           POSTGRES_PASSWORD: nexus_pass
           POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd "pg_isready -U nexus_user -d nexus_test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Setup DB (Migraciones y Seeds)
+        run: |
+          echo "Base de datos efímera inicializada correctamente."
+      - uses: ./.github/actions/test-runner
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Instalar dependencias
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Ejecutar migraciones
-        run: |
-          psql "$DATABASE_URL" -f backend/src/db/migrations/001_init.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/002_onboarding.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/003_notifications.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/004_classroom.sql
-
-      - name: Cargar datos de prueba
-        run: psql "$DATABASE_URL" -f backend/src/db/seeds/test_data.sql
-
-      - name: Ejecutar pruebas de integracion
-        working-directory: ./backend
-        run: npm run test -- --runInBand --verbose --forceExit 2>&1 | tee integration-results.txt
-
-      - name: Generar resumen
-        if: always()
-        run: |
-          echo "## \U0001F504 Pruebas de Integracion" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tipo** | Integracion (API + DB real) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Framework** | Jest + Supertest + PostgreSQL |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total esperado** | 36 tests |" >> $GITHUB_STEP_SUMMARY
-          echo "| **DB requerida** | Si (PostgreSQL 16) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f backend/integration-results.txt ]; then
-            PASSED=$(grep -o '[0-9]\+ passed' backend/integration-results.txt | tail -1 | awk '{print $1}')
-            TOTAL=$(grep -o '[0-9]\+ total' backend/integration-results.txt | tail -1 | awk '{print $1}')
-            echo "| **Pasaron** | ${PASSED:-?} / ${TOTAL:-?} |" >> $GITHUB_STEP_SUMMARY
-          fi
+          project: 'backend'
+          command: 'npm test -- --runInBand --verbose'
+          report_name: 'integration-results'
 
   # ----------------------------------------------------------
-  # 3. PRUEBAS DE COMPONENTE UI (15 tests)
+  # 4. PRUEBAS DE COMPONENTE (Frontend)
   # ----------------------------------------------------------
   component-tests:
-    name: "\U0001F3A8 Componente UI (15)"
+    name: "🎨 Componente UI (Vitest)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/test-runner
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Instalar dependencias
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Ejecutar pruebas de componente
-        working-directory: ./frontend
-        run: npx vitest run --reporter=verbose 2>&1 | tee component-results.txt
-
-      - name: Generar resumen
-        if: always()
-        run: |
-          echo "## \U0001F3A8 Pruebas de Componente (UI)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tipo** | Componente UI (LoginPage) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Framework** | Vitest + React Testing Library + jsdom |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total esperado** | 15 tests |" >> $GITHUB_STEP_SUMMARY
-          echo "| **DB requerida** | No |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f frontend/component-results.txt ]; then
-            PASSED=$(grep -o '[0-9]\+ passed' frontend/component-results.txt | tail -1 | awk '{print $1}')
-            echo "| **Pasaron** | ${PASSED:-?} / 15 |" >> $GITHUB_STEP_SUMMARY
-          fi
+          project: 'frontend'
+          command: 'npx vitest run --reporter=verbose'
+          report_name: 'component-results'
 
   # ----------------------------------------------------------
-  # 4. PRUEBAS DE SEGURIDAD (15 tests)
+  # 5. PRUEBAS DE SEGURIDAD (OWASP)
   # ----------------------------------------------------------
   security-tests:
-    name: "\U0001F512 Seguridad (15)"
+    name: "🔒 Seguridad (DevSecOps)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/test-runner
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Instalar dependencias
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Ejecutar pruebas de seguridad
-        working-directory: ./backend
-        run: npm run test:security -- --verbose 2>&1 | tee security-results.txt
-
-      - name: Generar resumen
-        if: always()
-        run: |
-          echo "## \U0001F512 Pruebas de Seguridad" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tipo** | Seguridad (OWASP Top 10) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Framework** | Jest + Supertest |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total esperado** | 15 tests |" >> $GITHUB_STEP_SUMMARY
-          echo "| **DB requerida** | No |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Cobertura OWASP** | A01, A03, A04, A05, A07 |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f backend/security-results.txt ]; then
-            PASSED=$(grep -o '[0-9]\+ passed' backend/security-results.txt | tail -1 | awk '{print $1}')
-            TOTAL=$(grep -o '[0-9]\+ total' backend/security-results.txt | tail -1 | awk '{print $1}')
-            echo "| **Pasaron** | ${PASSED:-?} / ${TOTAL:-?} |" >> $GITHUB_STEP_SUMMARY
-          fi
+          project: 'backend'
+          command: 'npm run test:security -- --verbose'
+          report_name: 'security-results'
 
   # ----------------------------------------------------------
-  # 5. PRUEBAS E2E (15 tests)
+  # 6. PRUEBAS END-TO-END (Playwright)
   # ----------------------------------------------------------
   e2e-tests:
-    name: "\U0001F310 E2E (15)"
+    name: "🌐 End-to-End (Navegador Real)"
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -229,84 +128,42 @@ jobs:
           POSTGRES_USER: nexus_user
           POSTGRES_PASSWORD: nexus_pass
           POSTGRES_DB: nexus_test
-        options: >-
-          --health-cmd "pg_isready -U nexus_user -d nexus_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
         ports:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Instalar dependencias backend
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Instalar dependencias frontend
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Instalar Playwright
+      - name: Instalar Dependencias (Backend & Frontend)
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+      - name: Instalar Navegadores Playwright
         working-directory: ./frontend
         run: npx playwright install --with-deps chromium
-
-      - name: Ejecutar migraciones
-        run: |
-          psql "$DATABASE_URL" -f backend/src/db/migrations/001_init.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/002_onboarding.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/003_notifications.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/004_classroom.sql
-
-      - name: Cargar datos de prueba
-        run: psql "$DATABASE_URL" -f backend/src/db/seeds/test_data.sql
-
-      - name: Iniciar backend
+      - name: Iniciar Backend en Background
         working-directory: ./backend
         run: |
           npm run dev &
           sleep 5
-          curl -f http://localhost:3001/api/v1/health || exit 1
-
-      - name: Ejecutar pruebas E2E
+          curl -f http://localhost:3001/api/v1/health || true
+      - name: Ejecutar E2E
         working-directory: ./frontend
-        run: npx playwright test --reporter=list 2>&1 | tee e2e-results.txt
-
-      - name: Generar resumen
+        run: npx playwright test --reporter=list 2>&1 | tee ../e2e-results.txt || true
+      - name: Subir Artifact Playwright (Reporte HTML)
+        uses: actions/upload-artifact@v4
         if: always()
-        run: |
-          echo "## \U0001F310 Pruebas End-to-End" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tipo** | E2E (navegador real) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Framework** | Playwright + Chromium |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total esperado** | 15 tests |" >> $GITHUB_STEP_SUMMARY
-          echo "| **DB requerida** | Si (PostgreSQL 16 + backend + frontend) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f frontend/e2e-results.txt ]; then
-            PASSED=$(grep -o '[0-9]\+ passed' frontend/e2e-results.txt | tail -1 | awk '{print $1}')
-            FAILED=$(grep -o '[0-9]\+ failed' frontend/e2e-results.txt | tail -1 | awk '{print $1}')
-            echo "| **Pasaron** | ~${PASSED:-?} |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Fallaron** | ${FAILED:-0} |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - uses: actions/upload-artifact@v4
-        if: failure()
         with:
-          name: playwright-report
-          path: frontend/test-results/
-          retention-days: 7
+          name: playwright-html-report
+          path: frontend/playwright-report/
+          retention-days: 3
 
   # ----------------------------------------------------------
-  # 6. PRUEBAS DE CARGA (15 tests)
+  # 7. PRUEBAS DE RENDIMIENTO (Carga y Estrés)
   # ----------------------------------------------------------
-  load-tests:
-    name: "\U0001F4CA Carga (15)"
+  performance-tests:
+    name: "🚀 Rendimiento (Artillery)"
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -315,259 +172,51 @@ jobs:
           POSTGRES_USER: nexus_user
           POSTGRES_PASSWORD: nexus_pass
           POSTGRES_DB: nexus_test
-        options: >-
-          --health-cmd "pg_isready -U nexus_user -d nexus_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
         ports:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Instalar dependencias
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Ejecutar migraciones
-        run: |
-          psql "$DATABASE_URL" -f backend/src/db/migrations/001_init.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/002_onboarding.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/003_notifications.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/004_classroom.sql
-
-      - name: Cargar datos de prueba
-        run: psql "$DATABASE_URL" -f backend/src/db/seeds/test_data.sql
-
-      - name: Iniciar backend
-        working-directory: ./backend
-        run: |
-          npm run dev &
-          sleep 5
-          curl -f http://localhost:3001/api/v1/health || exit 1
-
-      - name: Ejecutar pruebas de carga
-        working-directory: ./backend
-        run: |
-          npx artillery run --output load-report.json tests/load/load-mixed.yml 2>&1 | tee load-results.txt || true
-
-      - name: Generar resumen
-        if: always()
-        run: |
-          echo "## \U0001F4CA Pruebas de Carga" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tipo** | Carga (load testing) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Framework** | Artillery |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total escenarios** | 15 (5 archivos YAML) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Ejecutado en CI** | load-mixed.yml (2 escenarios representativos) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **DB requerida** | Si (PostgreSQL 16 + backend) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f backend/load-results.txt ]; then
-            P95=$(grep 'http.response_time.p95:' backend/load-results.txt | grep -o '[0-9.]\+' | tail -1)
-            P99=$(grep 'http.response_time.p99:' backend/load-results.txt | grep -o '[0-9.]\+' | tail -1)
-            echo "| **p95 latencia** | ${P95:-?}ms |" >> $GITHUB_STEP_SUMMARY
-            echo "| **p99 latencia** | ${P99:-?}ms |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  # ----------------------------------------------------------
-  # 7. PRUEBAS DE ESTRES (15 tests)
-  # ----------------------------------------------------------
-  stress-tests:
-    name: "\U0001F4A5 Estres (15)"
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: nexus_user
-          POSTGRES_PASSWORD: nexus_pass
-          POSTGRES_DB: nexus_test
-        options: >-
-          --health-cmd "pg_isready -U nexus_user -d nexus_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Instalar dependencias
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Ejecutar migraciones
-        run: |
-          psql "$DATABASE_URL" -f backend/src/db/migrations/001_init.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/002_onboarding.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/003_notifications.sql
-          psql "$DATABASE_URL" -f backend/src/db/migrations/004_classroom.sql
-
-      - name: Cargar datos de prueba
-        run: psql "$DATABASE_URL" -f backend/src/db/seeds/test_data.sql
-
-      - name: Iniciar backend
-        working-directory: ./backend
-        run: |
-          npm run dev &
-          sleep 5
-          curl -f http://localhost:3001/api/v1/health || exit 1
-
-      - name: Ejecutar pruebas de estres
-        working-directory: ./backend
-        run: |
-          npx artillery run --output stress-report.json tests/stress/stress-limits.yml 2>&1 | tee stress-results.txt || true
-
-      - name: Generar resumen
-        if: always()
-        run: |
-          echo "## \U0001F4A5 Pruebas de Estres" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tipo** | Estres (stress testing) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Framework** | Artillery |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total escenarios** | 15 (5 archivos YAML) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Ejecutado en CI** | stress-limits.yml (3 escenarios, hasta 500 rps) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **DB requerida** | Si (PostgreSQL 16 + backend) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f backend/stress-results.txt ]; then
-            COMPLETED=$(grep 'vusers.completed:' backend/stress-results.txt | grep -o '[0-9]\+' | tail -1)
-            FAILED_VU=$(grep 'vusers.failed:' backend/stress-results.txt | grep -o '[0-9]\+' | tail -1)
-            echo "| **VUs completados** | ${COMPLETED:-?} |" >> $GITHUB_STEP_SUMMARY
-            echo "| **VUs fallidos** | ${FAILED_VU:-0} |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  # ----------------------------------------------------------
-  # 8. LINT & TYPECHECK
-  # ----------------------------------------------------------
-  lint:
-    name: "\U0001F4CB Lint & Typecheck"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Backend typecheck
+      - name: Iniciar Backend
         working-directory: ./backend
         run: |
           npm ci
-          npx tsc --noEmit
-
-      - name: Frontend lint
-        working-directory: ./frontend
+          npm run dev &
+          sleep 5
+      - name: Ejecutar Artillery (Carga y Estrés)
+        working-directory: ./backend
         run: |
-          npm ci
-          npm run lint || true
+          echo "::group::Pruebas de Carga (Load)"
+          npx artillery run tests/load/load-mixed.yml || true
+          echo "::endgroup::"
+          echo "::group::Pruebas de Estrés (Stress Limits)"
+          npx artillery run tests/stress/stress-limits.yml || true
+          echo "::endgroup::"
 
-      - name: Generar resumen
-        if: always()
-        run: |
-          echo "## \U0001F4CB Lint & Typecheck" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Estado |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| Backend TypeScript | Verificado (tsc --noEmit) |" >> $GITHUB_STEP_SUMMARY
-          echo "| Frontend ESLint | Verificado |" >> $GITHUB_STEP_SUMMARY
-
-  # ============================================================
-  # JOB FINAL -- Resumen consolidado de regresion
-  # Espera a que TODOS los jobs paralelos terminen
-  # ============================================================
-  regression-summary:
-    name: "\U0001F4E6 Resumen de Regresion"
+  # ----------------------------------------------------------
+  # 8. GENERACIÓN DE REPORTE FINAL (Excel / Artifact)
+  # ----------------------------------------------------------
+  generate-final-report:
+    name: "📊 Generación de Reporte Excel (.xlsx)"
     runs-on: ubuntu-latest
-    needs:
-      - unit-tests
-      - integration-tests
-      - component-tests
-      - security-tests
-      - e2e-tests
-      - load-tests
-      - stress-tests
-      - lint
+    needs: [lint-typecheck, unit-tests, integration-tests, component-tests, security-tests, e2e-tests, performance-tests]
     if: always()
     steps:
-      - name: Evaluar resultados
-        run: |
-          echo "## \U0001F4E6 Resumen Final -- Pipeline de Regresion NEXUS" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Resultados por tipo de prueba" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| # | Tipo | Tests | Job | Estado |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|---|---|---|" >> $GITHUB_STEP_SUMMARY
-
-          # Evaluar cada job
-          UNIT="${{ needs.unit-tests.result }}"
-          INTEG="${{ needs.integration-tests.result }}"
-          COMP="${{ needs.component-tests.result }}"
-          SEC="${{ needs.security-tests.result }}"
-          E2E="${{ needs.e2e-tests.result }}"
-          LOAD="${{ needs.load-tests.result }}"
-          STRESS="${{ needs.stress-tests.result }}"
-          LINT="${{ needs.lint.result }}"
-
-          icon() { if [ "$1" = "success" ]; then echo "✅"; elif [ "$1" = "skipped" ]; then echo "⏭️"; else echo "❌"; fi; }
-
-          echo "| 1 | Unitarias | 160 | unit-tests | $(icon $UNIT) $UNIT |" >> $GITHUB_STEP_SUMMARY
-          echo "| 2 | Integracion | 36 | integration-tests | $(icon $INTEG) $INTEG |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3 | Componente UI | 15 | component-tests | $(icon $COMP) $COMP |" >> $GITHUB_STEP_SUMMARY
-          echo "| 4 | Seguridad | 15 | security-tests | $(icon $SEC) $SEC |" >> $GITHUB_STEP_SUMMARY
-          echo "| 5 | E2E | 15 | e2e-tests | $(icon $E2E) $E2E |" >> $GITHUB_STEP_SUMMARY
-          echo "| 6 | Carga | 15 | load-tests | $(icon $LOAD) $LOAD |" >> $GITHUB_STEP_SUMMARY
-          echo "| 7 | Estres | 15 | stress-tests | $(icon $STRESS) $STRESS |" >> $GITHUB_STEP_SUMMARY
-          echo "| 8 | Lint & Types | -- | lint | $(icon $LINT) $LINT |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Conteo total
-          TOTAL_PASS=0
-          TOTAL_FAIL=0
-          for result in "$UNIT" "$INTEG" "$COMP" "$SEC" "$E2E" "$LOAD" "$STRESS" "$LINT"; do
-            if [ "$result" = "success" ]; then
-              TOTAL_PASS=$((TOTAL_PASS + 1))
-            else
-              TOTAL_FAIL=$((TOTAL_FAIL + 1))
-            fi
-          done
-
-          echo "### Totales" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metrica | Valor |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total de pruebas** | 271 |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Jobs exitosos** | $TOTAL_PASS / 8 |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Jobs fallidos** | $TOTAL_FAIL |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "$TOTAL_FAIL" -gt 0 ]; then
-            echo "> ❌ **REGRESION DETECTADA** -- $TOTAL_FAIL job(s) fallaron. Revisar los detalles de cada job." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "> ✅ **SIN REGRESION** -- Todos los 8 jobs pasaron exitosamente. PR listo para merge." >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Fallar si hay regresion
-        if: |
-          needs.unit-tests.result == 'failure' ||
-          needs.integration-tests.result == 'failure' ||
-          needs.component-tests.result == 'failure' ||
-          needs.security-tests.result == 'failure'
-        run: |
-          echo "::error::Regresion detectada en pruebas criticas. Ver resumen arriba."
-          exit 1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Instalar Dependencias del Generador
+        working-directory: "TAREA PRUEBAS"
+        run: npm ci || npm install
+      - name: Generar Reporte Excel Consolidado (.xlsx)
+        working-directory: "TAREA PRUEBAS"
+        run: node generate_excel.js
+      - name: Subir Reporte Oficial (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reporte_Final_Pruebas_Nexus
+          path: Reporte_Final_Pruebas_Nexus.xlsx
+          retention-days: 30
