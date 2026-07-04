@@ -1,0 +1,76 @@
+# ============================================================
+# STRESS-AUTH: Pruebas de estres -- Autenticacion
+# Objetivo: Encontrar el punto de quiebre de auth
+# Escenarios: STRESS-01, STRESS-02, STRESS-03
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  # Patron de estres: escalar hasta romper
+  phases:
+    - duration: 10
+      arrivalRate: 10
+      name: "Calentamiento"
+    - duration: 20
+      arrivalRate: 50
+      name: "Carga alta"
+    - duration: 20
+      arrivalRate: 100
+      name: "Carga extrema"
+    - duration: 15
+      arrivalRate: 200
+      name: "Punto de quiebre"
+    - duration: 10
+      arrivalRate: 10
+      name: "Recuperacion"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  # STRESS-01: Avalancha de registros simultaneos
+  # Simula un evento viral donde cientos de usuarios se registran al mismo tiempo.
+  # Objetivo: encontrar donde bcrypt + transacciones DB colapsan.
+  - name: "STRESS-01: Avalancha de registros"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/register"
+          json:
+            nombres: "Stress"
+            apellidos: "Test{{ $randomNumber(1, 999999) }}"
+            email: "stress{{ $uuid }}@stresstest.com"
+            contrasena: "StressPass123!"
+            rol: "Padawan"
+
+  # STRESS-02: Fuerza bruta de login (bcrypt saturation)
+  # bcrypt es intencionalmente lento (CPU-bound).
+  # Bajo estres, cada request bcrypt.compare bloquea el thread pool.
+  - name: "STRESS-02: Saturacion bcrypt en login"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+
+  # STRESS-03: Flood de requests /me (JWT verify + DB)
+  # Simula sesiones concurrentes masivas tras un login exitoso.
+  - name: "STRESS-03: Flood de consultas /me"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - loop:
+          - get:
+              url: "/api/v1/auth/me"
+              headers:
+                Authorization: "Bearer {{ token }}"
+        count: 5

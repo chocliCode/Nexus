@@ -13,7 +13,12 @@
     "test:load:auth": "artillery run tests/load/load-auth.yml",
     "test:load:sessions": "artillery run tests/load/load-sessions.yml",
     "test:load:vacancies": "artillery run tests/load/load-vacancies.yml",
-    "test:load:notifications": "artillery run tests/load/load-notifications-ia.yml"
+    "test:load:notifications": "artillery run tests/load/load-notifications-ia.yml",
+    "test:stress": "artillery run tests/stress/stress-limits.yml",
+    "test:stress:auth": "artillery run tests/stress/stress-auth.yml",
+    "test:stress:db": "artillery run tests/stress/stress-db.yml",
+    "test:stress:spike": "artillery run tests/stress/stress-spike.yml",
+    "test:stress:endurance": "artillery run tests/stress/stress-endurance.yml"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

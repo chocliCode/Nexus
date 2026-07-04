@@ -1,0 +1,117 @@
+# ============================================================
+# STRESS-DB: Pruebas de estres -- Pool de conexiones PostgreSQL
+# Objetivo: Agotar el pool de conexiones y provocar timeouts
+# Escenarios: STRESS-04, STRESS-05, STRESS-06
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 10
+      arrivalRate: 20
+      name: "Calentamiento"
+    - duration: 30
+      arrivalRate: 80
+      name: "Presion sobre pool"
+    - duration: 20
+      arrivalRate: 150
+      name: "Agotamiento de pool"
+    - duration: 15
+      arrivalRate: 50
+      name: "Recuperacion parcial"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  # STRESS-04: Agotamiento del pool de conexiones
+  # Cada request ocupa una conexion del pool. Si llegan mas requests
+  # que conexiones disponibles, se encolan y el p99 se dispara.
+  # La query de 6 JOINs (my-sessions) es la mas lenta y retiene
+  # conexiones mas tiempo.
+  - name: "STRESS-04: Agotamiento pool con queries pesadas"
+    weight: 3
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/sessions/my-sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/api/v1/notifications"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/api/v1/ia/riesgo-abandono"
+          headers:
+            Authorization: "Bearer {{ token }}"
+
+  # STRESS-05: Escrituras masivas concurrentes
+  # Multiples INSERTs y UPDATEs simultaneos para estresar
+  # locks de fila y transacciones concurrentes.
+  - name: "STRESS-05: Escrituras masivas concurrentes"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - patch:
+          url: "/api/v1/notifications/read-all"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/api/v1/vacancies"
+          capture:
+            - json: "$.data[0].vacante_id"
+              as: "vacancyId"
+              optional: true
+      - post:
+          url: "/api/v1/vacancies/{{ vacancyId }}/apply"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            mensaje: "Stress apply {{ $randomNumber(1, 999999) }}"
+          ifTrue: "vacancyId"
+
+  # STRESS-06: Lecturas y escrituras mezcladas (contention maxima)
+  # Patron de acceso mixto que maximiza la contention en el pool:
+  # lectura pesada + escritura + lectura ligera en secuencia rapida.
+  - name: "STRESS-06: Contention lectura/escritura mixta"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/sessions/my-sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - patch:
+          url: "/api/v1/notifications/read-all"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/api/v1/notifications/unread-count"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/api/v1/auth/me"
+          headers:
+            Authorization: "Bearer {{ token }}"

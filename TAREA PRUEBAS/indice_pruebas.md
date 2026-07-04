@@ -10,12 +10,12 @@
 | **Unitarias** | 160 | Implementadas, documentadas | [`pruebas_unitarias.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_unitarias.md) |
 | **Componente (UI)** | 15 | Implementadas, documentadas | [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md) |
 | **Carga** | 15 | Implementadas, documentadas | [`pruebas_carga.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_carga.md) |
+| **Estres** | 15 | Implementadas, documentadas | [`pruebas_estres.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_estres.md) |
 | E2E | 0 | Pendiente | -- |
-| Estres | 0 | Pendiente | -- |
 | Seguridad | Parcial | Pendiente | -- |
 | Humo | 0 | Pendiente | -- |
 | Aceptacion | 0 | Pendiente | -- |
-| **Total** | **226** | | |
+| **Total** | **241** | | |
 
 ---
 
@@ -94,6 +94,23 @@
 
 ---
 
+### 5. Pruebas de Estres
+
+- **Archivo:** [`pruebas_estres.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_estres.md)
+- **Total:** 15 pruebas
+- **Tecnologia:** Artillery (npm) -- patrones agresivos (hasta 500 req/s)
+- **Estado:** Implementadas y documentadas.
+
+| Categoria | Archivo YAML | Tests | IDs | Rate maximo |
+|---|---|---|---|---|
+| Autenticacion | `stress-auth.yml` | 3 | STRESS-01 a 03 | 200 rps |
+| Pool DB | `stress-db.yml` | 3 | STRESS-04 a 06 | 150 rps |
+| Spike | `stress-spike.yml` | 3 | STRESS-07 a 09 | 200 rps |
+| Endurance | `stress-endurance.yml` | 3 | STRESS-10 a 12 | 15 rps x 5 min |
+| Limites | `stress-limits.yml` | 3 | STRESS-13 a 15 | 500 rps |
+
+---
+
 ## Comandos de Ejecucion
 
 ```bash
@@ -113,6 +130,13 @@ cd backend && npm run test:load:sessions     # Solo sesiones
 cd backend && npm run test:load:vacancies    # Solo vacantes
 cd backend && npm run test:load:notifications # Notificaciones + IA
 
+# Ejecutar pruebas de estres (requiere backend corriendo)
+cd backend && npm run test:stress            # Limites del sistema
+cd backend && npm run test:stress:auth       # Saturacion auth
+cd backend && npm run test:stress:db         # Agotamiento pool DB
+cd backend && npm run test:stress:spike      # Picos repentinos
+cd backend && npm run test:stress:endurance  # Soak 5 min
+
 # Ejecutar unitarias con cobertura
 cd backend && npm run test:unit -- --coverage
 
@@ -126,21 +150,23 @@ cd backend && npm test -- --testPathPattern=auth.test
 ## Piramide de Testing Actual
 
 ```
-              /\
-             /  \
-            / 0  \              E2E (pendiente)
-           /------\
-          /  15    \             Carga (Artillery)
-         /----------\
-        /    15      \           Componente UI (LoginPage)
-       /--------------\
-      /      36        \         Integracion (API + DB)
-     /------------------\
-    /        160         \       Unitarias (schemas, middleware, types)
-   /______________________\
+                /\
+               /  \
+              / 0  \                E2E (pendiente)
+             /------\
+            /  15    \               Estres (Artillery, hasta 500 rps)
+           /----------\
+          /    15      \             Carga (Artillery, hasta 20 rps)
+         /--------------\
+        /      15        \           Componente UI (LoginPage)
+       /------------------\
+      /        36          \         Integracion (API + DB)
+     /----------------------\
+    /          160           \       Unitarias (schemas, middleware, types)
+   /__________________________\
 ```
 
-Total: **226 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 carga.
+Total: **241 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 carga + 15 estres.
 
 ---
 
@@ -149,8 +175,6 @@ Total: **226 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 ca
 | Tipo | Prioridad | Herramienta sugerida | Notas |
 |---|---|---|---|
 | E2E | Alta | Playwright o Cypress | Flujos completos en navegador |
-
-| Estres | Media | k6 | Punto de quiebre del sistema |
 | Seguridad | Alta | OWASP ZAP | Inyeccion SQL, XSS, CSRF |
 | Humo | Baja | Jest | Subset critico de integracion |
 | Aceptacion | Baja | Manual / Cucumber | Validacion con usuario final |

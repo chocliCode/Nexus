@@ -1,0 +1,105 @@
+# ============================================================
+# STRESS-LIMITS: Pruebas de estres -- Limites del sistema
+# Objetivo: Encontrar limites absolutos y validar rate limiting
+# Escenarios: STRESS-13, STRESS-14, STRESS-15
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 10
+      arrivalRate: 5
+      name: "Pre-calentamiento"
+    - duration: 10
+      arrivalRate: 50
+      name: "Carga moderada"
+    - duration: 10
+      arrivalRate: 100
+      name: "Carga alta"
+    - duration: 10
+      arrivalRate: 250
+      name: "Carga extrema"
+    - duration: 10
+      arrivalRate: 500
+      name: "Limite absoluto"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  # STRESS-13: Rate limiter bajo ataque
+  # Verifica que el rate limiter (200 req/15min global,
+  # 10 req/15min auth) funciona bajo presion extrema.
+  # Debe retornar 429 (Too Many Requests) para la mayoria.
+  - name: "STRESS-13: Validacion rate limiter bajo ataque"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+
+  # STRESS-14: Throughput maximo del servidor (benchmark)
+  # El endpoint mas ligero posible (/health) bajo carga maxima.
+  # Determina el techo absoluto de requests/segundo del servidor.
+  - name: "STRESS-14: Throughput maximo (health benchmark)"
+    weight: 2
+    flow:
+      - loop:
+          - get:
+              url: "/api/v1/health"
+        count: 10
+
+  # STRESS-15: Cascada de fallos (failure cascade)
+  # Mezcla de operaciones pesadas que busca el efecto domino:
+  # si un componente falla (pool, bcrypt, calculo IA), arrastra
+  # a los demas. El peor escenario posible para el sistema.
+  - name: "STRESS-15: Cascada de fallos (worst case)"
+    weight: 1
+    flow:
+      # Login (bcrypt CPU-bound)
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      # Query pesada (6 JOINs)
+      - get:
+          url: "/api/v1/sessions/my-sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      # Calculo IA (5 queries + algoritmo)
+      - get:
+          url: "/api/v1/ia/riesgo-abandono"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      # Escritura masiva
+      - patch:
+          url: "/api/v1/notifications/read-all"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      # Lectura ligera (¿sigue respondiendo?)
+      - get:
+          url: "/api/v1/health"
+      # Otra query pesada
+      - get:
+          url: "/api/v1/notifications"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      # Endpoint publico (¿degradado?)
+      - get:
+          url: "/api/v1/vacancies"

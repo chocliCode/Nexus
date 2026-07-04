@@ -1,0 +1,90 @@
+# ============================================================
+# STRESS-SPIKE: Pruebas de estres -- Picos repentinos (spike testing)
+# Objetivo: Simular trafico impredecible con picos extremos
+# Escenarios: STRESS-07, STRESS-08, STRESS-09
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  # Patron spike: base baja → pico extremo → base baja → pico mayor
+  phases:
+    - duration: 15
+      arrivalRate: 5
+      name: "Base normal"
+    - duration: 10
+      arrivalRate: 100
+      name: "Spike 1"
+    - duration: 15
+      arrivalRate: 5
+      name: "Recuperacion 1"
+    - duration: 10
+      arrivalRate: 200
+      name: "Spike 2 (doble)"
+    - duration: 15
+      arrivalRate: 5
+      name: "Recuperacion 2"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  # STRESS-07: Spike en endpoint publico (vacantes)
+  # Simula un pico de trafico repentino en el endpoint sin auth.
+  # Comparable a un link viral compartido en redes sociales.
+  - name: "STRESS-07: Spike trafico en vacantes"
+    weight: 3
+    flow:
+      - get:
+          url: "/api/v1/vacancies"
+      - get:
+          url: "/api/v1/vacancies?modalidad=Remoto"
+
+  # STRESS-08: Spike en autenticacion (apertura de jornada)
+  # Simula el momento donde todos los empleados hacen login
+  # al mismo tiempo (9:00 AM de un lunes).
+  - name: "STRESS-08: Spike de logins simultaneos"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/auth/me"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/api/v1/notifications/unread-count"
+          headers:
+            Authorization: "Bearer {{ token }}"
+
+  # STRESS-09: Spike en operaciones mixtas
+  # El peor escenario: spike de trafico que mezcla
+  # lectura, escritura y computacion pesada.
+  - name: "STRESS-09: Spike de operaciones mixtas"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/ia/riesgo-abandono"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/api/v1/sessions/my-sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - patch:
+          url: "/api/v1/notifications/read-all"
+          headers:
+            Authorization: "Bearer {{ token }}"
