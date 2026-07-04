@@ -1,0 +1,104 @@
+# ============================================================
+# LOAD-NOTIFICATIONS: Pruebas de carga -- Modulo Notificaciones + IA
+# Herramienta: Artillery
+# Escenarios: LOAD-10, LOAD-11, LOAD-12, LOAD-13
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Ramp-up"
+    - duration: 60
+      arrivalRate: 15
+      name: "Carga sostenida"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  # LOAD-10: Polling de notificaciones (alta frecuencia)
+  # Simula el frontend haciendo polling cada pocos segundos.
+  # Endpoint mas consultado del sistema en produccion.
+  - name: "LOAD-10: Polling de notificaciones (alta frecuencia)"
+    weight: 3
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - loop:
+          - get:
+              url: "/api/v1/notifications/unread-count"
+              headers:
+                Authorization: "Bearer {{ token }}"
+              expect:
+                - statusCode: 200
+          - think: 2
+        count: 5
+
+  # LOAD-11: Listado de notificaciones paginado
+  # Simula usuarios abriendo su bandeja de notificaciones.
+  - name: "LOAD-11: Listado de notificaciones bajo carga"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/notifications"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  # LOAD-12: Marcar todas como leidas (operacion masiva)
+  # Simula la operacion bulk UPDATE en escenarios de alto uso.
+  - name: "LOAD-12: Marcar todas las notificaciones como leidas"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - patch:
+          url: "/api/v1/notifications/read-all"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  # LOAD-13: Calculo de riesgo de abandono (CPU-intensivo)
+  # La operacion mas pesada del sistema: 5 queries + calculo algoritmico.
+  # Clave para dimensionar el servidor.
+  - name: "LOAD-13: Calculo IA riesgo de abandono"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/ia/riesgo-abandono"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200

@@ -8,7 +8,12 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest --forceExit",
-    "test:unit": "jest --config jest.unit.config.js"
+    "test:unit": "jest --config jest.unit.config.js",
+    "test:load": "artillery run tests/load/load-mixed.yml",
+    "test:load:auth": "artillery run tests/load/load-auth.yml",
+    "test:load:sessions": "artillery run tests/load/load-sessions.yml",
+    "test:load:vacancies": "artillery run tests/load/load-vacancies.yml",
+    "test:load:notifications": "artillery run tests/load/load-notifications-ia.yml"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -31,6 +36,7 @@
     "@types/node": "^20.14.0",
     "@types/pg": "^8.11.6",
     "@types/supertest": "^6.0.2",
+    "artillery": "^2.0.33",
     "jest": "^29.7.0",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",

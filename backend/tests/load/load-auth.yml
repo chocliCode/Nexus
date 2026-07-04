@@ -1,0 +1,78 @@
+# ============================================================
+# LOAD-AUTH: Pruebas de carga -- Modulo de Autenticacion
+# Herramienta: Artillery
+# Escenarios: LOAD-01, LOAD-02, LOAD-03
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Ramp-up"
+    - duration: 60
+      arrivalRate: 10
+      name: "Carga sostenida"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  environments:
+    low:
+      phases:
+        - duration: 15
+          arrivalRate: 2
+    high:
+      phases:
+        - duration: 60
+          arrivalRate: 20
+
+scenarios:
+  # LOAD-01: Registro bajo carga concurrente
+  # Simula multiples usuarios registrandose simultaneamente.
+  # Estresa la transaccion BEGIN/COMMIT y la constraint UNIQUE de email.
+  - name: "LOAD-01: Registro concurrente de usuarios"
+    flow:
+      - post:
+          url: "/api/v1/auth/register"
+          json:
+            nombres: "LoadTest"
+            apellidos: "User{{ $randomNumber(1, 99999) }}"
+            email: "load{{ $uuid }}@loadtest.com"
+            contrasena: "LoadTestPass123!"
+            rol: "Padawan"
+          expect:
+            - statusCode: 201
+
+  # LOAD-02: Login sostenido de alta frecuencia
+  # Simula picos de autenticacion (ej: inicio de jornada laboral).
+  # Estresa bcrypt.compare y la generacion de JWT.
+  - name: "LOAD-02: Login de alta frecuencia"
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+
+  # LOAD-03: Consulta /me con sesiones concurrentes
+  # Simula muchos usuarios autenticados consultando su perfil.
+  # Estresa jwt.verify y el SELECT con JOINs.
+  - name: "LOAD-03: Consultas /me concurrentes"
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/auth/me"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200

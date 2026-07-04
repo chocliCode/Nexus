@@ -9,13 +9,13 @@
 | **Integracion** | 36 | Existentes, documentadas | [`pruebas_integracion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_integracion.md) |
 | **Unitarias** | 160 | Implementadas, documentadas | [`pruebas_unitarias.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_unitarias.md) |
 | **Componente (UI)** | 15 | Implementadas, documentadas | [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md) |
+| **Carga** | 15 | Implementadas, documentadas | [`pruebas_carga.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_carga.md) |
 | E2E | 0 | Pendiente | -- |
-| Carga | 0 | Pendiente | -- |
 | Estres | 0 | Pendiente | -- |
 | Seguridad | Parcial | Pendiente | -- |
 | Humo | 0 | Pendiente | -- |
 | Aceptacion | 0 | Pendiente | -- |
-| **Total** | **211** | | |
+| **Total** | **226** | | |
 
 ---
 
@@ -77,6 +77,23 @@
 
 ---
 
+### 4. Pruebas de Carga
+
+- **Archivo:** [`pruebas_carga.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_carga.md)
+- **Total:** 15 pruebas
+- **Tecnologia:** Artillery (npm) -- requiere backend corriendo
+- **Estado:** Implementadas y documentadas. Requieren usuario de test y backend activo.
+
+| Modulo | Archivo YAML | Tests | IDs |
+|---|---|---|---|
+| Auth | `load-auth.yml` | 3 | LOAD-01 a 03 |
+| Sesiones | `load-sessions.yml` | 3 | LOAD-04 a 06 |
+| Vacantes | `load-vacancies.yml` | 3 | LOAD-07 a 09 |
+| Notificaciones + IA | `load-notifications-ia.yml` | 4 | LOAD-10 a 13 |
+| Mixto | `load-mixed.yml` | 2 | LOAD-14 a 15 |
+
+---
+
 ## Comandos de Ejecucion
 
 ```bash
@@ -88,6 +105,13 @@ cd backend && npm run test:unit
 
 # Ejecutar pruebas de componente (frontend, no requiere DB)
 cd frontend && npm test
+
+# Ejecutar pruebas de carga (requiere backend corriendo en localhost:3000)
+cd backend && npm run test:load              # Flujos mixtos
+cd backend && npm run test:load:auth         # Solo auth
+cd backend && npm run test:load:sessions     # Solo sesiones
+cd backend && npm run test:load:vacancies    # Solo vacantes
+cd backend && npm run test:load:notifications # Notificaciones + IA
 
 # Ejecutar unitarias con cobertura
 cd backend && npm run test:unit -- --coverage
@@ -102,19 +126,21 @@ cd backend && npm test -- --testPathPattern=auth.test
 ## Piramide de Testing Actual
 
 ```
-            /\
-           /  \
-          / 0  \            E2E (pendiente)
-         /------\
-        /  15    \           Componente UI (LoginPage)
-       /----------\
-      /    36      \         Integracion (API + DB)
-     /--------------\
-    /      160       \       Unitarias (schemas, middleware, types)
-   /__________________\
+              /\
+             /  \
+            / 0  \              E2E (pendiente)
+           /------\
+          /  15    \             Carga (Artillery)
+         /----------\
+        /    15      \           Componente UI (LoginPage)
+       /--------------\
+      /      36        \         Integracion (API + DB)
+     /------------------\
+    /        160         \       Unitarias (schemas, middleware, types)
+   /______________________\
 ```
 
-La piramide tiene 160 pruebas unitarias como base, 36 de integracion, 15 de componente, y E2E pendiente. Total: **211 pruebas**.
+Total: **226 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 carga.
 
 ---
 
@@ -123,7 +149,7 @@ La piramide tiene 160 pruebas unitarias como base, 36 de integracion, 15 de comp
 | Tipo | Prioridad | Herramienta sugerida | Notas |
 |---|---|---|---|
 | E2E | Alta | Playwright o Cypress | Flujos completos en navegador |
-| Carga | Media | k6 | Rendimiento bajo carga esperada |
+
 | Estres | Media | k6 | Punto de quiebre del sistema |
 | Seguridad | Alta | OWASP ZAP | Inyeccion SQL, XSS, CSRF |
 | Humo | Baja | Jest | Subset critico de integracion |

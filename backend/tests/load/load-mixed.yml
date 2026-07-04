@@ -1,0 +1,99 @@
+# ============================================================
+# LOAD-MIXED: Pruebas de carga -- Flujos mixtos y sistema completo
+# Herramienta: Artillery
+# Escenarios: LOAD-14, LOAD-15
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 20
+      arrivalRate: 3
+      name: "Calentamiento"
+    - duration: 60
+      arrivalRate: 10
+      name: "Carga pico"
+    - duration: 20
+      arrivalRate: 3
+      name: "Enfriamiento"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  # LOAD-14: Health check bajo saturacion
+  # Benchmark de linea base: el endpoint mas ligero del sistema.
+  # Si este falla bajo carga, el servidor esta saturado.
+  - name: "LOAD-14: Health check bajo saturacion"
+    weight: 1
+    flow:
+      - loop:
+          - get:
+              url: "/api/v1/health"
+              expect:
+                - statusCode: 200
+                - hasProperty: "status"
+        count: 10
+
+  # LOAD-15: Flujo completo de usuario (end-to-end bajo carga)
+  # Simula el journey real: login → ver perfil → ver sesiones →
+  # consultar notificaciones → ver vacantes.
+  # Estresa todas las capas simultaneamente.
+  - name: "LOAD-15: Flujo completo de usuario"
+    weight: 2
+    flow:
+      # 1. Login
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+          expect:
+            - statusCode: 200
+      - think: 1
+
+      # 2. Consultar perfil
+      - get:
+          url: "/api/v1/auth/me"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+      - think: 2
+
+      # 3. Ver historial de sesiones
+      - get:
+          url: "/api/v1/sessions/my-sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+      - think: 1
+
+      # 4. Consultar notificaciones
+      - get:
+          url: "/api/v1/notifications/unread-count"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/v1/notifications"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+      - think: 2
+
+      # 5. Explorar vacantes
+      - get:
+          url: "/api/v1/vacancies"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/v1/vacancies?modalidad=Remoto"
+          expect:
+            - statusCode: 200

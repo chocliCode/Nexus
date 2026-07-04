@@ -1,0 +1,95 @@
+# ============================================================
+# LOAD-SESSIONS: Pruebas de carga -- Modulo de Sesiones
+# Herramienta: Artillery
+# Escenarios: LOAD-04, LOAD-05, LOAD-06
+# ============================================================
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Ramp-up"
+    - duration: 60
+      arrivalRate: 10
+      name: "Carga sostenida"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  variables:
+    matchingId: "REPLACE_WITH_REAL_MATCHING_ID"
+
+scenarios:
+  # LOAD-04: Creacion de sesiones bajo carga
+  # Simula mentores creando sesiones concurrentemente.
+  # Estresa INSERTs con verificacion de matching.
+  - name: "LOAD-04: Creacion concurrente de sesiones"
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest-jedi@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - post:
+          url: "/api/v1/matchings/{{ matchingId }}/sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            titulo: "Sesion de carga {{ $randomNumber(1, 9999) }}"
+            fecha_sesion: "2026-12-15T10:00:00.000Z"
+            duracion_min: 60
+
+  # LOAD-05: Lectura masiva del historial de sesiones
+  # Simula multiples Padawans consultando su historial.
+  # Estresa la query con 6 JOINs (la mas pesada del sistema).
+  - name: "LOAD-05: Lectura masiva historial sesiones"
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/sessions/my-sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  # LOAD-06: Actualizaciones concurrentes de sesiones
+  # Simula mentores actualizando estados simultaneamente.
+  # Estresa UPDATEs con posible contention de filas.
+  - name: "LOAD-06: Actualizaciones concurrentes de sesiones"
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "loadtest-jedi@loadtest.com"
+            contrasena: "LoadTestPass123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - post:
+          url: "/api/v1/matchings/{{ matchingId }}/sessions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            titulo: "Sesion update test {{ $randomNumber(1, 9999) }}"
+            fecha_sesion: "2026-12-20T14:00:00.000Z"
+            duracion_min: 45
+          capture:
+            - json: "$.data.sesion_id"
+              as: "sesionId"
+      - put:
+          url: "/api/v1/sessions/{{ sesionId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            estado: "Realizada"
+            notas: "Sesion completada bajo carga"
