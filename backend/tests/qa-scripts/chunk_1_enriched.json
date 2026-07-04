@@ -1,0 +1,863 @@
+[
+  {
+    "id": "1",
+    "desc": "registra un nuevo Padawan correctamente",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "2",
+    "desc": "retorna 409 cuando el email ya existe",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "3",
+    "desc": "retorna 400 con datos inválidos",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "4",
+    "desc": "retorna JWT con credenciales válidas",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "5",
+    "desc": "retorna 401 con contraseña incorrecta",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "6",
+    "desc": "retorna datos del usuario autenticado",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica todo el proceso por el cual un cliente nuevo se inscribe, comprobando que sus datos se guarden correctamente sin errores en el sistema.",
+    "justificacion_negocio": "Garantiza que no perdamos clientes nuevos por culpa de errores técnicos durante su primer contacto, ayudando directamente al crecimiento del negocio."
+  },
+  {
+    "id": "7",
+    "desc": "retorna 401 sin token",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "1",
+    "desc": "retorna score de riesgo para Padawan autenticado",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "2",
+    "desc": "retorna 401 sin autenticación",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "3",
+    "desc": "permite al Jedi ver todos los riesgos",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "4",
+    "desc": "retorna 403 si Padawan intenta ver todos",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "1",
+    "desc": "should return 200 with no query params",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "2",
+    "desc": "should return 200 with query param a=1",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "3",
+    "desc": "should return 200 with query param b=2",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "4",
+    "desc": "should return 200 with query param c=3",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "5",
+    "desc": "should return 200 with query param test=true",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "6",
+    "desc": "should return 200 with multiple query params",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "7",
+    "desc": "should return 200 with query param special characters",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "8",
+    "desc": "should return 200 with very long query param",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "9",
+    "desc": "should return 200 with query param missing value",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "1",
+    "desc": "lista notificaciones del usuario",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica todo el proceso por el cual un cliente nuevo se inscribe, comprobando que sus datos se guarden correctamente sin errores en el sistema.",
+    "justificacion_negocio": "Garantiza que no perdamos clientes nuevos por culpa de errores técnicos durante su primer contacto, ayudando directamente al crecimiento del negocio."
+  },
+  {
+    "id": "2",
+    "desc": "retorna 401 sin token",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "3",
+    "desc": "retorna conteo de no leídas",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "4",
+    "desc": "marca una notificación como leída",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "5",
+    "desc": "marca todas como leídas",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "1",
+    "desc": "retorna 200 y actualiza el OKR cuando todos los datos son válidos",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "2",
+    "desc": "retorna 401 cuando no se envía JWT",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Simula ataques cibernéticos enviados por hackers (con virus o trampas en el texto) para confirmar que nuestras barreras defensivas los bloquean.",
+    "justificacion_negocio": "Evita demandas legales multimillonarias, extorsiones por robo de bases de datos y la destrucción absoluta de la reputación pública de la empresa."
+  },
+  {
+    "id": "3",
+    "desc": "retorna 403 cuando el OKR pertenece a otro usuario (RN-01)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica todo el proceso por el cual un cliente nuevo se inscribe, comprobando que sus datos se guarden correctamente sin errores en el sistema.",
+    "justificacion_negocio": "Garantiza que no perdamos clientes nuevos por culpa de errores técnicos durante su primer contacto, ayudando directamente al crecimiento del negocio."
+  },
+  {
+    "id": "4",
+    "desc": "retorna 409 cuando el OKR está en estado Pendiente y no EnProgreso (RN-02)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "5",
+    "desc": "hace ROLLBACK si falla el INSERT en okr_historial (RN-06)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "6",
+    "desc": "actualiza el score_empleabilidad del perfil_aprendiz tras el COMMIT (RN-05)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "1",
+    "desc": "crea una sesión correctamente",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "2",
+    "desc": "retorna 401 sin autenticación",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "3",
+    "desc": "marca sesión como Realizada con notas",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "4",
+    "desc": "cancela una sesión programada",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "5",
+    "desc": "retorna historial de sesiones del usuario",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "1",
+    "desc": "crea una vacante como Admin",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "2",
+    "desc": "retorna 403 si Padawan intenta crear",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "3",
+    "desc": "lista vacantes activas",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "4",
+    "desc": "filtra por modalidad",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "5",
+    "desc": "permite al Padawan postularse",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "6",
+    "desc": "retorna 409 si ya está postulado",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "7",
+    "desc": "actualiza vacante como Admin",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "8",
+    "desc": "desactiva vacante",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "9",
+    "desc": "reactiva vacante",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "1",
+    "desc": "UNIT-MW-AUTH-01: llama next() con token valido",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "2",
+    "desc": "UNIT-MW-AUTH-02: retorna 401 sin header Authorization",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Hace una revisión rápida de las conexiones principales del sistema para asegurar que la comunicación entre el usuario y nuestros servidores funciona sin problemas.",
+    "justificacion_negocio": "Funciona como una alarma temprana. Nos asegura que el sistema está 'vivo' y disponible para que ningún cliente se quede sin servicio de imprevisto."
+  },
+  {
+    "id": "3",
+    "desc": "UNIT-MW-AUTH-03: retorna 401 con header que no empieza con \"Bearer \"",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Hace una revisión rápida de las conexiones principales del sistema para asegurar que la comunicación entre el usuario y nuestros servidores funciona sin problemas.",
+    "justificacion_negocio": "Funciona como una alarma temprana. Nos asegura que el sistema está 'vivo' y disponible para que ningún cliente se quede sin servicio de imprevisto."
+  },
+  {
+    "id": "4",
+    "desc": "UNIT-MW-AUTH-04: retorna 401 con token invalido (jwt.verify lanza error)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "5",
+    "desc": "UNIT-MW-AUTH-05: retorna 401 con token expirado",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "6",
+    "desc": "UNIT-MW-AUTH-06: extrae el token correctamente del header",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Hace una revisión rápida de las conexiones principales del sistema para asegurar que la comunicación entre el usuario y nuestros servidores funciona sin problemas.",
+    "justificacion_negocio": "Funciona como una alarma temprana. Nos asegura que el sistema está 'vivo' y disponible para que ningún cliente se quede sin servicio de imprevisto."
+  },
+  {
+    "id": "7",
+    "desc": "UNIT-MW-AUTH-07: setea req.user con el payload decodificado",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "8",
+    "desc": "UNIT-MW-AUTH-08: retorna 401 con header \"Bearer \" sin token",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Hace una revisión rápida de las conexiones principales del sistema para asegurar que la comunicación entre el usuario y nuestros servidores funciona sin problemas.",
+    "justificacion_negocio": "Funciona como una alarma temprana. Nos asegura que el sistema está 'vivo' y disponible para que ningún cliente se quede sin servicio de imprevisto."
+  },
+  {
+    "id": "9",
+    "desc": "UNIT-MW-ROLE-01: permite acceso cuando el rol esta en la lista",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "10",
+    "desc": "UNIT-MW-ROLE-02: retorna 403 cuando el rol NO esta en la lista",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "11",
+    "desc": "UNIT-MW-ROLE-03: retorna 401 si req.user no existe",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "12",
+    "desc": "UNIT-MW-ROLE-04: permite acceso con rol Admin cuando se requiere Admin",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "13",
+    "desc": "UNIT-MW-ROLE-05: permite cuando se aceptan multiples roles (Jedi o Admin)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "14",
+    "desc": "UNIT-MW-ROLE-06: incluye roles permitidos en el detalle del error 403",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "1",
+    "desc": "UNIT-ERR-01: crea un error con statusCode, message y code",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "2",
+    "desc": "UNIT-ERR-02: crea un error con details opcionales",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "3",
+    "desc": "UNIT-ERR-03: es instancia de Error",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "4",
+    "desc": "UNIT-ERR-04: tiene stack trace",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "5",
+    "desc": "UNIT-ERR-05: details es undefined cuando no se pasa",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "6",
+    "desc": "UNIT-ERR-06: retorna 500 para errores sin statusCode",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "7",
+    "desc": "UNIT-ERR-07: usa el statusCode del error si existe",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "8",
+    "desc": "UNIT-ERR-08: incluye correlationId en la respuesta",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "9",
+    "desc": "UNIT-ERR-09: usa el code del error si existe",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "10",
+    "desc": "UNIT-ERR-10: no expone message real en errores 500",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "11",
+    "desc": "UNIT-ERR-11: expone message en errores que no son 500",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "12",
+    "desc": "UNIT-ERR-12: genera correlationId unico por cada error",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "1",
+    "desc": "UNIT-MW-VAL-01: llama next() con datos validos en body",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "2",
+    "desc": "UNIT-MW-VAL-02: retorna 400 con datos invalidos en body",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "3",
+    "desc": "UNIT-MW-VAL-03: reemplaza body con datos parseados (limpios)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "4",
+    "desc": "UNIT-MW-VAL-04: valida params cuando target es \"params\"",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "5",
+    "desc": "UNIT-MW-VAL-05: valida query cuando target es \"query\"",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Verifica de forma automática que los botones, textos y ventanas visuales aparezcan correctamente en la pantalla del dispositivo sin errores gráficos.",
+    "justificacion_negocio": "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio."
+  },
+  {
+    "id": "6",
+    "desc": "UNIT-MW-VAL-06: incluye detalles de campo en el error",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "7",
+    "desc": "UNIT-MW-VAL-07: llama next(err) para errores que no son ZodError",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "8",
+    "desc": "UNIT-MW-VAL-08: maneja body vacio contra schema obligatorio",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Ejecuta una verificación automática para confirmar que esta pequeña pieza de la aplicación cumpla su tarea de forma exacta, tal como fue diseñada.",
+    "justificacion_negocio": "Previene que pequeños defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos de reparar software una vez que ya está público."
+  },
+  {
+    "id": "1",
+    "desc": "UNIT-AUTH-SCH-01: acepta datos validos de Padawan",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "2",
+    "desc": "UNIT-AUTH-SCH-02: acepta datos validos de Jedi",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "3",
+    "desc": "UNIT-AUTH-SCH-03: rechaza nombres con menos de 2 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "4",
+    "desc": "UNIT-AUTH-SCH-04: rechaza nombres vacios",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "5",
+    "desc": "UNIT-AUTH-SCH-05: rechaza nombres mayores a 100 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "6",
+    "desc": "UNIT-AUTH-SCH-06: rechaza apellidos con menos de 2 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "7",
+    "desc": "UNIT-AUTH-SCH-07: rechaza email invalido (sin @)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "8",
+    "desc": "UNIT-AUTH-SCH-08: rechaza email invalido (sin dominio)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "9",
+    "desc": "UNIT-AUTH-SCH-09: rechaza email mayor a 150 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "10",
+    "desc": "UNIT-AUTH-SCH-10: rechaza contrasena menor a 8 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "11",
+    "desc": "UNIT-AUTH-SCH-11: acepta contrasena de exactamente 8 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "12",
+    "desc": "UNIT-AUTH-SCH-12: rechaza contrasena mayor a 100 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "13",
+    "desc": "UNIT-AUTH-SCH-13: rechaza rol \"Admin\" (solo Padawan o Jedi permitidos)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "14",
+    "desc": "UNIT-AUTH-SCH-14: rechaza rol inventado",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "15",
+    "desc": "UNIT-AUTH-SCH-15: rechaza objeto vacio",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "16",
+    "desc": "UNIT-AUTH-SCH-16: rechaza si falta el campo email",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "17",
+    "desc": "UNIT-AUTH-SCH-17: rechaza si falta el campo rol",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "18",
+    "desc": "UNIT-AUTH-SCH-18: rechaza nombres como numero",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "19",
+    "desc": "UNIT-AUTH-SCH-19: acepta credenciales validas",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "20",
+    "desc": "UNIT-AUTH-SCH-20: rechaza email invalido",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "21",
+    "desc": "UNIT-AUTH-SCH-21: rechaza contrasena vacia",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "22",
+    "desc": "UNIT-AUTH-SCH-22: rechaza objeto sin campos",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "23",
+    "desc": "UNIT-AUTH-SCH-23: rechaza null como input",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.",
+    "justificacion_negocio": "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen."
+  },
+  {
+    "id": "1",
+    "desc": "UNIT-OKR-SCH-01: acepta OKR valido con todos los campos",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "2",
+    "desc": "UNIT-OKR-SCH-02: acepta OKR sin campos opcionales",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "3",
+    "desc": "UNIT-OKR-SCH-03: rechaza descripcion menor a 5 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "4",
+    "desc": "UNIT-OKR-SCH-04: rechaza descripcion mayor a 1000 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "5",
+    "desc": "UNIT-OKR-SCH-05: rechaza valor_meta negativo",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "6",
+    "desc": "UNIT-OKR-SCH-06: rechaza valor_meta igual a 0",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "7",
+    "desc": "UNIT-OKR-SCH-07: rechaza fecha_limite invalida",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "8",
+    "desc": "UNIT-OKR-SCH-08: rechaza indicador mayor a 500 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "9",
+    "desc": "UNIT-OKR-SCH-09: acepta actualizacion parcial (solo descripcion)",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "10",
+    "desc": "UNIT-OKR-SCH-10: acepta actualizacion de estado valido",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "11",
+    "desc": "UNIT-OKR-SCH-11: rechaza estado invalido",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "12",
+    "desc": "UNIT-OKR-SCH-12: acepta todos los estados validos",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "13",
+    "desc": "UNIT-OKR-SCH-13: acepta valor_actual igual a 0",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "14",
+    "desc": "UNIT-OKR-SCH-14: rechaza valor_actual negativo",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "15",
+    "desc": "UNIT-OKR-SCH-15: acepta completacion valida",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "16",
+    "desc": "UNIT-OKR-SCH-16: acepta valor_actual igual a 0",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "17",
+    "desc": "UNIT-OKR-SCH-17: rechaza sin nota_cierre",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "18",
+    "desc": "UNIT-OKR-SCH-18: rechaza nota_cierre vacia",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "19",
+    "desc": "UNIT-OKR-SCH-19: rechaza nota_cierre mayor a 2000 caracteres",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "20",
+    "desc": "UNIT-OKR-SCH-20: rechaza valor_actual negativo",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  },
+  {
+    "id": "21",
+    "desc": "UNIT-OKR-SCH-21: acepta accion \"aprobar\"",
+    "tecnica": "Caja Negra/Blanca",
+    "explicacion_tecnica": "Comprueba que las funciones principales del producto (como ver gráficas o buscar información) operen correctamente y muestren datos precisos al usuario.",
+    "justificacion_negocio": "Asegura que el producto entregue el valor prometido al cliente. Si esta función falla, los clientes dejarán de pagar por la plataforma."
+  }
+]

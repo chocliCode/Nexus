@@ -41,8 +41,8 @@ async function generateExcel() {
         }
     }
 
-    const mdFile = path.join(__dirname, '../docs/documentacion_todas_las_pruebas.md');
-    const excelFile = path.join(__dirname, '../Reporte_Final_Pruebas_Nexus.xlsx');
+    const mdFile = path.join(__dirname, '../../../docs/documentacion_todas_las_pruebas.md');
+    const excelFile = path.join(__dirname, '../../../Reporte_Final_Pruebas_Nexus.xlsx');
 
     const content = fs.readFileSync(mdFile, 'utf-8');
     const lines = content.split('\n');

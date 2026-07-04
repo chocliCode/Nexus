@@ -209,11 +209,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Instalar Dependencias del Generador
-        working-directory: "TAREA PRUEBAS"
+        working-directory: "backend"
         run: npm ci || npm install
       - name: Generar Reporte Excel Consolidado (.xlsx)
-        working-directory: "TAREA PRUEBAS"
-        run: node generate_excel.js
+        working-directory: "backend"
+        run: node tests/qa-scripts/generate_excel_enriched.js
       - name: Subir Reporte Oficial (Artifact)
         uses: actions/upload-artifact@v4
         with:

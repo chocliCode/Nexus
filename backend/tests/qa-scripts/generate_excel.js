@@ -58,8 +58,8 @@ function getCategoryInfo(rawTitle) {
 }
 
 async function generateExcel() {
-    const mdFile = path.join(__dirname, '../docs/documentacion_todas_las_pruebas.md');
-    const excelFile = path.join(__dirname, '../Reporte_Final_Pruebas_Nexus.xlsx');
+    const mdFile = path.join(__dirname, '../../../docs/documentacion_todas_las_pruebas.md');
+    const excelFile = path.join(__dirname, '../../../Reporte_Final_Pruebas_Nexus.xlsx');
 
     if (!fs.existsSync(mdFile)) {
         console.error("No se encontro el archivo MD de pruebas.");
