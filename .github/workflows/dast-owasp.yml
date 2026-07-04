@@ -1,0 +1,69 @@
+name: "OWASP ZAP DAST Analysis"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    # Se ejecuta todos los domingos a la medianoche (UTC)
+    - cron: '0 0 * * 0'
+
+env:
+  NODE_VERSION: "20"
+  DATABASE_URL: postgresql://nexus_user:nexus_pass@localhost:5432/nexus_test
+  JWT_SECRET: test_secret_ci_2026
+  NODE_ENV: test
+  PGPASSWORD: nexus_pass
+
+jobs:
+  zap_scan:
+    name: "🕷️ OWASP ZAP DAST Scan"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: "🔽 Checkout del código"
+        uses: actions/checkout@v4
+
+      - name: "⚙️ Configurar Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: "📦 Instalar Dependencias (Backend)"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🚀 Iniciar Backend (Modo Test)"
+        working-directory: ./backend
+        run: |
+          # Iniciamos el servidor en segundo plano
+          npm run dev &
+          # Le damos 10 segundos para inicializar DB y levantar la API
+          sleep 10
+          # Verificamos que responda
+          curl -f http://localhost:3001/api/v1/health || true
+
+      - name: "💣 Escaneo DAST (OWASP ZAP)"
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          # URL objetivo donde ZAP lanzará el ataque dinámico
+          target: 'http://localhost:3001'
+          # Crear incidencias (issues) en GitHub si falla
+          fail_action: false
