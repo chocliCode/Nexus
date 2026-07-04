@@ -1,0 +1,279 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 243,
+      "vusers.created": 720,
+      "http.requests": 720,
+      "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 243,
+      "errors.ECONNREFUSED": 720,
+      "vusers.failed": 720,
+      "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 477,
+      "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 477
+    },
+    "rates": {
+      "http.request_rate": 5
+    },
+    "firstCounterAt": 1783174243287,
+    "lastCounterAt": 1783174342415,
+    "firstMetricAt": 1783174243287,
+    "lastMetricAt": 1783174342415,
+    "period": 1783174340000,
+    "summaries": {},
+    "histograms": {}
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 12,
+        "vusers.created": 21,
+        "http.requests": 21,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 12,
+        "errors.ECONNREFUSED": 21,
+        "vusers.failed": 21,
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 9,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 9
+      },
+      "rates": {
+        "http.request_rate": 3
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174243287,
+      "lastCounterAt": 1783174249416,
+      "firstMetricAt": 1783174243287,
+      "lastMetricAt": 1783174249416,
+      "period": "1783174240000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 9,
+        "vusers.created": 30,
+        "http.requests": 30,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 9,
+        "errors.ECONNREFUSED": 30,
+        "vusers.failed": 30,
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 21,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 21
+      },
+      "rates": {
+        "http.request_rate": 3
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174250287,
+      "lastCounterAt": 1783174259417,
+      "firstMetricAt": 1783174250287,
+      "lastMetricAt": 1783174259417,
+      "period": "1783174250000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 30,
+        "vusers.created": 79,
+        "http.requests": 79,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 30,
+        "errors.ECONNREFUSED": 79,
+        "vusers.failed": 79,
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 49,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 49
+      },
+      "rates": {
+        "http.request_rate": 10
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174260287,
+      "lastCounterAt": 1783174269862,
+      "firstMetricAt": 1783174260287,
+      "lastMetricAt": 1783174269862,
+      "period": "1783174260000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 37,
+        "vusers.created": 100,
+        "http.requests": 100,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 37,
+        "errors.ECONNREFUSED": 100,
+        "vusers.failed": 100,
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 63,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 63
+      },
+      "rates": {
+        "http.request_rate": 10
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174270288,
+      "lastCounterAt": 1783174279864,
+      "firstMetricAt": 1783174270288,
+      "lastMetricAt": 1783174279864,
+      "period": "1783174270000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 34,
+        "vusers.created": 100,
+        "http.requests": 100,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 34,
+        "errors.ECONNREFUSED": 100,
+        "vusers.failed": 100,
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 66,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 66
+      },
+      "rates": {
+        "http.request_rate": 10
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174280288,
+      "lastCounterAt": 1783174289861,
+      "firstMetricAt": 1783174280288,
+      "lastMetricAt": 1783174289861,
+      "period": "1783174280000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 39,
+        "vusers.created": 100,
+        "http.requests": 100,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 39,
+        "errors.ECONNREFUSED": 100,
+        "vusers.failed": 100,
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 61,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 61
+      },
+      "rates": {
+        "http.request_rate": 10
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174290288,
+      "lastCounterAt": 1783174299861,
+      "firstMetricAt": 1783174290288,
+      "lastMetricAt": 1783174299861,
+      "period": "1783174290000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 62,
+        "vusers.created": 100,
+        "http.requests": 100,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 62,
+        "errors.ECONNREFUSED": 100,
+        "vusers.failed": 100,
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 38,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 38
+      },
+      "rates": {
+        "http.request_rate": 10
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174300288,
+      "lastCounterAt": 1783174309862,
+      "firstMetricAt": 1783174300288,
+      "lastMetricAt": 1783174309862,
+      "period": "1783174300000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 80,
+        "vusers.created": 100,
+        "http.requests": 100,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 80,
+        "errors.ECONNREFUSED": 100,
+        "vusers.failed": 100,
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 20,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 20
+      },
+      "rates": {
+        "http.request_rate": 10
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174310288,
+      "lastCounterAt": 1783174319862,
+      "firstMetricAt": 1783174310288,
+      "lastMetricAt": 1783174319862,
+      "period": "1783174310000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 35,
+        "vusers.created": 51,
+        "http.requests": 51,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 35,
+        "errors.ECONNREFUSED": 51,
+        "vusers.failed": 51,
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 16,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 16
+      },
+      "rates": {
+        "http.request_rate": 14
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174320288,
+      "lastCounterAt": 1783174329416,
+      "firstMetricAt": 1783174320288,
+      "lastMetricAt": 1783174329416,
+      "period": "1783174320000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 8,
+        "vusers.created": 30,
+        "http.requests": 30,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 8,
+        "errors.ECONNREFUSED": 30,
+        "vusers.failed": 30,
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 22,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 22
+      },
+      "rates": {
+        "http.request_rate": 3
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174330288,
+      "lastCounterAt": 1783174339418,
+      "firstMetricAt": 1783174330288,
+      "lastMetricAt": 1783174339418,
+      "period": "1783174330000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.LOAD-14: Health check bajo saturacion": 3,
+        "vusers.created": 9,
+        "http.requests": 9,
+        "plugins.metrics-by-endpoint./api/v1/health.errors.ECONNREFUSED": 3,
+        "errors.ECONNREFUSED": 9,
+        "vusers.failed": 9,
+        "vusers.created_by_name.LOAD-15: Flujo completo de usuario": 6,
+        "plugins.metrics-by-endpoint./api/v1/auth/login.errors.ECONNREFUSED": 6
+      },
+      "rates": {
+        "http.request_rate": 6
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1783174340288,
+      "lastCounterAt": 1783174342415,
+      "firstMetricAt": 1783174340288,
+      "lastMetricAt": 1783174342415,
+      "period": "1783174340000",
+      "summaries": {},
+      "histograms": {}
+    }
+  ]
+}

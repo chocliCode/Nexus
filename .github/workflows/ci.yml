@@ -62,11 +62,11 @@ jobs:
           echo "| **DB requerida** | No |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f backend/unit-results.txt ]; then
-            PASSED=$(grep -oP 'Tests:\s+\K\d+(?= passed)' backend/unit-results.txt || echo "?")
-            TOTAL=$(grep -oP 'Tests:\s+\d+ passed, \K\d+(?= total)' backend/unit-results.txt || echo "?")
-            SUITES=$(grep -oP 'Test Suites:\s+\K\d+(?= passed)' backend/unit-results.txt || echo "?")
-            echo "| **Suites** | $SUITES |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Pasaron** | $PASSED / $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            PASSED=$(grep -o '[0-9]\+ passed' backend/unit-results.txt | tail -1 | awk '{print $1}')
+            TOTAL=$(grep -o '[0-9]\+ total' backend/unit-results.txt | tail -1 | awk '{print $1}')
+            SUITES=$(grep -o '[0-9]\+ passed' backend/unit-results.txt | head -1 | awk '{print $1}')
+            echo "| **Suites** | ${SUITES:-?} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Pasaron** | ${PASSED:-?} / ${TOTAL:-?} |" >> $GITHUB_STEP_SUMMARY
           fi
 
   # ----------------------------------------------------------
@@ -129,9 +129,9 @@ jobs:
           echo "| **DB requerida** | Si (PostgreSQL 16) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f backend/integration-results.txt ]; then
-            PASSED=$(grep -oP 'Tests:\s+\K\d+(?= passed)' backend/integration-results.txt || echo "?")
-            TOTAL=$(grep -oP 'Tests:\s+\d+ passed, \K\d+(?= total)' backend/integration-results.txt || echo "?")
-            echo "| **Pasaron** | $PASSED / $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            PASSED=$(grep -o '[0-9]\+ passed' backend/integration-results.txt | tail -1 | awk '{print $1}')
+            TOTAL=$(grep -o '[0-9]\+ total' backend/integration-results.txt | tail -1 | awk '{print $1}')
+            echo "| **Pasaron** | ${PASSED:-?} / ${TOTAL:-?} |" >> $GITHUB_STEP_SUMMARY
           fi
 
   # ----------------------------------------------------------
@@ -170,8 +170,8 @@ jobs:
           echo "| **DB requerida** | No |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f frontend/component-results.txt ]; then
-            PASSED=$(grep -oP 'Tests\s+\K\d+(?= passed)' frontend/component-results.txt || echo "?")
-            echo "| **Pasaron** | $PASSED / 15 |" >> $GITHUB_STEP_SUMMARY
+            PASSED=$(grep -o '[0-9]\+ passed' frontend/component-results.txt | tail -1 | awk '{print $1}')
+            echo "| **Pasaron** | ${PASSED:-?} / 15 |" >> $GITHUB_STEP_SUMMARY
           fi
 
   # ----------------------------------------------------------
@@ -211,9 +211,9 @@ jobs:
           echo "| **Cobertura OWASP** | A01, A03, A04, A05, A07 |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f backend/security-results.txt ]; then
-            PASSED=$(grep -oP 'Tests:\s+\K\d+(?= passed)' backend/security-results.txt || echo "?")
-            TOTAL=$(grep -oP 'Tests:\s+\d+ passed, \K\d+(?= total)' backend/security-results.txt || echo "?")
-            echo "| **Pasaron** | $PASSED / $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            PASSED=$(grep -o '[0-9]\+ passed' backend/security-results.txt | tail -1 | awk '{print $1}')
+            TOTAL=$(grep -o '[0-9]\+ total' backend/security-results.txt | tail -1 | awk '{print $1}')
+            echo "| **Pasaron** | ${PASSED:-?} / ${TOTAL:-?} |" >> $GITHUB_STEP_SUMMARY
           fi
 
   # ----------------------------------------------------------
@@ -289,10 +289,10 @@ jobs:
           echo "| **DB requerida** | Si (PostgreSQL 16 + backend + frontend) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f frontend/e2e-results.txt ]; then
-            PASSED=$(grep -c "✓\|passed" frontend/e2e-results.txt || echo "?")
-            FAILED=$(grep -c "✗\|failed" frontend/e2e-results.txt || echo "0")
-            echo "| **Pasaron** | ~$PASSED |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Fallaron** | $FAILED |" >> $GITHUB_STEP_SUMMARY
+            PASSED=$(grep -o '[0-9]\+ passed' frontend/e2e-results.txt | tail -1 | awk '{print $1}')
+            FAILED=$(grep -o '[0-9]\+ failed' frontend/e2e-results.txt | tail -1 | awk '{print $1}')
+            echo "| **Pasaron** | ~${PASSED:-?} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Fallaron** | ${FAILED:-0} |" >> $GITHUB_STEP_SUMMARY
           fi
 
       - uses: actions/upload-artifact@v4
@@ -371,10 +371,10 @@ jobs:
           echo "| **DB requerida** | Si (PostgreSQL 16 + backend) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f backend/load-results.txt ]; then
-            P95=$(grep -oP 'p95:\s*\K\d+' backend/load-results.txt | head -1 || echo "?")
-            P99=$(grep -oP 'p99:\s*\K\d+' backend/load-results.txt | head -1 || echo "?")
-            echo "| **p95 latencia** | ${P95}ms |" >> $GITHUB_STEP_SUMMARY
-            echo "| **p99 latencia** | ${P99}ms |" >> $GITHUB_STEP_SUMMARY
+            P95=$(grep 'http.response_time.p95:' backend/load-results.txt | grep -o '[0-9.]\+' | tail -1)
+            P99=$(grep 'http.response_time.p99:' backend/load-results.txt | grep -o '[0-9.]\+' | tail -1)
+            echo "| **p95 latencia** | ${P95:-?}ms |" >> $GITHUB_STEP_SUMMARY
+            echo "| **p99 latencia** | ${P99:-?}ms |" >> $GITHUB_STEP_SUMMARY
           fi
 
   # ----------------------------------------------------------
@@ -446,10 +446,10 @@ jobs:
           echo "| **DB requerida** | Si (PostgreSQL 16 + backend) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f backend/stress-results.txt ]; then
-            COMPLETED=$(grep -oP 'Scenarios completed:\s*\K\d+' backend/stress-results.txt || echo "?")
-            FAILED_VU=$(grep -oP 'Scenarios failed:\s*\K\d+' backend/stress-results.txt || echo "0")
-            echo "| **VUs completados** | $COMPLETED |" >> $GITHUB_STEP_SUMMARY
-            echo "| **VUs fallidos** | $FAILED_VU |" >> $GITHUB_STEP_SUMMARY
+            COMPLETED=$(grep 'vusers.completed:' backend/stress-results.txt | grep -o '[0-9]\+' | tail -1)
+            FAILED_VU=$(grep 'vusers.failed:' backend/stress-results.txt | grep -o '[0-9]\+' | tail -1)
+            echo "| **VUs completados** | ${COMPLETED:-?} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **VUs fallidos** | ${FAILED_VU:-0} |" >> $GITHUB_STEP_SUMMARY
           fi
 
   # ----------------------------------------------------------
