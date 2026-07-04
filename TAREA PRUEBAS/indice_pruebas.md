@@ -11,11 +11,11 @@
 | **Componente (UI)** | 15 | Implementadas, documentadas | [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md) |
 | **Carga** | 15 | Implementadas, documentadas | [`pruebas_carga.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_carga.md) |
 | **Estres** | 15 | Implementadas, documentadas | [`pruebas_estres.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_estres.md) |
-| E2E | 0 | Pendiente | -- |
-| Seguridad | Parcial | Pendiente | -- |
+| **E2E** | 15 | Implementadas, documentadas | [`pruebas_e2e.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_e2e.md) |
+| **Seguridad** | 15 | Implementadas, documentadas | [`pruebas_seguridad.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_seguridad.md) |
 | Humo | 0 | Pendiente | -- |
 | Aceptacion | 0 | Pendiente | -- |
-| **Total** | **241** | | |
+| **Total** | **271** | | |
 
 ---
 
@@ -111,6 +111,41 @@
 
 ---
 
+### 6. Pruebas E2E
+
+- **Archivo:** [`pruebas_e2e.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_e2e.md)
+- **Total:** 15 pruebas
+- **Tecnologia:** Playwright + Chromium (navegador real)
+- **Estado:** Implementadas. Requieren frontend + backend + PostgreSQL corriendo.
+
+| Flujo | Tests | IDs |
+|---|---|---|
+| Login | 4 | E2E-01 a 04 |
+| Registro | 2 | E2E-05, 06 |
+| Dashboard | 4 | E2E-07 a 10 |
+| Proteccion de rutas | 3 | E2E-11 a 13 |
+| Vacantes | 1 | E2E-14 |
+| Logout | 1 | E2E-15 |
+
+---
+
+### 7. Pruebas de Seguridad
+
+- **Archivo:** [`pruebas_seguridad.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_seguridad.md)
+- **Total:** 15 pruebas
+- **Tecnologia:** Jest + Supertest (no requiere DB)
+- **Estado:** Implementadas, 15/15 pasando.
+
+| Categoria OWASP | Tests | IDs |
+|---|---|---|
+| A03: Inyeccion SQL | 3 | SEC-01 a 03 |
+| A07: XSS | 2 | SEC-04, 05 |
+| A01: Control de acceso | 5 | SEC-06 a 10 |
+| A05: Configuracion HTTP | 2 | SEC-11, 12 |
+| A04: Payloads malformados | 3 | SEC-13 a 15 |
+
+---
+
 ## Comandos de Ejecucion
 
 ```bash
@@ -122,6 +157,13 @@ cd backend && npm run test:unit
 
 # Ejecutar pruebas de componente (frontend, no requiere DB)
 cd frontend && npm test
+
+# Ejecutar pruebas de seguridad (no requiere DB)
+cd backend && npm run test:security
+
+# Ejecutar pruebas E2E (requiere frontend + backend + DB corriendo)
+cd frontend && npm run test:e2e
+cd frontend && npx playwright test --headed  # Con navegador visible
 
 # Ejecutar pruebas de carga (requiere backend corriendo en localhost:3000)
 cd backend && npm run test:load              # Flujos mixtos
@@ -139,10 +181,6 @@ cd backend && npm run test:stress:endurance  # Soak 5 min
 
 # Ejecutar unitarias con cobertura
 cd backend && npm run test:unit -- --coverage
-
-# Ejecutar un archivo de prueba especifico
-cd backend && npm run test:unit -- --testPathPattern=auth.schema
-cd backend && npm test -- --testPathPattern=auth.test
 ```
 
 ---
@@ -150,23 +188,25 @@ cd backend && npm test -- --testPathPattern=auth.test
 ## Piramide de Testing Actual
 
 ```
-                /\
-               /  \
-              / 0  \                E2E (pendiente)
-             /------\
-            /  15    \               Estres (Artillery, hasta 500 rps)
-           /----------\
-          /    15      \             Carga (Artillery, hasta 20 rps)
-         /--------------\
-        /      15        \           Componente UI (LoginPage)
-       /------------------\
-      /        36          \         Integracion (API + DB)
-     /----------------------\
-    /          160           \       Unitarias (schemas, middleware, types)
-   /__________________________\
+                  /\
+                 /  \
+                / 15  \                  E2E (Playwright)
+               /--------\
+              /   15      \               Seguridad (OWASP)
+             /------------\
+            /     15        \             Estres (hasta 500 rps)
+           /----------------\
+          /       15          \           Carga (hasta 20 rps)
+         /--------------------\
+        /         15            \         Componente UI
+       /------------------------\
+      /           36              \       Integracion (API + DB)
+     /----------------------------\
+    /             160               \     Unitarias
+   /________________________________\
 ```
 
-Total: **241 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 carga + 15 estres.
+Total: **271 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 carga + 15 estres + 15 E2E + 15 seguridad.
 
 ---
 
@@ -174,8 +214,6 @@ Total: **241 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 ca
 
 | Tipo | Prioridad | Herramienta sugerida | Notas |
 |---|---|---|---|
-| E2E | Alta | Playwright o Cypress | Flujos completos en navegador |
-| Seguridad | Alta | OWASP ZAP | Inyeccion SQL, XSS, CSRF |
 | Humo | Baja | Jest | Subset critico de integracion |
 | Aceptacion | Baja | Manual / Cucumber | Validacion con usuario final |
 
