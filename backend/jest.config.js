@@ -12,7 +12,7 @@ module.exports = {
   // Load .env.test before each test suite
   setupFiles: ['<rootDir>/tests/setup.ts'],
 
-  // Close the DB pool once after ALL suites finish
+  // Close the DB pool after all test suites within the worker
   globalTeardown: '<rootDir>/tests/globalTeardown.ts',
 
   // Run test files serially to avoid pool contention across files
