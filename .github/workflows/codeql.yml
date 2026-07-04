@@ -1,0 +1,49 @@
+name: "CodeQL SAST Analysis"
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  schedule:
+    # Se ejecuta todos los domingos a la medianoche (UTC)
+    - cron: '0 0 * * 0'
+
+jobs:
+  analyze:
+    name: Analizar vulnerabilidades
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # CodeQL soporta 'javascript-typescript' como un solo lenguaje unificado
+        language: [ 'javascript-typescript' ]
+
+    steps:
+      - name: Descargar el código fuente
+        uses: actions/checkout@v4
+
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # Opcional: Especificar el nivel de consultas (queries). 
+          # 'security-extended' incluye verificaciones del OWASP Top 10 de alta severidad.
+          queries: security-extended,security-and-quality
+
+      # (Opcional) Si tu proyecto requiere un build manual para que CodeQL lo entienda,
+      # se debe ejecutar aquí. En el caso de JavaScript/TypeScript, CodeQL no 
+      # requiere compilar el código (es interpretado), por lo que este paso se omite.
+      # - run: |
+      #     npm install
+      #     npm run build
+
+      - name: Ejecutar Análisis de Seguridad (SAST)
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
