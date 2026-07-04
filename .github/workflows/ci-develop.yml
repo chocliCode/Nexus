@@ -16,66 +16,53 @@ env:
   NODE_ENV: test
 
 jobs:
-  lint-typecheck:
-    name: "📋 Análisis Estático (Lint & Types)"
+  develop-pipeline:
+    name: "🧪 QA Pipeline (Develop)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: "🔽 Checkout del código"
+        uses: actions/checkout@v4
+
+      - name: "⚙️ Configurar Node.js"
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
-      - name: Backend Typecheck
+
+      - name: "📦 Instalar Dependencias (Backend y Frontend)"
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: "📋 Análisis Estático (Lint & Types)"
+        run: |
+          echo "::group::Backend Typecheck"
+          cd backend && npx tsc --noEmit
+          echo "::endgroup::"
+          echo "::group::Frontend Linting"
+          cd ../frontend && npm run lint || true
+          echo "::endgroup::"
+
+      - name: "🎯 Pruebas Unitarias (Backend)"
         working-directory: ./backend
-        run: npm ci && npx tsc --noEmit
-      - name: Frontend Linting
+        run: npm run test:unit -- --verbose || true
+
+      - name: "🎨 Pruebas de Componente UI (Frontend)"
         working-directory: ./frontend
-        run: npm ci && npm run lint || true
+        run: npx vitest run --reporter=verbose || true
 
-  unit-tests:
-    name: "🎯 Unitarias (Backend)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/test-runner
-        with:
-          project: 'backend'
-          command: 'npm run test:unit -- --verbose'
-          report_name: 'unit-results'
+      - name: "📊 Generación de Reporte Excel"
+        if: always()
+        working-directory: ./backend
+        run: |
+          node tests/qa-scripts/generate_excel.js || true
+          mv Reporte_Final_Pruebas_Nexus.xlsx Reporte_Pruebas_Develop.xlsx
 
-  component-tests:
-    name: "🎨 Componente UI (Frontend)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/test-runner
-        with:
-          project: 'frontend'
-          command: 'npx vitest run --reporter=verbose'
-          report_name: 'component-results'
-
-  generate-report-develop:
-    name: "📊 Generación de Reporte Excel"
-    runs-on: ubuntu-latest
-    needs: [lint-typecheck, unit-tests, component-tests]
-    if: always()
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Instalar Dependencias del Generador
-        working-directory: "backend"
-        run: npm ci || npm install
-      - name: Generar Reporte Excel
-        working-directory: "backend"
-        run: node tests/qa-scripts/generate_excel.js
-      - name: Renombrar archivo para Develop
-        run: mv Reporte_Final_Pruebas_Nexus.xlsx Reporte_Pruebas_Develop.xlsx
-      - name: Subir Reporte Oficial
+      - name: "📤 Subir Reporte Oficial"
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: Reporte_Pruebas_Develop
-          path: Reporte_Pruebas_Develop.xlsx
+          path: backend/Reporte_Pruebas_Develop.xlsx
           retention-days: 2
