@@ -4,7 +4,7 @@
  *
  * Requiere:
  * - Frontend corriendo en localhost:5174 (npm run dev)
- * - Backend corriendo en localhost:3000 (npm run dev)
+ * - Backend corriendo en localhost:3001 (npm run dev)
  * - PostgreSQL con datos de test
  * - Usuario de test registrado
  */

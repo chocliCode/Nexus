@@ -5,7 +5,7 @@
 # ============================================================
 
 config:
-  target: "http://localhost:3000"
+  target: "http://localhost:3001"
   phases:
     - duration: 30
       arrivalRate: 10

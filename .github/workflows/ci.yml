@@ -270,7 +270,7 @@ jobs:
         run: |
           npm run dev &
           sleep 5
-          curl -f http://localhost:3000/api/v1/health || exit 1
+          curl -f http://localhost:3001/api/v1/health || exit 1
 
       - name: Ejecutar pruebas E2E
         working-directory: ./frontend
@@ -350,7 +350,7 @@ jobs:
         run: |
           npm run dev &
           sleep 5
-          curl -f http://localhost:3000/api/v1/health || exit 1
+          curl -f http://localhost:3001/api/v1/health || exit 1
 
       - name: Ejecutar pruebas de carga
         working-directory: ./backend
@@ -425,7 +425,7 @@ jobs:
         run: |
           npm run dev &
           sleep 5
-          curl -f http://localhost:3000/api/v1/health || exit 1
+          curl -f http://localhost:3001/api/v1/health || exit 1
 
       - name: Ejecutar pruebas de estres
         working-directory: ./backend
