@@ -213,7 +213,7 @@ jobs:
         run: npm ci || npm install
       - name: Generar Reporte Excel Consolidado (.xlsx)
         working-directory: "backend"
-        run: node tests/qa-scripts/generate_excel_enriched.js
+        run: node tests/qa-scripts/generate_excel.js
       - name: Subir Reporte Oficial (Artifact)
         uses: actions/upload-artifact@v4
         with:
