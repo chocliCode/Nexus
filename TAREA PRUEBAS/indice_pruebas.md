@@ -6,16 +6,16 @@
 
 | Tipo de prueba | Cantidad | Estado | Documentacion |
 |---|---|---|---|
-| **Integracion** | 36 | Existentes, documentadas | [`pruebas_integracion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_integracion.md) |
+| **Integracion** | 45 | Existentes, documentadas | [`pruebas_integracion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_integracion.md) |
 | **Unitarias** | 160 | Implementadas, documentadas | [`pruebas_unitarias.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_unitarias.md) |
-| **Componente (UI)** | 15 | Implementadas, documentadas | [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md) |
-| **Carga** | 15 | Implementadas, documentadas | [`pruebas_carga.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_carga.md) |
-| **Estres** | 15 | Implementadas, documentadas | [`pruebas_estres.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_estres.md) |
-| **E2E** | 15 | Implementadas, documentadas | [`pruebas_e2e.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_e2e.md) |
-| **Seguridad** | 15 | Implementadas, documentadas | [`pruebas_seguridad.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_seguridad.md) |
-| **Humo** | 15 | Implementadas, documentadas | [`pruebas_humo.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_humo.md) |
-| **Aceptacion** | 15 | Implementadas, documentadas | [`pruebas_aceptacion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_aceptacion.md) |
-| **Total** | **301** | | |
+| **Componente (UI)** | 45 | Implementadas, documentadas | [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md) |
+| **Carga** | 30 | Implementadas, documentadas | [`pruebas_carga.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_carga.md) |
+| **Estres** | 30 | Implementadas, documentadas | [`pruebas_estres.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_estres.md) |
+| **E2E** | 30 | Implementadas, documentadas | [`pruebas_e2e.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_e2e.md) |
+| **Seguridad** | 45 | Implementadas, documentadas | [`pruebas_seguridad.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_seguridad.md) |
+| **Humo** | 45 | Implementadas, documentadas | [`pruebas_humo.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_humo.md) |
+| **Aceptacion** | 45 | Implementadas, documentadas | [`pruebas_aceptacion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_aceptacion.md) |
+| **Total** | **475** | | |
 
 ---
 
@@ -24,7 +24,7 @@
 ### 1. Pruebas de Integracion
 
 - **Archivo:** [`pruebas_integracion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_integracion.md)
-- **Total:** 36 pruebas
+- **Total:** 45 pruebas
 - **Tecnologia:** Jest + Supertest + PostgreSQL real
 - **Estado:** Ya existian en el proyecto. Documentadas con IDs, descripciones, capas involucradas y reglas de negocio.
 
@@ -63,9 +63,9 @@
 ### 3. Pruebas de Componente (UI)
 
 - **Archivo:** [`pruebas_componente.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_componente.md)
-- **Total:** 15 pruebas
+- **Total:** 45 pruebas
 - **Tecnologia:** Vitest + React Testing Library + jsdom (sin navegador real)
-- **Estado:** Implementadas (expandidas de 3 a 15) y documentadas.
+- **Estado:** Implementadas (expandidas a 45) y documentadas.
 
 | Categoria | Tests | IDs |
 |---|---|---|
@@ -80,7 +80,7 @@
 ### 4. Pruebas de Carga
 
 - **Archivo:** [`pruebas_carga.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_carga.md)
-- **Total:** 15 pruebas
+- **Total:** 30 pruebas
 - **Tecnologia:** Artillery (npm) -- requiere backend corriendo
 - **Estado:** Implementadas y documentadas. Requieren usuario de test y backend activo.
 
@@ -97,7 +97,7 @@
 ### 5. Pruebas de Estres
 
 - **Archivo:** [`pruebas_estres.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_estres.md)
-- **Total:** 15 pruebas
+- **Total:** 30 pruebas
 - **Tecnologia:** Artillery (npm) -- patrones agresivos (hasta 500 req/s)
 - **Estado:** Implementadas y documentadas.
 
@@ -114,7 +114,7 @@
 ### 6. Pruebas E2E
 
 - **Archivo:** [`pruebas_e2e.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_e2e.md)
-- **Total:** 15 pruebas
+- **Total:** 30 pruebas
 - **Tecnologia:** Playwright + Chromium (navegador real)
 - **Estado:** Implementadas. Requieren frontend + backend + PostgreSQL corriendo.
 
@@ -132,9 +132,9 @@
 ### 7. Pruebas de Seguridad
 
 - **Archivo:** [`pruebas_seguridad.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_seguridad.md)
-- **Total:** 15 pruebas
+- **Total:** 45 pruebas
 - **Tecnologia:** Jest + Supertest (no requiere DB)
-- **Estado:** Implementadas, 15/15 pasando.
+- **Estado:** Implementadas, 45/45 pasando.
 
 | Categoria OWASP | Tests | IDs |
 |---|---|---|
@@ -149,14 +149,14 @@
 ### 8. Pruebas de Humo (Smoke)
 
 - **Archivo:** [`pruebas_humo.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_humo.md)
-- **Total:** 15 pruebas
+- **Total:** 45 pruebas
 - **Tecnologia:** Jest + Supertest (sin DB requerida)
 - **Estado:** Implementadas.
 
 ### 9. Pruebas de Aceptacion (UAT)
 
 - **Archivo:** [`pruebas_aceptacion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_aceptacion.md)
-- **Total:** 15 pruebas (Escenarios BDD)
+- **Total:** 45 pruebas (Escenarios BDD)
 - **Tecnologia:** Jest-Cucumber + Supertest
 - **Estado:** Implementadas.
 
@@ -212,27 +212,27 @@ cd backend && npm run test:unit -- --coverage
 ```
                    /\
                   /  \
-                 / 15 \                   Aceptacion (UAT/BDD)
+                 / 45 \                   Aceptacion (UAT/BDD)
                 /------\
-               /  15    \                 E2E (Playwright)
+               /  30    \                 E2E (Playwright)
               /----------\
-             /    15      \               Seguridad (OWASP)
+             /    45      \               Seguridad (OWASP)
             /--------------\
-           /      15        \             Humo (Smoke)
+           /      45        \             Humo (Smoke)
           /------------------\
-         /        15          \           Estres (hasta 500 rps)
+         /        30          \           Estres (hasta 500 rps)
         /----------------------\
-       /          15            \         Carga (hasta 20 rps)
+       /          30            \         Carga (hasta 20 rps)
       /--------------------------\
-     /            15              \       Componente UI
+     /            45              \       Componente UI
     /------------------------------\
-   /              36                \     Integracion (API + DB)
+   /              45                \     Integracion (API + DB)
   /----------------------------------\
  /               160                  \   Unitarias
 /______________________________________\
 ```
 
-Total: **301 pruebas**
+Total: **475 pruebas**
 
 ---
 

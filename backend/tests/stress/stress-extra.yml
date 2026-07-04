@@ -1,0 +1,83 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 10
+      arrivalRate: 10
+      name: "Calentamiento"
+    - duration: 20
+      arrivalRate: 50
+      name: "Carga alta"
+    - duration: 20
+      arrivalRate: 100
+      name: "Carga extrema"
+    - duration: 15
+      arrivalRate: 200
+      name: "Punto de quiebre"
+    - duration: 10
+      arrivalRate: 10
+      name: "Recuperacion"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Scenario 1"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 2"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 3"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 4"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 5"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 6"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 7"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 8"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 9"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 10"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 11"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 12"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 13"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 14"
+    flow:
+      - get:
+          url: "/api/v1/health"
+  - name: "Scenario 15"
+    flow:
+      - get:
+          url: "/api/v1/health"

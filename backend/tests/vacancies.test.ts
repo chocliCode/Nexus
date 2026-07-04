@@ -90,7 +90,6 @@ describe('UC-21: POST /api/v1/vacancies (publicar vacante)', () => {
 describe('UC-22: GET /api/v1/vacancies (buscar vacantes)', () => {
   it('lista vacantes activas', async () => {
     const res = await request(app).get('/api/v1/vacancies');
-
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
