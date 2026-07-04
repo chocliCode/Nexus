@@ -219,4 +219,4 @@ jobs:
         with:
           name: Reporte_Final_Pruebas_Nexus
           path: Reporte_Final_Pruebas_Nexus.xlsx
-          retention-days: 30
+          retention-days: 2
