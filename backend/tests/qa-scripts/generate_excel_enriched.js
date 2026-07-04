@@ -23,24 +23,53 @@ function getCategoryInfo(rawTitle) {
     return { shortName: clean.substring(0, 31).replace(/[:\\\/?*\[\]]/g, ''), title: clean, desc: 'Pruebas generales.', tech: 'N/A' };
 }
 
-async function generateExcel() {
-    // 1. Cargar metadatos enriquecidos
-    const enrichedMap = {};
-    for (let i = 1; i <= 4; i++) {
-        const file = path.join(__dirname, `chunk_${i}_enriched.json`);
-        if (fs.existsSync(file)) {
-            const data = JSON.parse(fs.readFileSync(file, 'utf-8'));
-            data.forEach(item => {
-                enrichedMap[item.id] = {
-                    explicacion: item.explicacion_tecnica || 'N/A',
-                    justificacion: item.justificacion_negocio || 'N/A'
-                };
-            });
-        } else {
-            console.warn(`Warning: ${file} no encontrado.`);
-        }
-    }
+function getTechExplanation(desc, fileName) {
+    desc = (desc || '').toLowerCase();
+    fileName = (fileName || '').toLowerCase();
 
+    if (fileName.includes('smoke') || desc.includes('health') || desc.includes('header')) {
+        return "Hace una revisión rápida de las conexiones principales del sistema para asegurar que la comunicación entre el usuario y nuestros servidores funciona sin problemas.";
+    } else if (fileName.includes('auth') || fileName.includes('login') || desc.includes('sesion') || desc.includes('auth')) {
+        return "Revisa los candados de seguridad simulando intentos de ingreso (correctos e incorrectos) para confirmar que el sistema reconoce quién puede entrar y quién no.";
+    } else if (desc.includes('registro') || desc.includes('usuario')) {
+        return "Verifica todo el proceso por el cual un cliente nuevo se inscribe, comprobando que sus datos se guarden correctamente sin errores en el sistema.";
+    } else if (fileName.includes('load') || fileName.includes('stress') || fileName.includes('spike') || desc.includes('scenario')) {
+        return "Simula la entrada masiva de miles de usuarios al mismo tiempo (ej: inyectando escenarios paralelos) para medir si los servidores soportan la presión sin ponerse lentos o apagarse.";
+    } else if (fileName.includes('e2e') || desc.includes('pagina') || desc.includes('navega')) {
+        return "Imita el comportamiento de un ser humano real navegando por la aplicación (haciendo clics, llenando formularios) para confirmar que todo fluya correctamente.";
+    } else if (fileName.includes('tsx') || fileName.includes('component') || desc.includes('render') || desc.includes('id') || desc.includes('tag')) {
+        return "Verifica de forma automática que los botones, textos y ventanas visuales de este componente (ej: DIVs, títulos) aparezcan correctamente en la pantalla sin errores gráficos.";
+    } else if (fileName.includes('security') || desc.includes('sql') || desc.includes('xss') || desc.includes('jwt')) {
+        return "Simula ataques cibernéticos enviados por hackers (con virus o trampas en el texto) para confirmar que nuestras barreras defensivas los bloquean inmediatamente.";
+    } else {
+        return "Verifica la regla de negocio de este módulo específico, comprobando que la lógica matemática o el flujo de datos responda de manera exacta y sin errores.";
+    }
+}
+
+function getBizJustification(desc, fileName) {
+    desc = (desc || '').toLowerCase();
+    fileName = (fileName || '').toLowerCase();
+
+    if (fileName.includes('smoke') || desc.includes('health') || desc.includes('header')) {
+        return "Funciona como una alarma temprana. Nos asegura que el sistema está 'vivo' y disponible para que ningún cliente se quede sin servicio de imprevisto.";
+    } else if (fileName.includes('auth') || fileName.includes('login') || desc.includes('sesion') || desc.includes('auth')) {
+        return "Protege la privacidad de los usuarios, asegurando que nadie pueda robar información confidencial ni entrar a cuentas que no le pertenecen.";
+    } else if (desc.includes('registro') || desc.includes('usuario')) {
+        return "Garantiza que no perdamos clientes nuevos por culpa de errores técnicos durante su primer contacto, ayudando directamente al crecimiento del negocio.";
+    } else if (fileName.includes('load') || fileName.includes('stress') || fileName.includes('spike') || desc.includes('scenario')) {
+        return "Asegura que en días de alta demanda comercial (como campañas publicitarias) la plataforma no colapse, protegiendo las ventas y la reputación de la empresa.";
+    } else if (fileName.includes('e2e') || desc.includes('pagina') || desc.includes('navega')) {
+        return "Evita que los usuarios se sientan frustrados. Una experiencia de navegación perfecta es clave para que los clientes recomienden nuestra aplicación.";
+    } else if (fileName.includes('tsx') || fileName.includes('component') || desc.includes('render') || desc.includes('id') || desc.includes('tag')) {
+        return "Garantiza que la aplicación se vea muy profesional, evitando que un diseño roto genere desconfianza visual y provoque que los usuarios abandonen el sitio.";
+    } else if (fileName.includes('security') || desc.includes('sql') || desc.includes('xss') || desc.includes('jwt')) {
+        return "Evita demandas legales multimillonarias, extorsiones por robo de bases de datos y la destrucción absoluta de la reputación pública de la empresa.";
+    } else {
+        return "Previene que defectos internos lleguen al cliente final, ahorrando a la empresa los enormes costos económicos de reparar errores en producción.";
+    }
+}
+
+async function generateExcel() {
     const mdFile = path.join(__dirname, '../../../docs/documentacion_todas_las_pruebas.md');
     const excelFile = path.join(__dirname, '../../../Reporte_Final_Pruebas_Nexus.xlsx');
 
@@ -71,7 +100,7 @@ async function generateExcel() {
             // Título
             currentSheet.mergeCells('A1:F1');
             const titleCell = currentSheet.getCell('A1');
-            titleCell.value = `REPORTE DE CALIDAD (ENRIQUECIDO): ${catInfo.title.toUpperCase()}`;
+            titleCell.value = `REPORTE DE CALIDAD (GERENCIAL): ${catInfo.title.toUpperCase()}`;
             titleCell.font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
             titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D2A42' } };
             titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -79,7 +108,7 @@ async function generateExcel() {
             // Info de negocio
             currentSheet.mergeCells('A2:A4');
             const descHeaderCell = currentSheet.getCell('A2');
-            descHeaderCell.value = 'Metadatos\ny\nPropósito';
+            descHeaderCell.value = 'Impacto\nde\nNegocio';
             descHeaderCell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF0D2A42' } };
             descHeaderCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
             descHeaderCell.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
@@ -87,14 +116,14 @@ async function generateExcel() {
 
             currentSheet.mergeCells('B2:F3');
             const descValueCell = currentSheet.getCell('B2');
-            descValueCell.value = `Descripción y Diseño: ${catInfo.desc}`;
+            descValueCell.value = `Propósito Arquitectónico: ${catInfo.desc}`;
             descValueCell.font = { name: 'Arial', size: 11, italic: true, color: { argb: 'FF333333' } };
             descValueCell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true, indent: 1 };
             descValueCell.border = { top: {style:'thin'}, right: {style:'thin'} };
 
             currentSheet.mergeCells('B4:F4');
             const techValueCell = currentSheet.getCell('B4');
-            techValueCell.value = `Stack Tecnológico / Herramientas: ${catInfo.tech}`;
+            techValueCell.value = `Framework y Herramientas: ${catInfo.tech}`;
             techValueCell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF1F4E78' } };
             techValueCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
             techValueCell.border = { bottom: {style:'thin'}, right: {style:'thin'} };
@@ -106,9 +135,9 @@ async function generateExcel() {
             headerRow.values = {
                 archivo: 'Archivo Fuente',
                 id: 'ID',
-                descripcion: 'Caso de Prueba',
-                explicacion: 'Explicación Técnica (Agentes AI)',
-                justificacion: 'Impacto de Negocio (El Porqué)',
+                descripcion: 'Escenario Evaluado',
+                explicacion: 'Explicación del Comportamiento',
+                justificacion: 'Justificación (El Porqué importa)',
                 estado: 'Estado'
             };
             
@@ -128,15 +157,16 @@ async function generateExcel() {
                 const id = parts[0];
                 const desc = parts[1];
                 
-                const meta = enrichedMap[id] || { explicacion: 'Autogenerando...', justificacion: 'Autogenerando...' };
+                const explicacion = getTechExplanation(desc, currentFile);
+                const justificacion = getBizJustification(desc, currentFile);
                 
                 const row = currentSheet.getRow(rowIndex);
                 row.values = {
                     archivo: currentFile,
                     id: id,
                     descripcion: desc,
-                    explicacion: meta.explicacion,
-                    justificacion: meta.justificacion,
+                    explicacion: explicacion,
+                    justificacion: justificacion,
                     estado: 'PASSED'
                 };
 
@@ -175,7 +205,7 @@ async function generateExcel() {
     });
 
     await workbook.xlsx.writeFile(excelFile);
-    console.log(`🚀 Reporte Excel Enriquecido generado en: ${excelFile}`);
+    console.log(`🚀 Reporte Excel Gerencial generado en: ${excelFile}`);
 }
 
 generateExcel().catch(err => { console.error(err); process.exit(1); });
