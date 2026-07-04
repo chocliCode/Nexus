@@ -13,9 +13,9 @@
 | **Estres** | 15 | Implementadas, documentadas | [`pruebas_estres.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_estres.md) |
 | **E2E** | 15 | Implementadas, documentadas | [`pruebas_e2e.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_e2e.md) |
 | **Seguridad** | 15 | Implementadas, documentadas | [`pruebas_seguridad.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_seguridad.md) |
-| Humo | 0 | Pendiente | -- |
-| Aceptacion | 0 | Pendiente | -- |
-| **Total** | **271** | | |
+| **Humo** | 15 | Implementadas, documentadas | [`pruebas_humo.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_humo.md) |
+| **Aceptacion** | 15 | Implementadas, documentadas | [`pruebas_aceptacion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_aceptacion.md) |
+| **Total** | **301** | | |
 
 ---
 
@@ -146,6 +146,22 @@
 
 ---
 
+### 8. Pruebas de Humo (Smoke)
+
+- **Archivo:** [`pruebas_humo.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_humo.md)
+- **Total:** 15 pruebas
+- **Tecnologia:** Jest + Supertest (sin DB requerida)
+- **Estado:** Implementadas.
+
+### 9. Pruebas de Aceptacion (UAT)
+
+- **Archivo:** [`pruebas_aceptacion.md`](file:///c:/Users/USUARIO/Desktop/Nexus/TAREA%20PRUEBAS/pruebas_aceptacion.md)
+- **Total:** 15 pruebas (Escenarios BDD)
+- **Tecnologia:** Jest-Cucumber + Supertest
+- **Estado:** Implementadas.
+
+---
+
 ## Comandos de Ejecucion
 
 ```bash
@@ -158,8 +174,14 @@ cd backend && npm run test:unit
 # Ejecutar pruebas de componente (frontend, no requiere DB)
 cd frontend && npm test
 
+# Ejecutar pruebas de humo (no requiere DB)
+cd backend && npm run test:smoke
+
 # Ejecutar pruebas de seguridad (no requiere DB)
 cd backend && npm run test:security
+
+# Ejecutar pruebas de aceptacion (requiere DB)
+cd backend && npm run test:acceptance
 
 # Ejecutar pruebas E2E (requiere frontend + backend + DB corriendo)
 cd frontend && npm run test:e2e
@@ -188,34 +210,42 @@ cd backend && npm run test:unit -- --coverage
 ## Piramide de Testing Actual
 
 ```
-                  /\
-                 /  \
-                / 15  \                  E2E (Playwright)
-               /--------\
-              /   15      \               Seguridad (OWASP)
-             /------------\
-            /     15        \             Estres (hasta 500 rps)
-           /----------------\
-          /       15          \           Carga (hasta 20 rps)
-         /--------------------\
-        /         15            \         Componente UI
-       /------------------------\
-      /           36              \       Integracion (API + DB)
-     /----------------------------\
-    /             160               \     Unitarias
-   /________________________________\
+                   /\
+                  /  \
+                 / 15 \                   Aceptacion (UAT/BDD)
+                /------\
+               /  15    \                 E2E (Playwright)
+              /----------\
+             /    15      \               Seguridad (OWASP)
+            /--------------\
+           /      15        \             Humo (Smoke)
+          /------------------\
+         /        15          \           Estres (hasta 500 rps)
+        /----------------------\
+       /          15            \         Carga (hasta 20 rps)
+      /--------------------------\
+     /            15              \       Componente UI
+    /------------------------------\
+   /              36                \     Integracion (API + DB)
+  /----------------------------------\
+ /               160                  \   Unitarias
+/______________________________________\
 ```
 
-Total: **271 pruebas** -- 160 unitarias + 36 integracion + 15 componente + 15 carga + 15 estres + 15 E2E + 15 seguridad.
+Total: **301 pruebas**
 
 ---
 
-## Tipos de Prueba Pendientes
+## Modulos Cubiertos
 
-| Tipo | Prioridad | Herramienta sugerida | Notas |
-|---|---|---|---|
-| Humo | Baja | Jest | Subset critico de integracion |
-| Aceptacion | Baja | Manual / Cucumber | Validacion con usuario final |
+Todas las fases de pruebas cubren de manera exhaustiva:
+- Autenticacion y Roles (JWT, Padawan, Jedi, Admin)
+- Validacion Zod de esquemas de datos
+- Gestion de OKRs (Flujo core)
+- Sistema de Vacantes (Publicacion y postulacion)
+- Sesiones de Mentoria
+- Notificaciones
+- Inteligencia Artificial (Analisis de riesgo)
 
 ---
 
