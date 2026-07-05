@@ -67,7 +67,6 @@ jobs:
       - name: "💣 Escaneo DAST (OWASP ZAP)"
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          # URL objetivo donde ZAP lanzará el ataque dinámico
           target: 'http://localhost:3001'
-          # Crear incidencias (issues) en GitHub si falla
           fail_action: false
+          artifact_name: 'ZAP_DAST_Report'
