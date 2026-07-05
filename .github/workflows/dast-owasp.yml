@@ -20,6 +20,10 @@ jobs:
   zap_scan:
     name: "🕷️ OWASP ZAP DAST Scan"
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
     services:
       postgres:
         image: postgres:16-alpine
