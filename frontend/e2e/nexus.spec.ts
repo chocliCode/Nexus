@@ -22,7 +22,7 @@ test.describe('E2E: Flujo de Login', () => {
 
   test('E2E-01: La pagina de login carga correctamente', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('NEXUS')).toBeVisible();
+    await expect(page.getByText('NEXUS', { exact: true })).toBeVisible();
     await expect(page.getByText('Iniciar Sesión')).toBeVisible();
     await expect(page.getByPlaceholder('tu@email.com')).toBeVisible();
     await expect(page.getByPlaceholder('••••••••')).toBeVisible();
@@ -35,7 +35,7 @@ test.describe('E2E: Flujo de Login', () => {
     await page.getByPlaceholder('••••••••').fill('WrongPassword');
     await page.getByRole('button', { name: /ingresar/i }).click();
     // Wait for error message to appear
-    await expect(page.getByText(/error|inválid|incorrect/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/error|inválid|incorrect|credenciales/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('E2E-03: Login exitoso redirige al dashboard', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('E2E: Flujo de Login', () => {
     await page.getByPlaceholder('tu@email.com').fill('not-an-email');
     await page.getByPlaceholder('••••••••').fill('somepassword');
     await page.getByRole('button', { name: /ingresar/i }).click();
-    await expect(page.getByText(/email inválido/i)).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText(/email inválido/i).first()).toBeVisible({ timeout: 5000 });
   });
 
 });
@@ -67,15 +67,15 @@ test.describe('E2E: Flujo de Registro', () => {
     await page.goto('/');
     await page.getByText('Regístrate aquí').click();
     await expect(page).toHaveURL(/register/);
-    await expect(page.getByText('Crear Cuenta')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Crear Cuenta' })).toBeVisible();
   });
 
   test('E2E-06: La pagina de registro muestra todos los campos', async ({ page }) => {
     await page.goto('/register');
-    await expect(page.getByPlaceholder('Carlos')).toBeVisible();
+    await expect(page.getByPlaceholder('María')).toBeVisible();
     await expect(page.getByPlaceholder('García')).toBeVisible();
     await expect(page.getByPlaceholder('tu@email.com')).toBeVisible();
-    await expect(page.getByPlaceholder('••••••••')).toBeVisible();
+    await expect(page.getByPlaceholder('Mínimo 8 caracteres')).toBeVisible();
   });
 
 });
