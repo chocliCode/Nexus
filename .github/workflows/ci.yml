@@ -1,0 +1,465 @@
+# ============================================================
+# NEXUS -- Pipeline de Regresion Completa (Manual Dispatch)
+# Fusion de ci-develop.yml (Gate 1) + ci-main.yml (Gate 2)
+# ============================================================
+
+name: "🧪 NEXUS Regression Pipeline (Completo)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_all:
+        description: 'Ejecutar todas las suites de pruebas'
+        required: false
+        default: 'true'
+        type: boolean
+
+concurrency:
+  group: regression-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  DATABASE_URL: postgresql://nexus_user:nexus_pass@localhost:5432/nexus_test
+  JWT_SECRET: test_secret_ci_2026
+  NODE_ENV: test
+  PGPASSWORD: nexus_pass
+
+jobs:
+  # ============================================================
+  # GATE 1 — DEVELOP (Shift-Left, sin DB)
+  # ============================================================
+
+  # ----------------------------------------------------------
+  # 1. LINT & TYPECHECK
+  # ----------------------------------------------------------
+  lint-typecheck:
+    name: "📋 Analisis Estatico (Lint & Types)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+      - name: "🔍 Backend — TypeScript typecheck"
+        working-directory: ./backend
+        run: npx tsc --noEmit
+      - name: "🔍 Frontend — ESLint"
+        working-directory: ./frontend
+        run: npm run lint
+
+  # ----------------------------------------------------------
+  # 2. PRUEBAS UNITARIAS (Backend)
+  # ----------------------------------------------------------
+  unit-tests:
+    name: "🎯 Unitarias Backend (160)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "🧪 Ejecutar pruebas unitarias"
+        working-directory: ./backend
+        run: npm run test:unit -- --verbose --coverage
+
+  # ----------------------------------------------------------
+  # 3. PRUEBAS DE COMPONENTE UI (Frontend)
+  # ----------------------------------------------------------
+  component-tests:
+    name: "🎨 Componente UI (45)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./frontend
+        run: npm ci
+      - name: "🧪 Ejecutar pruebas de componente"
+        working-directory: ./frontend
+        run: npx vitest run --reporter=verbose
+
+  # ----------------------------------------------------------
+  # 4. PRUEBAS DE SEGURIDAD (OWASP)
+  # ----------------------------------------------------------
+  security-tests:
+    name: "🔒 Seguridad OWASP (45)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "🧪 Ejecutar pruebas de seguridad"
+        working-directory: ./backend
+        run: npm run test:security -- --verbose
+
+  # ----------------------------------------------------------
+  # 5. PRUEBAS DE HUMO (Smoke)
+  # ----------------------------------------------------------
+  smoke-tests:
+    name: "💨 Humo / Smoke (45)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "🧪 Ejecutar pruebas de humo"
+        working-directory: ./backend
+        run: npm run test:smoke -- --verbose
+
+  # ============================================================
+  # GATE 2 — MAIN (Release Gate, con PostgreSQL)
+  # ============================================================
+
+  # ----------------------------------------------------------
+  # 6. PRUEBAS DE INTEGRACION (API + DB)
+  # ----------------------------------------------------------
+  integration-tests:
+    name: "🔄 Integracion API + DB (45)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "🧪 Ejecutar pruebas de integracion"
+        working-directory: ./backend
+        run: npm test -- --runInBand --verbose
+
+  # ----------------------------------------------------------
+  # 7. PRUEBAS DE ACEPTACION BDD (Gherkin)
+  # ----------------------------------------------------------
+  acceptance-tests:
+    name: "✅ Aceptacion BDD (45)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "🧪 Ejecutar pruebas de aceptacion"
+        working-directory: ./backend
+        run: npm run test:acceptance -- --verbose
+
+  # ----------------------------------------------------------
+  # 8. PRUEBAS END-TO-END (Playwright)
+  # ----------------------------------------------------------
+  e2e-tests:
+    name: "🌐 E2E Playwright (30)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+      - name: "🎭 Instalar Playwright + Chromium"
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+      - name: "🚀 Levantar Backend"
+        working-directory: ./backend
+        run: |
+          npm run dev &
+          sleep 5
+          curl -f http://localhost:3001/api/v1/health || true
+      - name: "🧪 Ejecutar pruebas E2E"
+        working-directory: ./frontend
+        run: npx playwright test --reporter=list
+      - name: "📸 Subir reporte Playwright"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-html-report
+          path: frontend/playwright-report/
+          retention-days: 5
+
+  # ----------------------------------------------------------
+  # 9. PRUEBAS DE CARGA (Artillery)
+  # ----------------------------------------------------------
+  load-tests:
+    name: "📈 Carga / Load (Artillery)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "🚀 Levantar Backend"
+        working-directory: ./backend
+        run: |
+          npm run dev &
+          sleep 5
+      - name: "🧪 Pruebas de Carga"
+        working-directory: ./backend
+        run: |
+          npx artillery run tests/load/load-auth.yml --output reports/load-auth.json || true
+          npx artillery run tests/load/load-mixed.yml --output reports/load-mixed.json || true
+      - name: "📤 Subir reportes de carga"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-reports
+          path: backend/reports/
+          retention-days: 5
+
+  # ----------------------------------------------------------
+  # 10. PRUEBAS DE ESTRES (Artillery)
+  # ----------------------------------------------------------
+  stress-tests:
+    name: "💥 Estres / Stress (Artillery)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "🚀 Levantar Backend"
+        working-directory: ./backend
+        run: |
+          npm run dev &
+          sleep 5
+      - name: "🧪 Pruebas de Estres"
+        working-directory: ./backend
+        run: |
+          npx artillery run tests/stress/stress-limits.yml --output reports/stress-limits.json || true
+          npx artillery run tests/stress/stress-spike.yml --output reports/stress-spike.json || true
+      - name: "📤 Subir reportes de estres"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stress-test-reports
+          path: backend/reports/
+          retention-days: 5
+
+  # ============================================================
+  # REPORTE FINAL + RESUMEN
+  # ============================================================
+
+  # ----------------------------------------------------------
+  # 11. GENERACION DE REPORTE EXCEL
+  # ----------------------------------------------------------
+  generate-final-report:
+    name: "📊 Generar Reporte Excel (.xlsx)"
+    runs-on: ubuntu-latest
+    needs:
+      - lint-typecheck
+      - unit-tests
+      - component-tests
+      - security-tests
+      - smoke-tests
+      - integration-tests
+      - acceptance-tests
+      - e2e-tests
+      - load-tests
+      - stress-tests
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+      - name: "📊 Generar reporte Excel consolidado"
+        working-directory: ./backend
+        run: node tests/qa-scripts/generate_excel.js
+      - name: "📤 Subir Reporte Oficial"
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reporte_Final_Pruebas_Nexus
+          path: Reporte_Final_Pruebas_Nexus.xlsx
+          retention-days: 10
+
+  # ----------------------------------------------------------
+  # 12. VEREDICTO FINAL
+  # ----------------------------------------------------------
+  regression-summary:
+    name: "🏁 Veredicto Final — Regresion Completa"
+    runs-on: ubuntu-latest
+    needs:
+      - lint-typecheck
+      - unit-tests
+      - component-tests
+      - security-tests
+      - smoke-tests
+      - integration-tests
+      - acceptance-tests
+      - e2e-tests
+      - load-tests
+      - stress-tests
+    if: always()
+    steps:
+      - name: "📋 Resumen de resultados"
+        run: |
+          echo "╔══════════════════════════════════════════════════════════╗"
+          echo "║   NEXUS — Regression Pipeline (Completo) Summary       ║"
+          echo "╠══════════════════════════════════════════════════════════╣"
+          echo "║  GATE 1 (Develop / Shift-Left)                         ║"
+          echo "║  ─────────────────────────────────────────────────────  ║"
+          echo "║  Lint & Types:       ${{ needs.lint-typecheck.result }}"
+          echo "║  Unit Tests (160):   ${{ needs.unit-tests.result }}"
+          echo "║  Component UI (45):  ${{ needs.component-tests.result }}"
+          echo "║  Security (45):      ${{ needs.security-tests.result }}"
+          echo "║  Smoke (45):         ${{ needs.smoke-tests.result }}"
+          echo "║                                                        ║"
+          echo "║  GATE 2 (Main / Release)                               ║"
+          echo "║  ─────────────────────────────────────────────────────  ║"
+          echo "║  Integration (45):   ${{ needs.integration-tests.result }}"
+          echo "║  Acceptance BDD(45): ${{ needs.acceptance-tests.result }}"
+          echo "║  E2E Playwright(30): ${{ needs.e2e-tests.result }}"
+          echo "║  Load (Artillery):   ${{ needs.load-tests.result }}"
+          echo "║  Stress (Artillery): ${{ needs.stress-tests.result }}"
+          echo "╚══════════════════════════════════════════════════════════╝"
+
+      - name: "🚫 Fallo si jobs criticos fallaron"
+        if: |
+          needs.lint-typecheck.result == 'failure' ||
+          needs.unit-tests.result == 'failure' ||
+          needs.component-tests.result == 'failure' ||
+          needs.security-tests.result == 'failure' ||
+          needs.smoke-tests.result == 'failure' ||
+          needs.integration-tests.result == 'failure' ||
+          needs.acceptance-tests.result == 'failure' ||
+          needs.e2e-tests.result == 'failure'
+        run: |
+          echo "❌ REGRESION FALLIDA — Uno o mas jobs criticos fallaron."
+          exit 1
+
+      - name: "✅ Regresion aprobada"
+        if: |
+          needs.lint-typecheck.result == 'success' &&
+          needs.unit-tests.result == 'success' &&
+          needs.component-tests.result == 'success' &&
+          needs.security-tests.result == 'success' &&
+          needs.smoke-tests.result == 'success' &&
+          needs.integration-tests.result == 'success' &&
+          needs.acceptance-tests.result == 'success' &&
+          needs.e2e-tests.result == 'success'
+        run: |
+          echo "✅ REGRESION COMPLETA APROBADA."
+          echo "⚠️  Nota: Load/Stress son informativos, no bloquean."
