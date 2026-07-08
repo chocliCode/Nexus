@@ -14,16 +14,16 @@ defineFeature(feature, (test) => {
     // Generar un random email para evitar conflictos en cada ejecucion
     const rnd = Math.floor(Math.random() * 100000);
     
-    // Login inicial de admin (asumiendo que admin@nexus.com existe por el seed)
+    // Login inicial de admin (asumiendo que admin@nexus.test existe por el seed)
     const adminRes = await request(app)
       .post('/api/v1/auth/login')
-      .send({ email: 'admin@nexus.com', contrasena: 'admin123' });
+      .send({ email: 'admin@nexus.test', contrasena: 'Test1234!' });
     adminToken = adminRes.body.data?.token || '';
 
-    // Login inicial de padawan (padawan1@nexus.com)
+    // Login inicial de padawan (padawan@nexus.test)
     const padRes = await request(app)
       .post('/api/v1/auth/login')
-      .send({ email: 'padawan1@nexus.com', contrasena: 'password123' });
+      .send({ email: 'padawan@nexus.test', contrasena: 'Test1234!' });
     padawanToken = padRes.body.data?.token || '';
   });
 
@@ -64,7 +64,7 @@ defineFeature(feature, (test) => {
     when('el administrador intenta iniciar sesion', async () => {
       response = await request(app)
         .post('/api/v1/auth/login')
-        .send({ email: 'admin@nexus.com', contrasena: 'admin123' });
+        .send({ email: 'admin@nexus.test', contrasena: 'Test1234!' });
     });
     then('el sistema debe retornar un token JWT de acceso', () => {
       expect(response.body.data).toHaveProperty('token');
@@ -81,7 +81,7 @@ defineFeature(feature, (test) => {
     when('el padawan intenta iniciar sesion', async () => {
       response = await request(app)
         .post('/api/v1/auth/login')
-        .send({ email: 'padawan1@nexus.com', contrasena: 'password123' });
+        .send({ email: 'padawan@nexus.test', contrasena: 'Test1234!' });
     });
     then('el sistema debe retornar un token JWT de acceso', () => {
       expect(response.body.data).toHaveProperty('token');

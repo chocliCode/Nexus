@@ -14,13 +14,13 @@ Feature: Validacion de Flujos de Negocio de NEXUS (Pruebas de Aceptacion)
     And el status de la respuesta debe ser 201
 
   Scenario: UAT-02 Un admin puede iniciar sesion
-    Given que existe un administrador en el sistema con email "admin@nexus.com" y contrasena "admin123"
+    Given que existe un administrador en el sistema con email "admin@nexus.test" y contrasena "Test1234!"
     When el administrador intenta iniciar sesion
     Then el sistema debe retornar un token JWT de acceso
     And el status de la respuesta debe ser 200
 
   Scenario: UAT-03 Un padawan puede iniciar sesion
-    Given que existe un padawan en el sistema con email "padawan1@nexus.com" y contrasena "password123"
+    Given que existe un padawan en el sistema con email "padawan@nexus.test" y contrasena "Test1234!"
     When el padawan intenta iniciar sesion
     Then el sistema debe retornar un token JWT de acceso
 
