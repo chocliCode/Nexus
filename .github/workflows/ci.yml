@@ -243,6 +243,7 @@ jobs:
       - name: "🚀 Levantar Backend"
         working-directory: ./backend
         run: |
+          npx ts-node -e "require('./tests/globalSetup.ts').default()"
           npm run dev &
           sleep 5
           curl -f http://localhost:3001/api/v1/health || true
@@ -290,6 +291,7 @@ jobs:
       - name: "🚀 Levantar Backend"
         working-directory: ./backend
         run: |
+          npx ts-node -e "require('./tests/globalSetup.ts').default()"
           npm run dev &
           sleep 5
       - name: "🧪 Pruebas de Carga"
@@ -338,6 +340,7 @@ jobs:
       - name: "🚀 Levantar Backend"
         working-directory: ./backend
         run: |
+          npx ts-node -e "require('./tests/globalSetup.ts').default()"
           npm run dev &
           sleep 5
       - name: "🧪 Pruebas de Estres"

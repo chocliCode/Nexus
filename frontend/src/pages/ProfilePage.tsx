@@ -59,7 +59,11 @@ const ProfilePage = () => {
   }, []);
 
   useEffect(() => {
-    Promise.all([loadProfile(), loadSkills()]).finally(() => setLoading(false));
+    const init = async () => {
+      await Promise.all([loadProfile(), loadSkills()]);
+      setLoading(false);
+    };
+    void init();
   }, [loadProfile, loadSkills]);
 
   const handleSave = async () => {

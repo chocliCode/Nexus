@@ -1,33 +1,33 @@
 import type { ClassroomPeople } from '../../types';
 import { Lightbulb, Calendar, Star, BarChart2, Link2 } from 'lucide-react';
 
+const PersonCard = ({ role, name, email, bio, extra }: {
+  role: 'Mentor' | 'Estudiante'; name: string; email: string; bio: string; extra: React.ReactNode;
+}) => (
+  <div className="card p-5">
+    <div className="flex items-center gap-4 mb-4">
+      <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+           style={{ backgroundColor: role === 'Mentor' ? 'var(--color-primary-100)' : 'var(--color-success-light)',
+                    color: role === 'Mentor' ? 'var(--color-primary-700)' : 'var(--color-success-dark)' }}>
+        {name.split(' ').map(w => w[0]).join('').slice(0, 2)}
+      </div>
+      <div>
+        <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{name}</p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{email}</p>
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full mt-1 inline-block"
+              style={{ backgroundColor: role === 'Mentor' ? 'var(--color-primary-50)' : 'var(--color-success-light)',
+                       color: role === 'Mentor' ? 'var(--color-primary-600)' : 'var(--color-success-dark)' }}>
+          {role === 'Mentor' ? '🧙‍♂️ Mentor Jedi' : '🧑‍🎓 Padawan'}
+        </span>
+      </div>
+    </div>
+    {bio && <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>{bio}</p>}
+    {extra}
+  </div>
+);
+
 export default function PeopleTab({ people }: { people: ClassroomPeople | null }) {
   if (!people) return <p className="text-center py-8 text-sm" style={{ color: 'var(--text-muted)' }}>Cargando...</p>;
-
-  const PersonCard = ({ role, name, email, bio, extra }: {
-    role: 'Mentor' | 'Estudiante'; name: string; email: string; bio: string; extra: React.ReactNode;
-  }) => (
-    <div className="card p-5">
-      <div className="flex items-center gap-4 mb-4">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
-             style={{ backgroundColor: role === 'Mentor' ? 'var(--color-primary-100)' : 'var(--color-success-light)',
-                      color: role === 'Mentor' ? 'var(--color-primary-700)' : 'var(--color-success-dark)' }}>
-          {name.split(' ').map(w => w[0]).join('').slice(0, 2)}
-        </div>
-        <div>
-          <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{name}</p>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{email}</p>
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full mt-1 inline-block"
-                style={{ backgroundColor: role === 'Mentor' ? 'var(--color-primary-50)' : 'var(--color-success-light)',
-                         color: role === 'Mentor' ? 'var(--color-primary-600)' : 'var(--color-success-dark)' }}>
-            {role === 'Mentor' ? '🧙‍♂️ Mentor Jedi' : '🧑‍🎓 Padawan'}
-          </span>
-        </div>
-      </div>
-      {bio && <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>{bio}</p>}
-      {extra}
-    </div>
-  );
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">

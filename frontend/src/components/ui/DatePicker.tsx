@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 import { useState, useRef, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';

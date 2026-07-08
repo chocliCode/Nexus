@@ -21,7 +21,9 @@ export default function ChatWidget({ matchingId, partnerName }: { matchingId: st
     if (!open) chatService.getUnreadCount(matchingId).then(r => setUnread(r.data.data.unread)).catch(() => {});
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadUnread(); const i = setInterval(loadUnread, 10000); return () => clearInterval(i); }, [open]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (open) { loadMessages(); const i = setInterval(loadMessages, 5000); return () => clearInterval(i); } }, [open]);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 

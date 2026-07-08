@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { classroomService, sessionService } from '../services/api';
+import { classroomService } from '../services/api';
 import { LoadingSpinner } from '../components/ui';
 import FeedTab from '../components/classroom/FeedTab';
 import WorkTab from '../components/classroom/WorkTab';

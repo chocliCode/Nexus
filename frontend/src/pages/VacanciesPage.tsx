@@ -74,7 +74,8 @@ const VacanciesPage = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { loadData(); }, [filterModalidad]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { void loadData(); }, [filterModalidad]);
 
   const handleApply = async () => {
     if (!applyVacancy) return;

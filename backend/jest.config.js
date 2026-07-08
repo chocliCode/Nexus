@@ -13,6 +13,7 @@ module.exports = {
   setupFiles: ['<rootDir>/tests/setup.ts'],
 
   // Close the DB pool after all test suites within the worker
+  globalSetup: '<rootDir>/tests/globalSetup.ts',
   globalTeardown: '<rootDir>/tests/globalTeardown.ts',
 
   // Run test files serially to avoid pool contention across files

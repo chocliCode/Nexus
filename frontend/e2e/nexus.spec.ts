@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
 
 const TEST_EMAIL = 'e2etest@e2etest.com';
 const TEST_PASSWORD = 'E2eTestPass123!';
-const BASE_URL = 'http://localhost:5174';
+
 
 // ============================================================
 // Flujo de Login

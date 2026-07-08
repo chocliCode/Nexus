@@ -89,3 +89,31 @@ export const getDashboard = async (req: AuthRequest, res: Response, next: NextFu
     });
   } catch (err) { next(err); }
 };
+
+/**
+ * GET /api/v1/dashboard/stats
+ * UAT-15: Estadísticas generales para el Admin
+ */
+export const getAdminDashboardStats = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const statsResult = await pool.query(`
+      SELECT
+        (SELECT COUNT(*) FROM usuario WHERE rol = 'Padawan') AS total_padawans,
+        (SELECT COUNT(*) FROM usuario WHERE rol = 'Jedi') AS total_jedis,
+        (SELECT COUNT(*) FROM vacante) AS total_vacantes,
+        (SELECT COUNT(*) FROM sesion_mentoria) AS total_sesiones
+    `);
+
+    res.json({
+      success: true,
+      data: {
+        total_padawans: parseInt(statsResult.rows[0].total_padawans, 10),
+        total_jedis: parseInt(statsResult.rows[0].total_jedis, 10),
+        total_vacantes: parseInt(statsResult.rows[0].total_vacantes, 10),
+        total_sesiones: parseInt(statsResult.rows[0].total_sesiones, 10),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};

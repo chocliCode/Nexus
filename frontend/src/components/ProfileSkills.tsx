@@ -39,8 +39,9 @@ export const ProfileSkills = ({ profileId, onOpenAddSkillModal }: ProfileSkillsP
       setDeletingSkillId(skillId);
       setDeleteError('');
       await removeSkill(skillId);
-    } catch (err: any) {
-      setDeleteError(err.message || 'Error al eliminar la habilidad');
+    } catch (err: unknown) {
+      const e = err as { message: string };
+      setDeleteError(e.message || 'Error al eliminar la habilidad');
     } finally {
       setDeletingSkillId(null);
     }

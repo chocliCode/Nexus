@@ -4,7 +4,8 @@ import { classroomService } from '../../services/api';
 import type { ClassroomPost } from '../../types';
 import { Megaphone, FileText, Link2, Pin, Trash2, Github, Video, Paperclip, MessageSquare } from 'lucide-react';
 
-const TIPO_ICONS: Record<string, any> = { anuncio: <Megaphone className="w-4 h-4 inline" />, material: <FileText className="w-4 h-4 inline" />, enlace: <Link2 className="w-4 h-4 inline" /> };
+import type React from 'react';
+const TIPO_ICONS: Record<string, React.ReactNode> = { anuncio: <Megaphone className="w-4 h-4 inline" />, material: <FileText className="w-4 h-4 inline" />, enlace: <Link2 className="w-4 h-4 inline" /> };
 
 const timeAgo = (d: string) => {
   const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);

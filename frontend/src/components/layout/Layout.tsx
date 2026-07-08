@@ -32,12 +32,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    loadNotifications();
-    const interval = setInterval(loadNotifications, 30000); // poll every 30s
-    return () => clearInterval(interval);
-  }, []);
-
   const loadNotifications = async () => {
     try {
       const [listRes, countRes] = await Promise.all([
@@ -48,6 +42,13 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       setUnreadCount(countRes.data.data.unread);
     } catch { /* silent */ }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadNotifications();
+    const interval = setInterval(loadNotifications, 30000); // poll every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMarkAllRead = async () => {
     try {
@@ -73,7 +74,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
     color: active ? 'var(--color-primary-200)' : 'var(--color-neutral-400)',
   });
 
-  const TIPO_ICONS: Record<string, any> = {
+  const TIPO_ICONS: Record<string, React.ElementType> = {
     nueva_sesion: Target, sesion_cancelada: XCircle, sesion_realizada: CheckCircle2,
     okr_creado: TrendingUp, okr_completado: Trophy, okr_feedback: MessageSquare,
     matching_nuevo: LinkIcon, matching_aceptado: CheckCircle2, matching_rechazado: XCircle,

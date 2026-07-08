@@ -11,7 +11,7 @@ interface AddSkillModalProps {
 }
 
 export const AddSkillModal = ({ profileId, isOpen, onClose, onSkillAdded }: AddSkillModalProps) => {
-  const { skills, availableSkills, addSkill, loading, error, setError, score } = useProfileSkills(profileId);
+  const { skills, availableSkills, addSkill, error, score } = useProfileSkills(profileId);
   const [selectedSkillId, setSelectedSkillId] = useState<string>('');
   const [selectedLevel, setSelectedLevel] = useState<'Basico' | 'Intermedio' | 'Avanzado'>('Basico');
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -52,8 +52,9 @@ export const AddSkillModal = ({ profileId, isOpen, onClose, onSkillAdded }: AddS
         onSkillAdded?.(score);
         onClose();
       }, 2000);
-    } catch (err: any) {
-      setLocalError(err.message || 'Error al agregar la habilidad');
+    } catch (err: unknown) {
+      const e = err as { message: string };
+      setLocalError(e.message || 'Error al agregar la habilidad');
     } finally {
       setIsAdding(false);
     }

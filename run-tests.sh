@@ -53,6 +53,8 @@ trap cleanup_backend EXIT
 
 start_backend() {
   cleanup_backend
+  echo ">>> Inicializando base de datos de test..."
+  (cd "$ROOT_DIR/backend" && npx ts-node -e "require('./tests/globalSetup.ts').default()")
   echo ">>> Iniciando backend en background..."
   (cd "$ROOT_DIR/backend" && npm run dev &)
   BACKEND_PID=$!

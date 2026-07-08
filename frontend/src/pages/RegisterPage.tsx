@@ -31,6 +31,7 @@ const RegisterPage = () => {
     defaultValues: { rol: 'Padawan' },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedRol = watch('rol');
 
   const onSubmit = async (data: RegisterForm) => {

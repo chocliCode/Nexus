@@ -12,7 +12,9 @@ interface OKR {
   fecha_limite: string | null; fecha_actualizacion: string; notas?: string | null;
 }
 
-const ESTADO_MAP: Record<string, { bg: string; color: string; label: string; icon: any }> = {
+import type { ReactNode } from 'react';
+
+const ESTADO_MAP: Record<string, { bg: string; color: string; label: string; icon: ReactNode }> = {
   Pendiente:  { bg: 'var(--color-warning-light,#fff3cd)', color: 'var(--color-warning-dark,#856404)', label: 'Sin entregar', icon: <ClipboardList className="w-4 h-4 inline" /> },
   EnProgreso: { bg: 'var(--color-primary-100)', color: 'var(--color-primary-700)', label: 'Entregado', icon: <Upload className="w-4 h-4 inline" /> },
   Completado: { bg: 'var(--color-success-light)', color: 'var(--color-success-dark)', label: 'Calificado', icon: <CheckCircle2 className="w-4 h-4 inline" /> },
@@ -50,6 +52,7 @@ const OKRPage = () => {
     if (!sesionId) return;
     okrService.listBySession(sesionId).then(r => setOkrs(r.data.data)).catch(() => {}).finally(() => setLoading(false));
   };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadOkrs(); }, [sesionId]);
 
   const handleCreate = async () => {
@@ -61,7 +64,7 @@ const OKRPage = () => {
         valor_meta: createForm.valor_meta, fecha_limite: createForm.fecha_limite || undefined,
       });
       setShowCreate(false); setCreateForm({ descripcion: '', indicador: '', valor_meta: 100, fecha_limite: '' }); loadOkrs();
-    } catch (e: any) { alert(e.response?.data?.error || 'Error'); } finally { setCreating(false); }
+    } catch (e: unknown) { const err = e as { response?: { data?: { error?: string } } }; alert(err.response?.data?.error || 'Error'); } finally { setCreating(false); }
   };
 
   const handleSubmit = async () => {
@@ -70,7 +73,7 @@ const OKRPage = () => {
     try {
       await okrService.update(submitOkr.okr_id, { indicador: submitText, estado: 'EnProgreso' });
       setShowSubmit(false); setSubmitOkr(null); setSubmitText(''); loadOkrs();
-    } catch (e: any) { alert(e.response?.data?.error || 'Error'); } finally { setSubmitting(false); }
+    } catch (e: unknown) { const err = e as { response?: { data?: { error?: string } } }; alert(err.response?.data?.error || 'Error'); } finally { setSubmitting(false); }
   };
 
   const handleGrade = async () => {
@@ -79,7 +82,7 @@ const OKRPage = () => {
     try {
       await okrService.complete(gradeOkr.okr_id, { valor_actual: gradeScore, nota_cierre: gradeNote });
       setShowGrade(false); setGradeOkr(null); setGradeNote(''); loadOkrs();
-    } catch (e: any) { alert(e.response?.data?.error || 'Error'); } finally { setGrading(false); }
+    } catch (e: unknown) { const err = e as { response?: { data?: { error?: string } } }; alert(err.response?.data?.error || 'Error'); } finally { setGrading(false); }
   };
 
   if (loading) return <LoadingSpinner size="lg" />;
@@ -136,7 +139,6 @@ const OKRPage = () => {
         <div className="space-y-3">
           {okrs.map(okr => {
             const st = ESTADO_MAP[okr.estado] || ESTADO_MAP.Pendiente;
-            const score = okr.valor_meta > 0 ? Math.min((okr.valor_actual / okr.valor_meta) * 100, 100) : 0;
             const isLate = okr.fecha_limite && new Date(okr.fecha_limite) < new Date() && okr.estado === 'Pendiente';
 
             return (

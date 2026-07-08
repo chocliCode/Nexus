@@ -41,8 +41,9 @@ export const useProfileSkills = (profileId: string | null) => {
       const response = await profileService.getMyProfile();
       setSkills(response.data.data.habilidades || []);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al cargar las habilidades');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      setError(e.response?.data?.error || 'Error al cargar las habilidades');
       console.error('Error loading profile skills:', err);
     } finally {
       setLoading(false);
@@ -50,11 +51,11 @@ export const useProfileSkills = (profileId: string | null) => {
   };
 
   // Load available skills
-  const loadAvailableSkills = async (categoria?: string) => {
+  const loadAvailableSkills = async () => {
     try {
       const response = await profileService.listSkills();
       setAvailableSkills(response.data.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading available skills:', err);
     }
   };
@@ -72,10 +73,11 @@ export const useProfileSkills = (profileId: string | null) => {
       await loadProfileSkills();
       setError(null);
       return response.data;
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Error al agregar la habilidad';
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      const errorMsg = e.response?.data?.error || 'Error al agregar la habilidad';
       setError(errorMsg);
-      throw new Error(errorMsg);
+      throw new Error(errorMsg, { cause: err });
     } finally {
       setLoading(false);
     }
@@ -91,10 +93,11 @@ export const useProfileSkills = (profileId: string | null) => {
       await loadProfileSkills();
       setError(null);
       return response.data;
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Error al remover la habilidad';
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      const errorMsg = e.response?.data?.error || 'Error al remover la habilidad';
       setError(errorMsg);
-      throw new Error(errorMsg);
+      throw new Error(errorMsg, { cause: err });
     } finally {
       setLoading(false);
     }
@@ -103,9 +106,11 @@ export const useProfileSkills = (profileId: string | null) => {
   // Load skills on mount or when profileId changes
   useEffect(() => {
     if (profileId) {
-      loadProfileSkills();
-      loadAvailableSkills();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void loadProfileSkills();
+      void loadAvailableSkills();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileId]);
 
   return {

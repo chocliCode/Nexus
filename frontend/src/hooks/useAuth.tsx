@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
@@ -34,11 +35,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (token) {
-      refreshUser().finally(() => setIsLoading(false));
-    } else {
+    const init = async () => {
+      if (token) {
+        await refreshUser();
+      }
       setIsLoading(false);
-    }
+    };
+    void init();
   }, [token, refreshUser]);
 
   const login = async (email: string, contrasena: string) => {

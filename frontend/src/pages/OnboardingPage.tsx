@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { profileService } from '../services/api';
+
 import { LoadingSpinner } from '../components/ui';
 import api from '../services/api';
 import { Target, Trophy, Pin, CalendarDays, CheckCircle2, Bot, AlertTriangle, ArrowLeft, ArrowRight, Circle } from 'lucide-react';
@@ -42,8 +42,9 @@ const OnboardingPage = () => {
     try {
       const res = await api.post('/onboarding/diagnostic', { respuestas: answers });
       setEvaluation(res.data.data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Hubo un error al enviar la evaluación. Intenta nuevamente.');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      setError(e.response?.data?.error || 'Hubo un error al enviar la evaluación. Intenta nuevamente.');
     }
     finally { setSubmitting(false); }
   };
