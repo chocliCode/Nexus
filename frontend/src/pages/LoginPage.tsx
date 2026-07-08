@@ -73,7 +73,7 @@ const LoginPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div>
               <label className="block text-sm font-medium mb-1.5"
                      style={{ color: 'var(--text-secondary)' }}>

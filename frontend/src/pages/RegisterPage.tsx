@@ -85,7 +85,7 @@ const RegisterPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             {/* Role Selector */}
             <div>
               <label className="block text-sm font-medium mb-2"

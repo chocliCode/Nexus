@@ -21,9 +21,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('nexus_token');
-      localStorage.removeItem('nexus_user');
-      window.location.href = '/login';
+      const isLoginRoute = error.config?.url?.includes('/auth/login');
+      if (!isLoginRoute) {
+        localStorage.removeItem('nexus_token');
+        localStorage.removeItem('nexus_user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
