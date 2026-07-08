@@ -81,11 +81,21 @@ run_step "Component Tests" bash -c "cd '$ROOT_DIR/frontend' && npx vitest run --
 
 # 4. PRUEBAS DE SEGURIDAD
 section "4/10  Seguridad OWASP"
-run_step "Security Tests" bash -c "cd '$ROOT_DIR/backend' && npm run test:security -- --verbose"
+if $DB_AVAILABLE; then
+  run_step "Security Tests" bash -c "cd '$ROOT_DIR/backend' && npm run test:security -- --verbose"
+else
+  echo "[SKIP] PostgreSQL no disponible -- omitiendo seguridad"
+  ((SKIP++))
+fi
 
 # 5. PRUEBAS DE HUMO
 section "5/10  Humo / Smoke"
-run_step "Smoke Tests" bash -c "cd '$ROOT_DIR/backend' && npm run test:smoke -- --verbose"
+if $DB_AVAILABLE; then
+  run_step "Smoke Tests" bash -c "cd '$ROOT_DIR/backend' && npm run test:smoke -- --verbose"
+else
+  echo "[SKIP] PostgreSQL no disponible -- omitiendo humo"
+  ((SKIP++))
+fi
 
 # ============================================================
 # GATE 2 — MAIN (Release, requiere PostgreSQL)
