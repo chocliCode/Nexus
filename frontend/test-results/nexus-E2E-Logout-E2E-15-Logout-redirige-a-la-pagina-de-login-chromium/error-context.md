@@ -1,0 +1,166 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: nexus.spec.ts >> E2E: Logout >> E2E-15: Logout redirige a la pagina de login
+- Location: e2e\nexus.spec.ts:179:3
+
+# Error details
+
+```
+Error: expect(page).toHaveURL(expected) failed
+
+Expected pattern: /dashboard/
+Received string:  "http://localhost:5174/login"
+Timeout: 10000ms
+
+Call log:
+  - Expect "toHaveURL" with timeout 10000ms
+    23 × unexpected value "http://localhost:5174/login"
+
+```
+
+```yaml
+- text: "N"
+- heading "NEXUS" [level=1]
+- paragraph: Transformación del Talento
+- heading "Iniciar Sesión" [level=2]
+- text: Error de conexión con el servidor Email
+- textbox "tu@email.com": e2etest@e2etest.com
+- text: Contraseña
+- textbox "••••••••": E2eTestPass123!
+- button "Ingresar"
+- paragraph:
+  - text: ¿No tienes cuenta?
+  - link "Regístrate aquí":
+    - /url: /register
+- paragraph: NEXUS · ODS 4, ODS 8, ODS 17 · UNMSM
+```
+
+# Test source
+
+```ts
+  85  | // ============================================================
+  86  | 
+  87  | test.describe('E2E: Dashboard', () => {
+  88  | 
+  89  |   test.beforeEach(async ({ page }) => {
+  90  |     // Login before each test
+  91  |     await page.goto('/');
+  92  |     await page.getByPlaceholder('tu@email.com').fill(TEST_EMAIL);
+  93  |     await page.getByPlaceholder('••••••••').fill(TEST_PASSWORD);
+  94  |     await page.getByRole('button', { name: /ingresar/i }).click();
+  95  |     await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+  96  |   });
+  97  | 
+  98  |   test('E2E-07: Dashboard muestra el nombre del usuario', async ({ page }) => {
+  99  |     // Dashboard should show some user-specific content
+  100 |     await expect(page.locator('body')).not.toBeEmpty();
+  101 |     // Verify the page loaded with actual content (not a blank page)
+  102 |     const bodyText = await page.locator('body').textContent();
+  103 |     expect(bodyText?.length).toBeGreaterThan(50);
+  104 |   });
+  105 | 
+  106 |   test('E2E-08: Dashboard tiene navegacion lateral funcional', async ({ page }) => {
+  107 |     // Check that navigation/sidebar exists
+  108 |     const nav = page.locator('nav, [class*="sidebar"], [class*="nav"]');
+  109 |     await expect(nav.first()).toBeVisible({ timeout: 5000 });
+  110 |   });
+  111 | 
+  112 |   test('E2E-09: Navega del dashboard a sesiones', async ({ page }) => {
+  113 |     await page.getByText(/sesiones/i).first().click();
+  114 |     await expect(page).toHaveURL(/sessions/, { timeout: 5000 });
+  115 |   });
+  116 | 
+  117 |   test('E2E-10: Navega del dashboard a vacantes', async ({ page }) => {
+  118 |     await page.getByText(/vacantes/i).first().click();
+  119 |     await expect(page).toHaveURL(/vacancies|vacantes/, { timeout: 5000 });
+  120 |   });
+  121 | 
+  122 | });
+  123 | 
+  124 | // ============================================================
+  125 | // Proteccion de rutas
+  126 | // ============================================================
+  127 | 
+  128 | test.describe('E2E: Proteccion de rutas', () => {
+  129 | 
+  130 |   test('E2E-11: Redirige a login si accede a /dashboard sin auth', async ({ page }) => {
+  131 |     await page.goto('/dashboard');
+  132 |     // Should redirect to login page
+  133 |     await expect(page.getByText('Iniciar Sesión')).toBeVisible({ timeout: 5000 });
+  134 |   });
+  135 | 
+  136 |   test('E2E-12: Redirige a login si accede a /sessions sin auth', async ({ page }) => {
+  137 |     await page.goto('/sessions');
+  138 |     await expect(page.getByText('Iniciar Sesión')).toBeVisible({ timeout: 5000 });
+  139 |   });
+  140 | 
+  141 |   test('E2E-13: Redirige a login si accede a /profile sin auth', async ({ page }) => {
+  142 |     await page.goto('/profile');
+  143 |     await expect(page.getByText('Iniciar Sesión')).toBeVisible({ timeout: 5000 });
+  144 |   });
+  145 | 
+  146 | });
+  147 | 
+  148 | // ============================================================
+  149 | // Vacantes (publico + autenticado)
+  150 | // ============================================================
+  151 | 
+  152 | test.describe('E2E: Vacantes', () => {
+  153 | 
+  154 |   test('E2E-14: La pagina de vacantes carga y muestra contenido', async ({ page }) => {
+  155 |     // Login first
+  156 |     await page.goto('/');
+  157 |     await page.getByPlaceholder('tu@email.com').fill(TEST_EMAIL);
+  158 |     await page.getByPlaceholder('••••••••').fill(TEST_PASSWORD);
+  159 |     await page.getByRole('button', { name: /ingresar/i }).click();
+  160 |     await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+  161 | 
+  162 |     // Navigate to vacancies
+  163 |     await page.getByText(/vacantes/i).first().click();
+  164 |     await expect(page).toHaveURL(/vacancies|vacantes/, { timeout: 5000 });
+  165 | 
+  166 |     // Page should have loaded content
+  167 |     const bodyText = await page.locator('body').textContent();
+  168 |     expect(bodyText?.length).toBeGreaterThan(100);
+  169 |   });
+  170 | 
+  171 | });
+  172 | 
+  173 | // ============================================================
+  174 | // Logout
+  175 | // ============================================================
+  176 | 
+  177 | test.describe('E2E: Logout', () => {
+  178 | 
+  179 |   test('E2E-15: Logout redirige a la pagina de login', async ({ page }) => {
+  180 |     // Login first
+  181 |     await page.goto('/');
+  182 |     await page.getByPlaceholder('tu@email.com').fill(TEST_EMAIL);
+  183 |     await page.getByPlaceholder('••••••••').fill(TEST_PASSWORD);
+  184 |     await page.getByRole('button', { name: /ingresar/i }).click();
+> 185 |     await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+      |                        ^ Error: expect(page).toHaveURL(expected) failed
+  186 | 
+  187 |     // Find and click logout
+  188 |     const logoutButton = page.getByText(/salir|logout|cerrar sesión/i).first();
+  189 |     if (await logoutButton.isVisible()) {
+  190 |       await logoutButton.click();
+  191 |       // Should redirect to login
+  192 |       await expect(page.getByText('Iniciar Sesión')).toBeVisible({ timeout: 5000 });
+  193 |     } else {
+  194 |       // Try looking for a logout icon/button in nav
+  195 |       const logoutIcon = page.locator('[class*="logout"], [aria-label*="logout"], [title*="Salir"]').first();
+  196 |       await logoutIcon.click();
+  197 |       await expect(page.getByText('Iniciar Sesión')).toBeVisible({ timeout: 5000 });
+  198 |     }
+  199 |   });
+  200 | 
+  201 | });
+  202 | 
+```
