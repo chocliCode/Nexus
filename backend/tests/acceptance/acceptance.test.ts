@@ -99,10 +99,10 @@ defineFeature(feature, (test) => {
         .set('Authorization', `Bearer ${padawanToken}`);
     });
     then('el sistema debe devolver los detalles del perfil actual', () => {
-      expect(response.body.data).toHaveProperty('user');
+      expect(response.body.data).toBeDefined();
     });
     and('la respuesta debe contener los nombres del usuario', () => {
-      expect(response.body.data.user).toHaveProperty('nombres');
+      expect(response.body.data).toHaveProperty('nombres');
     });
   });
 
@@ -111,18 +111,16 @@ defineFeature(feature, (test) => {
     given('que el usuario inicio sesion', () => {});
     when(/^el usuario crea un OKR con titulo "(.*)" y meta (.*)$/, async (titulo, meta) => {
       response = await request(app)
-        .post('/api/v1/okr')
+        .post('/api/v1/sessions/d1000001-0000-0000-0000-000000000001/okrs')
         .set('Authorization', `Bearer ${padawanToken}`)
         .send({
-          titulo: titulo,
-          descripcion: 'Descripcion de prueba',
-          valor_objetivo: parseInt(meta),
-          valor_actual: 0
+          descripcion: titulo,
+          valor_meta: parseInt(meta)
         });
-      currentOkrId = response.body.data?.id_okr;
+      currentOkrId = response.body.data?.okr_id;
     });
     then('el OKR debe ser creado exitosamente', () => {
-      expect(response.body.data).toHaveProperty('id_okr');
+      expect(response.body.data).toHaveProperty('okr_id');
     });
     and('el status de la respuesta debe ser 201', () => {
       expect(response.status).toBe(201);
@@ -134,7 +132,7 @@ defineFeature(feature, (test) => {
     given('que el usuario inicio sesion y tiene OKRs', () => {});
     when('el usuario solicita su lista de OKRs', async () => {
       response = await request(app)
-        .get('/api/v1/okr')
+        .get('/api/v1/sessions/d1000001-0000-0000-0000-000000000001/okrs')
         .set('Authorization', `Bearer ${padawanToken}`);
     });
     then('el sistema debe devolver una lista de OKRs', () => {
@@ -152,12 +150,12 @@ defineFeature(feature, (test) => {
     });
     when(/^el usuario actualiza el valor actual a (.*)$/, async (valor) => {
       response = await request(app)
-        .patch(`/api/v1/okr/${currentOkrId}/progress`)
+        .put(`/api/v1/okrs/${currentOkrId}`)
         .set('Authorization', `Bearer ${padawanToken}`)
         .send({ valor_actual: parseInt(valor) });
     });
     then('el sistema confirma la actualizacion', () => {
-      expect(response.body.data.valor_actual).toBe(5);
+      expect(Number(response.body.data.valor_actual)).toBe(5);
     });
     and('el status de la respuesta debe ser 200', () => {
       expect(response.status).toBe(200);
@@ -169,11 +167,11 @@ defineFeature(feature, (test) => {
     given('que el usuario inicio sesion y creo un OKR para eliminar', () => {});
     when('el usuario solicita eliminar dicho OKR', async () => {
       response = await request(app)
-        .delete(`/api/v1/okr/${currentOkrId}`)
+        .delete(`/api/v1/okrs/${currentOkrId}`)
         .set('Authorization', `Bearer ${padawanToken}`);
     });
     then('el OKR se elimina del sistema', () => {
-      expect(response.body.message).toMatch(/eliminado/i);
+      expect(response.body.data).toHaveProperty('estado', 'Cancelado');
     });
     and('el status de la respuesta debe ser 200', () => {
       expect(response.status).toBe(200);
@@ -186,20 +184,20 @@ defineFeature(feature, (test) => {
       expect(adminToken).not.toBe('');
     });
     when(/^el admin publica una vacante "(.*)"$/, async (titulo) => {
+      const vacRes = await request(app).get('/api/v1/vacancies');
+      const empId = vacRes.body.data[0]?.empresa_id;
+
       response = await request(app)
         .post('/api/v1/vacancies')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           titulo: titulo,
-          descripcion: 'Desc',
-          empresa: 'Nexus',
-          modalidad: 'Remoto',
-          ubicacion: 'Online',
-          requisitos: 'N/A'
+          empresa_id: empId,
+          modalidad: 'Remoto'
         });
     });
     then('la vacante debe ser creada', () => {
-      expect(response.body.data).toHaveProperty('id_vacante');
+      expect(response.body.data).toHaveProperty('vacante_id');
     });
     and('el status de la respuesta debe ser 201', () => {
       expect(response.status).toBe(201);
@@ -237,16 +235,12 @@ defineFeature(feature, (test) => {
   test('UAT-12 Un admin puede agendar una sesion a un padawan', ({ given, when, then }) => {
     given('que un admin inicio sesion', () => {});
     when(/^el admin programa una sesion "(.*)"$/, async (tema) => {
-      // Necesitamos un ID de padawan. Lo sacamos de su login (10)
       response = await request(app)
-        .post('/api/v1/sessions')
+        .post('/api/v1/matchings/fc333333-3333-3333-3333-333333333333/sessions')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          id_mentor: 1, // asumiendo mentor = admin (o un id valido)
-          id_padawan: 10,
-          fecha_hora: new Date(Date.now() + 86400000).toISOString(),
-          tema: tema,
-          enlace_reunion: 'http://meet.com/test'
+          titulo: tema,
+          fecha_sesion: new Date(Date.now() + 86400000).toISOString()
         });
     });
     then('el sistema confirma la programacion', () => {

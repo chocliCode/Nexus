@@ -7,7 +7,7 @@
 --   Admin:   admin@nexus.test    / Test1234!
 --
 -- Hash bcrypt de "Test1234!" (12 rounds):
--- $2a$12$7lYKC9tTDazcOFCCTp7O4OEEqyjReX66OdprQooXkDjnsOvnpFfNe
+-- $2a$12$K0kFXL9VVtIKGo.zepFooObrJjGHlskrg.TTAmD5p6eRsNdPM2w9m
 -- ============================================================
 
 -- Agregar columna notas a OKR si no existe (necesaria para feedback del Jedi)
@@ -31,7 +31,7 @@ VALUES (
   'aa000000-0000-4000-a000-000000000001',
   'Diego', 'Adawon Solis',
   'padawan@nexus.test',
-  '$2a$12$7lYKC9tTDazcOFCCTp7O4OEEqyjReX66OdprQooXkDjnsOvnpFfNe',
+  '$2a$12$K0kFXL9VVtIKGo.zepFooObrJjGHlskrg.TTAmD5p6eRsNdPM2w9m',
   'Padawan'
 ) ON CONFLICT (email) DO NOTHING;
 
@@ -41,7 +41,7 @@ VALUES (
   'aa000000-0000-4000-a000-000000000002',
   'Maestro Jedi', 'Kenobi',
   'jedi@nexus.test',
-  '$2a$12$7lYKC9tTDazcOFCCTp7O4OEEqyjReX66OdprQooXkDjnsOvnpFfNe',
+  '$2a$12$K0kFXL9VVtIKGo.zepFooObrJjGHlskrg.TTAmD5p6eRsNdPM2w9m',
   'Jedi'
 ) ON CONFLICT (email) DO NOTHING;
 
@@ -51,7 +51,7 @@ VALUES (
   'aa000000-0000-4000-a000-000000000003',
   'Admin', 'Nexus',
   'admin@nexus.test',
-  '$2a$12$7lYKC9tTDazcOFCCTp7O4OEEqyjReX66OdprQooXkDjnsOvnpFfNe',
+  '$2a$12$K0kFXL9VVtIKGo.zepFooObrJjGHlskrg.TTAmD5p6eRsNdPM2w9m',
   'Admin'
 ) ON CONFLICT (email) DO NOTHING;
 
