@@ -1,8 +1,12 @@
-name: "🚀 NEXUS CI (Develop) - Shift-Left"
+name: "🧪 NEXUS CI — Develop (Shift-Left)"
+
+# ═══════════════════════════════════════════════════════════════
+# GATE 1: Validacion rapida antes de llegar a develop
+# Se ejecuta en PRs de feature/* hacia develop
+# NO requiere base de datos — feedback en < 2 minutos
+# ═══════════════════════════════════════════════════════════════
 
 on:
-  push:
-    branches: [develop]
   pull_request:
     branches: [develop]
 
@@ -16,53 +20,164 @@ env:
   NODE_ENV: test
 
 jobs:
-  develop-pipeline:
-    name: "🧪 QA Pipeline (Develop)"
+  # ─────────────────────────────────────────────────────────────
+  # Job 1: Analisis Estatico (Lint + TypeScript)
+  # ─────────────────────────────────────────────────────────────
+  lint-and-types:
+    name: "📋 Lint & TypeScript"
     runs-on: ubuntu-latest
     steps:
-      - name: "🔽 Checkout del código"
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: "⚙️ Configurar Node.js"
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
 
-      - name: "📦 Instalar Dependencias (Backend y Frontend)"
+      - name: "📦 Instalar dependencias"
         run: |
           cd backend && npm ci
           cd ../frontend && npm ci
 
-      - name: "📋 Análisis Estático (Lint & Types)"
-        run: |
-          echo "::group::Backend Typecheck"
-          cd backend && npx tsc --noEmit
-          echo "::endgroup::"
-          echo "::group::Frontend Linting"
-          cd ../frontend && npm run lint || true
-          echo "::endgroup::"
-
-      - name: "🎯 Pruebas Unitarias (Backend)"
+      - name: "🔍 Backend — TypeScript typecheck"
         working-directory: ./backend
-        run: npm run test:unit -- --verbose || true
+        run: npx tsc --noEmit
 
-      - name: "🎨 Pruebas de Componente UI (Frontend)"
+      - name: "🔍 Frontend — ESLint"
         working-directory: ./frontend
-        run: npx vitest run --reporter=verbose || true
+        run: npm run lint
 
-      - name: "📊 Generación de Reporte Excel"
-        if: always()
-        working-directory: ./backend
-        run: |
-          node tests/qa-scripts/generate_excel.js || true
-          mv ../Reporte_Final_Pruebas_Nexus.xlsx ../Reporte_Pruebas_Develop.xlsx || true
+  # ─────────────────────────────────────────────────────────────
+  # Job 2: Pruebas Unitarias Backend (160 tests, sin DB)
+  # ─────────────────────────────────────────────────────────────
+  unit-tests:
+    name: "🎯 Unitarias Backend (160)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: "📤 Subir Reporte Oficial"
-        uses: actions/upload-artifact@v4
-        if: always()
+      - uses: actions/setup-node@v4
         with:
-          name: Reporte_Pruebas_Develop
-          path: Reporte_Pruebas_Develop.xlsx
-          retention-days: 2
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🧪 Ejecutar pruebas unitarias"
+        working-directory: ./backend
+        run: npm run test:unit -- --verbose
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 3: Pruebas de Componente UI Frontend (45 tests, sin DB)
+  # ─────────────────────────────────────────────────────────────
+  component-tests:
+    name: "🎨 Componente UI (45)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: "🧪 Ejecutar pruebas de componente"
+        working-directory: ./frontend
+        run: npx vitest run --reporter=verbose
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 4: Pruebas de Seguridad OWASP (45 tests, sin DB)
+  # ─────────────────────────────────────────────────────────────
+  security-tests:
+    name: "🔒 Seguridad OWASP (45)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🧪 Ejecutar pruebas de seguridad"
+        working-directory: ./backend
+        run: npm run test:security -- --verbose
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 5: Pruebas de Humo (45 tests, sin DB)
+  # ─────────────────────────────────────────────────────────────
+  smoke-tests:
+    name: "💨 Humo / Smoke (45)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🧪 Ejecutar pruebas de humo"
+        working-directory: ./backend
+        run: npm run test:smoke -- --verbose
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 6: Reporte de Regresion (resumen del gate)
+  # ─────────────────────────────────────────────────────────────
+  develop-gate-summary:
+    name: "📊 Develop Gate — Resumen"
+    runs-on: ubuntu-latest
+    needs: [lint-and-types, unit-tests, component-tests, security-tests, smoke-tests]
+    if: always()
+    steps:
+      - name: "📋 Evaluar resultados del Gate"
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║   NEXUS — Develop Gate (Shift-Left) Summary     ║"
+          echo "╠══════════════════════════════════════════════════╣"
+          echo "║ Lint & Types:      ${{ needs.lint-and-types.result }}"
+          echo "║ Unit Tests (160):  ${{ needs.unit-tests.result }}"
+          echo "║ Component UI (45): ${{ needs.component-tests.result }}"
+          echo "║ Security (45):     ${{ needs.security-tests.result }}"
+          echo "║ Smoke (45):        ${{ needs.smoke-tests.result }}"
+          echo "╚══════════════════════════════════════════════════╝"
+
+      - name: "🚫 Bloquear si algun job fallo"
+        if: |
+          needs.lint-and-types.result == 'failure' ||
+          needs.unit-tests.result == 'failure' ||
+          needs.component-tests.result == 'failure' ||
+          needs.security-tests.result == 'failure' ||
+          needs.smoke-tests.result == 'failure'
+        run: |
+          echo "❌ DEVELOP GATE FALLIDO — El PR no puede mergearse."
+          exit 1
+
+      - name: "✅ Gate aprobado"
+        if: |
+          needs.lint-and-types.result == 'success' &&
+          needs.unit-tests.result == 'success' &&
+          needs.component-tests.result == 'success' &&
+          needs.security-tests.result == 'success' &&
+          needs.smoke-tests.result == 'success'
+        run: |
+          echo "✅ DEVELOP GATE APROBADO — El PR puede mergearse a develop."

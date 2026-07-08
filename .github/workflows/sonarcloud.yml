@@ -1,26 +1,29 @@
-name: SonarCloud Analysis
+name: "📊 SonarCloud Quality Analysis"
+
+# ═══════════════════════════════════════════════════════════════
+# SCA: Analisis de Calidad de Codigo
+# Se ejecuta en PRs a main + push a main
+# Reporta code smells, bugs, vulnerabilidades y cobertura
+# ═══════════════════════════════════════════════════════════════
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   sonarcloud:
-    name: SonarCloud Scan
+    name: "📊 SCA — SonarCloud Scan"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout del código
+      - name: "🔽 Checkout del codigo"
         uses: actions/checkout@v4
         with:
-          # Fetch depth 0 es obligatorio para un análisis preciso (requiere el historial completo)
+          # Fetch depth 0 es obligatorio para analisis preciso
           fetch-depth: 0
 
-      - name: Escaneo de SonarCloud
+      - name: "🔍 Escaneo SonarCloud"
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

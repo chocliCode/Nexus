@@ -1,8 +1,12 @@
-name: "🚀 NEXUS CI (Main) - Release Validation"
+name: "🚀 NEXUS CI — Main (Release Gate)"
+
+# ═══════════════════════════════════════════════════════════════
+# GATE 2: Validacion completa antes de llegar a main
+# Se ejecuta SOLO en PRs de develop hacia main
+# Requiere base de datos PostgreSQL — validacion exhaustiva
+# ═══════════════════════════════════════════════════════════════
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -18,8 +22,11 @@ env:
   PGPASSWORD: nexus_pass
 
 jobs:
-  main-pipeline:
-    name: "🚀 QA Pipeline (Main)"
+  # ─────────────────────────────────────────────────────────────
+  # Job 1: Pruebas de Integracion (45 tests, API + DB real)
+  # ─────────────────────────────────────────────────────────────
+  integration-tests:
+    name: "🔄 Integracion API + DB (45)"
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -37,66 +44,296 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: "🔽 Checkout del código"
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: "⚙️ Configurar Node.js"
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🧪 Ejecutar pruebas de integracion"
+        working-directory: ./backend
+        run: npm test -- --runInBand --verbose
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 2: Pruebas de Aceptacion BDD (45 tests, Gherkin)
+  # ─────────────────────────────────────────────────────────────
+  acceptance-tests:
+    name: "✅ Aceptacion BDD (45)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🧪 Ejecutar pruebas de aceptacion"
+        working-directory: ./backend
+        run: npm run test:acceptance -- --verbose
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 3: Pruebas End-to-End (30 tests, Playwright + Chromium)
+  # ─────────────────────────────────────────────────────────────
+  e2e-tests:
+    name: "🌐 E2E Playwright (30)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
 
-      - name: "📦 Instalar Dependencias (Backend y Frontend)"
+      - name: "📦 Instalar dependencias"
         run: |
           cd backend && npm ci
           cd ../frontend && npm ci
 
-      - name: "🔄 Pruebas de Integración (API + DB)"
+      - name: "🎭 Instalar Playwright + Chromium"
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: "🚀 Levantar Backend"
         working-directory: ./backend
         run: |
-          echo "Base de datos efímera inicializada."
-          npm test -- --runInBand --verbose || true
-
-      - name: "🔒 Pruebas de Seguridad (DevSecOps)"
-        working-directory: ./backend
-        run: npm run test:security -- --verbose || true
-
-      - name: "🌐 Pruebas End-to-End (Playwright)"
-        run: |
-          cd frontend
-          npx playwright install --with-deps chromium
-          cd ../backend
           npm run dev &
           sleep 5
-          cd ../frontend
-          npx playwright test --reporter=list || true
-          pkill -f "npm run dev" || true
 
-      - name: "🚀 Pruebas de Rendimiento (Artillery)"
-        run: |
-          cd backend
-          npm run dev &
-          sleep 5
-          echo "::group::Pruebas de Carga"
-          npx artillery run tests/load/load-mixed.yml || true
-          echo "::endgroup::"
-          echo "::group::Pruebas de Estrés"
-          npx artillery run tests/stress/stress-limits.yml || true
-          echo "::endgroup::"
-          pkill -f "npm run dev" || true
+      - name: "🧪 Ejecutar pruebas E2E"
+        working-directory: ./frontend
+        run: npx playwright test --reporter=list
 
-      - name: "📊 Generación de Reporte Excel"
-        if: always()
+      - name: "📸 Subir screenshots en caso de fallo"
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots
+          path: frontend/test-results/
+          retention-days: 5
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 4: Pruebas de Carga (Artillery, ~30 escenarios)
+  # ─────────────────────────────────────────────────────────────
+  load-tests:
+    name: "📈 Carga / Load (Artillery)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🚀 Levantar Backend"
         working-directory: ./backend
         run: |
-          node tests/qa-scripts/generate_excel.js || true
-          mv ../Reporte_Final_Pruebas_Nexus.xlsx ../Reporte_Pruebas_Main.xlsx || true
+          npm run dev &
+          sleep 5
 
-      - name: "📤 Subir Reporte Oficial"
+      - name: "🧪 Pruebas de Carga"
+        working-directory: ./backend
+        run: |
+          npx artillery run tests/load/load-auth.yml --output reports/load-auth.json || true
+          npx artillery run tests/load/load-mixed.yml --output reports/load-mixed.json || true
+
+      - name: "📤 Subir reportes de carga"
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Reporte_Pruebas_Main
-          path: Reporte_Pruebas_Main.xlsx
-          retention-days: 2
+          name: load-test-reports
+          path: backend/reports/
+          retention-days: 5
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 5: Pruebas de Estres (Artillery, ~30 escenarios)
+  # ─────────────────────────────────────────────────────────────
+  stress-tests:
+    name: "💥 Estres / Stress (Artillery)"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nexus_user
+          POSTGRES_PASSWORD: nexus_pass
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexus_user -d nexus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "🚀 Levantar Backend"
+        working-directory: ./backend
+        run: |
+          npm run dev &
+          sleep 5
+
+      - name: "🧪 Pruebas de Estres"
+        working-directory: ./backend
+        run: |
+          npx artillery run tests/stress/stress-limits.yml --output reports/stress-limits.json || true
+          npx artillery run tests/stress/stress-spike.yml --output reports/stress-spike.json || true
+
+      - name: "📤 Subir reportes de estres"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stress-test-reports
+          path: backend/reports/
+          retention-days: 5
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 6: Generar Reporte Excel consolidado
+  # ─────────────────────────────────────────────────────────────
+  generate-report:
+    name: "📊 Generar Reporte Excel"
+    runs-on: ubuntu-latest
+    needs: [integration-tests, acceptance-tests, e2e-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: "📦 Instalar dependencias"
+        working-directory: ./backend
+        run: npm ci
+
+      - name: "📊 Generar reporte"
+        working-directory: ./backend
+        run: |
+          node tests/qa-scripts/generate_excel.js || true
+          mv ../Reporte_Final_Pruebas_Nexus.xlsx ../Reporte_Release_Gate.xlsx || true
+
+      - name: "📤 Subir Reporte"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Reporte_Release_Gate
+          path: Reporte_Release_Gate.xlsx
+          retention-days: 10
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 7: Main Gate — Veredicto Final
+  # ─────────────────────────────────────────────────────────────
+  main-gate-summary:
+    name: "🚀 Main Gate — Veredicto"
+    runs-on: ubuntu-latest
+    needs: [integration-tests, acceptance-tests, e2e-tests, load-tests, stress-tests]
+    if: always()
+    steps:
+      - name: "📋 Evaluar resultados del Release Gate"
+        run: |
+          echo "╔══════════════════════════════════════════════════════╗"
+          echo "║   NEXUS — Main Gate (Release Validation) Summary    ║"
+          echo "╠══════════════════════════════════════════════════════╣"
+          echo "║ Integration (45):   ${{ needs.integration-tests.result }}"
+          echo "║ Acceptance BDD(45): ${{ needs.acceptance-tests.result }}"
+          echo "║ E2E Playwright(30): ${{ needs.e2e-tests.result }}"
+          echo "║ Load (Artillery):   ${{ needs.load-tests.result }}"
+          echo "║ Stress (Artillery): ${{ needs.stress-tests.result }}"
+          echo "╚══════════════════════════════════════════════════════╝"
+
+      - name: "🚫 Bloquear si jobs criticos fallaron"
+        if: |
+          needs.integration-tests.result == 'failure' ||
+          needs.acceptance-tests.result == 'failure' ||
+          needs.e2e-tests.result == 'failure'
+        run: |
+          echo "❌ MAIN GATE FALLIDO — El PR NO puede mergearse a main."
+          echo "Jobs criticos fallaron: integracion, aceptacion o E2E."
+          exit 1
+
+      - name: "✅ Gate aprobado"
+        if: |
+          needs.integration-tests.result == 'success' &&
+          needs.acceptance-tests.result == 'success' &&
+          needs.e2e-tests.result == 'success'
+        run: |
+          echo "✅ MAIN GATE APROBADO — El PR puede mergearse a main."
+          echo "⚠️  Nota: Load/Stress son informativos, no bloquean."

@@ -1,0 +1,51 @@
+{
+  "name": "Proteccion Nexus — Main (Produccion)",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": [
+        "refs/heads/main"
+      ]
+    }
+  },
+  "bypass_actors": [],
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "creation"
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true,
+        "allowed_merge_methods": ["merge", "squash"]
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "required_status_checks": [
+          { "context": "🔄 Integracion API + DB (45)" },
+          { "context": "✅ Aceptacion BDD (45)" },
+          { "context": "🌐 E2E Playwright (30)" },
+          { "context": "🚀 Main Gate — Veredicto" },
+          { "context": "🔐 SAST — Analizar vulnerabilidades" },
+          { "context": "🕷️ DAST — OWASP ZAP Scan" },
+          { "context": "📊 SCA — SonarCloud Scan" }
+        ]
+      }
+    }
+  ]
+}

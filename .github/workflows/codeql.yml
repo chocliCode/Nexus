@@ -1,17 +1,23 @@
-name: "CodeQL SAST Analysis"
+name: "🔐 CodeQL SAST Analysis"
+
+# ═══════════════════════════════════════════════════════════════
+# SAST: Analisis Estatico de Seguridad del codigo fuente
+# Se ejecuta en PRs a develop Y main + push a main + semanal
+# Detecta vulnerabilidades en el codigo sin ejecutarlo
+# ═══════════════════════════════════════════════════════════════
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [develop, main]
   schedule:
-    # Se ejecuta todos los domingos a la medianoche (UTC)
+    # Todos los domingos a medianoche (UTC)
     - cron: '0 0 * * 0'
 
 jobs:
   analyze:
-    name: Analizar vulnerabilidades
+    name: "🔐 SAST — Analizar vulnerabilidades"
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -21,29 +27,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # CodeQL soporta 'javascript-typescript' como un solo lenguaje unificado
-        language: [ 'javascript-typescript' ]
+        language: ['javascript-typescript']
 
     steps:
-      - name: Descargar el código fuente
+      - name: "🔽 Checkout del codigo"
         uses: actions/checkout@v4
 
-      - name: Inicializar CodeQL
+      - name: "🔧 Inicializar CodeQL"
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          # Opcional: Especificar el nivel de consultas (queries). 
-          # 'security-extended' incluye verificaciones del OWASP Top 10 de alta severidad.
+          # security-extended incluye OWASP Top 10 de alta severidad
+          # security-and-quality agrega reglas de calidad de codigo
           queries: security-extended,security-and-quality
 
-      # (Opcional) Si tu proyecto requiere un build manual para que CodeQL lo entienda,
-      # se debe ejecutar aquí. En el caso de JavaScript/TypeScript, CodeQL no 
-      # requiere compilar el código (es interpretado), por lo que este paso se omite.
-      # - run: |
-      #     npm install
-      #     npm run build
-
-      - name: Ejecutar Análisis de Seguridad (SAST)
+      - name: "🔍 Ejecutar Analisis SAST"
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{matrix.language}}"
+          category: "/language:${{ matrix.language }}"
