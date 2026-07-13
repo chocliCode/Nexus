@@ -37,8 +37,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          # security-extended incluye OWASP Top 10 de alta severidad
-          # security-and-quality agrega reglas de calidad de codigo
+          config-file: ./.github/codeql/codeql-config.yml
           queries: security-extended,security-and-quality
 
       - name: "🔍 Ejecutar Analisis SAST"

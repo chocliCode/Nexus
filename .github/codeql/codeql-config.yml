@@ -1,0 +1,9 @@
+name: "CodeQL custom configuration"
+paths-ignore:
+  - "backend/tests"
+  - "backend/src/tests"
+  - "**/test-utils"
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "frontend/tests"
+  - "frontend/e2e"
