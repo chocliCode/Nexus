@@ -144,7 +144,7 @@ export default function CourseClassroomPage() {
 
   // Grades modal
   const [showGradeModal, setShowGradeModal] = useState(false);
-  const [gradeForm, setGradeForm] = useState({ padawan_id: '', titulo: '', nota: 0, nota_maxima: 20, comentario: '' });
+  const [gradeForm, setGradeForm] = useState({ padawan_id: '', titulo: '', nota: 0, nota_maxima: 20, comentario: '', submissionId: '' });
 
   // Submissions Modals
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
@@ -256,21 +256,21 @@ export default function CourseClassroomPage() {
   const handleCreateGrade = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!courseId) return;
+    if (!gradeForm.submissionId) {
+      alert('Para calificar a este alumno, primero debe subir su entrega.');
+      return;
+    }
     setSubmitting(true);
     try {
-      await courseService.createGrade(courseId, gradeForm);
+      await courseService.gradeSubmission(gradeForm.submissionId, {
+        nota: gradeForm.nota,
+        feedback_mentor: gradeForm.comentario
+      });
       setShowGradeModal(false);
-      setGradeForm({ padawan_id: '', titulo: '', nota: 0, nota_maxima: 20, comentario: '' });
+      setGradeForm({ padawan_id: '', titulo: '', nota: 0, nota_maxima: 20, comentario: '', submissionId: '' });
       await reloadGrades();
     } catch { /* silent */ }
     finally { setSubmitting(false); }
-  };
-
-  const handleDeleteGrade = async (gradeId: string) => {
-    try {
-      await courseService.deleteGrade(gradeId);
-      await reloadGrades();
-    } catch { /* silent */ }
   };
 
   const handleExportGrades = async () => {
@@ -330,7 +330,8 @@ export default function CourseClassroomPage() {
       titulo: post?.titulo || 'Tarea', 
       nota: 0, 
       nota_maxima: 20, 
-      comentario: '' 
+      comentario: '',
+      submissionId: sub.entrega_id
     });
     setShowSubmissionsListModal(false);
     setShowGradeModal(true);
@@ -829,7 +830,7 @@ export default function CourseClassroomPage() {
                                 ) : (
                                   isJedi ? (
                                     <button onClick={() => {
-                                      setGradeForm({ padawan_id: s.usuario_id, titulo: post.titulo || (post.tipo === 'tarea' ? 'Tarea' : 'Examen'), nota: 0, nota_maxima: 20, comentario: '' });
+                                      setGradeForm({ padawan_id: s.usuario_id, titulo: post.titulo || (post.tipo === 'tarea' ? 'Tarea' : 'Examen'), nota: 0, nota_maxima: 20, comentario: '', submissionId: '' });
                                       setShowGradeModal(true);
                                     }} className="text-[10px] px-2 py-1 bg-gray-500/10 hover:bg-gray-500/20 rounded font-semibold text-gray-500 transition-colors">
                                       Calificar

@@ -19,12 +19,10 @@ import {
   deleteCourseComment,
   getCourseStudents,
   getCourseGrades,
-  createCourseGrade,
-  updateCourseGrade,
-  deleteCourseGrade,
   exportCourseGrades,
   submitAssignment,
   getAssignmentSubmissions,
+  gradeSubmission,
 } from '../controllers/course-classroom.controller';
 import { uploadMiddleware, postUploadMiddleware } from '../middleware/upload.middleware';
 
@@ -59,13 +57,11 @@ router.delete('/comments/:commentId', deleteCourseComment);
 // Course Assignments (tareas)
 router.post('/posts/:postId/submissions', uploadMiddleware.single('archivo'), submitAssignment);
 router.get('/posts/:postId/submissions', getAssignmentSubmissions);
+router.put('/submissions/:submissionId/grade', gradeSubmission);
 
 // Course Grades (calificaciones)
 router.get('/:courseId/grades', getCourseGrades);
 router.get('/:courseId/grades/export', exportCourseGrades);
-router.post('/:courseId/grades', createCourseGrade);
-router.put('/grades/:gradeId', updateCourseGrade);
-router.delete('/grades/:gradeId', deleteCourseGrade);
 
 export default router;
 

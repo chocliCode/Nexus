@@ -27,6 +27,7 @@ services:
       - ./backend/src/db/migrations/011_okr_attachments.sql:/docker-entrypoint-initdb.d/011_okr_attachments.sql
       - ./backend/src/db/migrations/012_memberships.sql:/docker-entrypoint-initdb.d/012_memberships.sql
       - ./backend/src/db/migrations/013_extra_limits.sql:/docker-entrypoint-initdb.d/013_extra_limits.sql
+      - ./backend/src/db/migrations/014_grades.sql:/docker-entrypoint-initdb.d/014_grades.sql
       - ./backend/src/db/seeds/test_data.sql:/docker-entrypoint-initdb.d/013_test_data.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U nexus_user -d nexus_db"]

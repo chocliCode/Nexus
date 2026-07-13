@@ -13,13 +13,36 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  if (import.meta.env.VITE_ENABLE_API_LOGS === 'true') {
+    const metodo = config.method?.toUpperCase();
+    console.group(`🚀 [API Request] ${metodo} ${config.url}`);
+    console.log('🔗 URL Completa:', `${config.baseURL}${config.url}`);
+    if (config.data) console.log('📦 Body:', config.data);
+    console.log('🔑 Token presente:', !!token);
+    console.groupEnd();
+  }
+  
   return config;
 });
 
 // Interceptor: handle 401 responses
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (import.meta.env.VITE_ENABLE_API_LOGS === 'true') {
+      console.group(`✅ [API Response] 200 OK - ${response.config.url}`);
+      console.log('📄 Datos recibidos:', response.data);
+      console.groupEnd();
+    }
+    return response;
+  },
   (error) => {
+    if (import.meta.env.VITE_ENABLE_API_LOGS === 'true') {
+      console.group(`❌ [API Error] Ocurrió un error en ${error.config?.url}`);
+      console.error('Código de estado:', error.response?.status);
+      console.error('Detalles:', error.response?.data);
+      console.groupEnd();
+    }
     if (error.response?.status === 401) {
       const isLoginRoute = error.config?.url?.includes('/auth/login');
       if (!isLoginRoute) {
@@ -168,7 +191,7 @@ export const mentorsService = {
 // ============ Course Service ============
 export const courseService = {
   list: () => api.get('/courses'),
-  mine: () => api.get('/courses/my-courses'),
+  mine: () => api.get('/courses/mine'),
   getById: (courseId: string) => api.get(`/courses/${courseId}`),
   create: (data: any) => api.post('/courses', data),
   join: (courseId: string) => api.post(`/courses/${courseId}/join`),
@@ -187,6 +210,6 @@ export const courseService = {
   getGrades: (courseId: string) => api.get(`/courses/${courseId}/grades`),
   togglePin: (postId: string) => api.patch(`/courses/posts/${postId}/pin`),
   deleteComment: (commentId: string) => api.delete(`/courses/comments/${commentId}`),
-  createGrade: (courseId: string, data: any) => api.post(`/courses/${courseId}/grades`, data),
-  deleteGrade: (gradeId: string) => api.delete(`/courses/grades/${gradeId}`),
+  gradeSubmission: (submissionId: string, data: { nota: number; feedback_mentor?: string }) => 
+    api.put(`/courses/submissions/${submissionId}/grade`, data),
 };

@@ -30,7 +30,7 @@ export default function LandingPage() {
     const fetchMemberships = async () => {
       try {
         const res = await membershipService.list();
-        setMemberships(res.data);
+        setMemberships(res.data.data || []);
       } catch (error) {
         console.error('Error fetching memberships', error);
       } finally {

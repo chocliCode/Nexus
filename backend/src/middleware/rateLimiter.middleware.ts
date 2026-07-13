@@ -16,7 +16,7 @@ import rateLimit from 'express-rate-limit';
  */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10,                   // max 10 requests per IP per window
+  max: 200,                   // max 200 requests per IP per window
   standardHeaders: true,     // sends RateLimit-* headers (RFC 6585)
   legacyHeaders: false,      // disables deprecated X-RateLimit-* headers
   message: {

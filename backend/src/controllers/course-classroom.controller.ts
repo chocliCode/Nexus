@@ -256,182 +256,7 @@ export const getCourseStudents = async (req: AuthRequest, res: Response, next: N
   } catch (err) { next(err); }
 };
 
-/**
- * GET /api/v1/courses/:courseId/grades
- * Jedi sees all grades. Padawan sees only their own.
- */
-export const getCourseGrades = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  const { courseId } = req.params;
-  const userId = req.user!.userId;
-  const isJediGlobal = req.user!.rol === 'Jedi' || req.user!.rol === 'Admin';
-  
-  try {
-    const access = await verifyCourseAccess(courseId, userId);
-    if (!access.allowed) {
-      res.status(403).json({ error: 'No tienes acceso a este curso', code: 'FORBIDDEN' }); return;
-    }
 
-    let query = `
-      SELECT gc.*, 
-             u.nombres as padawan_nombres, u.apellidos as padawan_apellidos, u.email as padawan_email,
-             p.titulo as post_titulo
-      FROM curso_calificacion gc
-      JOIN usuario u ON gc.padawan_id = u.usuario_id
-      LEFT JOIN curso_post p ON gc.post_id = p.post_id
-      WHERE gc.curso_id = $1
-    `;
-    const params: any[] = [courseId];
-
-    if (!access.isJedi && !isJediGlobal) {
-      query += ` AND gc.padawan_id = $2`;
-      params.push(userId);
-    }
-
-    query += ` ORDER BY u.apellidos ASC, gc.fecha_calificacion DESC`;
-
-    const result = await pool.query(query, params);
-    res.json({ success: true, data: result.rows });
-  } catch (err) { next(err); }
-};
-
-/**
- * POST /api/v1/courses/:courseId/grades
- * Create a grade (Jedi only)
- */
-export const createCourseGrade = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  const { courseId } = req.params;
-  const { padawan_id, post_id, titulo, nota, nota_maxima, comentario } = req.body;
-  const userId = req.user!.userId;
-
-  try {
-    const access = await verifyCourseAccess(courseId, userId);
-    if (!access.allowed || !access.isJedi) {
-      res.status(403).json({ error: 'Solo el profesor puede calificar', code: 'FORBIDDEN' }); return;
-    }
-
-    const result = await pool.query(
-      `INSERT INTO curso_calificacion (curso_id, padawan_id, post_id, titulo, nota, nota_maxima, comentario)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [courseId, padawan_id, post_id || null, titulo, nota, nota_maxima || 20.0, comentario || null]
-    );
-    
-    // Notify padawan
-    await createNotification(
-      padawan_id,
-      'curso_calificacion',
-      'Nueva calificacion',
-      `Has sido calificado en "${titulo}" con nota ${nota}/${nota_maxima || 20}.`,
-      courseId,
-      'curso'
-    );
-
-    res.status(201).json({ success: true, data: result.rows[0] });
-  } catch (err) { next(err); }
-};
-
-/**
- * PUT /api/v1/courses/grades/:gradeId
- * Update a grade (Jedi only)
- */
-export const updateCourseGrade = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  const { gradeId } = req.params;
-  const { nota, comentario } = req.body;
-  const userId = req.user!.userId;
-
-  try {
-    const check = await pool.query(
-      `SELECT c.jedi_id FROM curso_calificacion gc JOIN curso c ON gc.curso_id = c.curso_id WHERE gc.calificacion_id = $1`,
-      [gradeId]
-    );
-    if (check.rows.length === 0) { res.status(404).json({ error: 'Calificacion no encontrada' }); return; }
-    if (check.rows[0].jedi_id !== userId) {
-      res.status(403).json({ error: 'Solo el profesor puede editar calificaciones' }); return;
-    }
-
-    const result = await pool.query(
-      `UPDATE curso_calificacion SET nota = $1, comentario = $2 WHERE calificacion_id = $3 RETURNING *`,
-      [nota, comentario || null, gradeId]
-    );
-    res.json({ success: true, data: result.rows[0] });
-  } catch (err) { next(err); }
-};
-
-/**
- * DELETE /api/v1/courses/grades/:gradeId
- * Delete a grade (Jedi only)
- */
-export const deleteCourseGrade = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  const { gradeId } = req.params;
-  const userId = req.user!.userId;
-
-  try {
-    const check = await pool.query(
-      `SELECT c.jedi_id FROM curso_calificacion gc JOIN curso c ON gc.curso_id = c.curso_id WHERE gc.calificacion_id = $1`,
-      [gradeId]
-    );
-    if (check.rows.length === 0) { res.status(404).json({ error: 'Calificacion no encontrada' }); return; }
-    if (check.rows[0].jedi_id !== userId) {
-      res.status(403).json({ error: 'Solo el profesor puede eliminar calificaciones' }); return;
-    }
-
-    await pool.query('DELETE FROM curso_calificacion WHERE calificacion_id = $1', [gradeId]);
-    res.json({ success: true });
-  } catch (err) { next(err); }
-};
-
-/**
- * GET /api/v1/courses/:courseId/grades/export
- * Export grades as CSV
- */
-export const exportCourseGrades = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  const { courseId } = req.params;
-  const userId = req.user!.userId;
-  const isJediGlobal = req.user!.rol === 'Jedi' || req.user!.rol === 'Admin';
-  
-  try {
-    const access = await verifyCourseAccess(courseId, userId);
-    if (!access.allowed) {
-      res.status(403).json({ error: 'No tienes acceso a este curso', code: 'FORBIDDEN' }); return;
-    }
-
-    let query = `
-      SELECT gc.titulo as evaluacion, gc.nota, gc.nota_maxima, gc.comentario, gc.fecha_calificacion,
-             u.nombres as padawan_nombres, u.apellidos as padawan_apellidos, u.email as padawan_email
-      FROM curso_calificacion gc
-      JOIN usuario u ON gc.padawan_id = u.usuario_id
-      WHERE gc.curso_id = $1
-    `;
-    const params: any[] = [courseId];
-
-    if (!access.isJedi && !isJediGlobal) {
-      query += ` AND gc.padawan_id = $2`;
-      params.push(userId);
-    }
-    
-    query += ` ORDER BY u.apellidos ASC, gc.fecha_calificacion ASC`;
-    const result = await pool.query(query, params);
-
-    // Build CSV
-    const rows = result.rows;
-    let csv = '';
-    
-    if (access.isJedi) {
-      csv = 'Alumno,Email,Evaluacion,Nota,Nota Maxima,Comentario,Fecha\n';
-      rows.forEach(r => {
-        csv += `"${r.padawan_apellidos}, ${r.padawan_nombres}","${r.padawan_email}","${r.evaluacion}",${r.nota},${r.nota_maxima},"${(r.comentario||'').replace(/"/g, '""')}","${new Date(r.fecha_calificacion).toLocaleDateString()}"\n`;
-      });
-    } else {
-      csv = 'Evaluacion,Nota,Nota Maxima,Comentario,Fecha\n';
-      rows.forEach(r => {
-        csv += `"${r.evaluacion}",${r.nota},${r.nota_maxima},"${(r.comentario||'').replace(/"/g, '""')}","${new Date(r.fecha_calificacion).toLocaleDateString()}"\n`;
-      });
-    }
-
-    res.header('Content-Type', 'text/csv');
-    res.attachment(`notas_curso_${courseId}.csv`);
-    res.send(csv);
-  } catch (err) { next(err); }
-};
 
 /**
  * POST /api/v1/courses/posts/:postId/submissions
@@ -507,5 +332,140 @@ export const getAssignmentSubmissions = async (req: AuthRequest, res: Response, 
     const result = await pool.query(query, params);
     res.json({ success: true, data: result.rows });
   } catch (err) { next(err); }
+};
+
+export const gradeSubmission = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  const { submissionId } = req.params;
+  const { nota, feedback_mentor } = req.body;
+  const userId = req.user?.userId;
+
+  try {
+    // 1. Verify if the user is the Jedi of this course
+    const checkJedi = await pool.query(
+      `SELECT c.jedi_id FROM curso_tarea_entrega cte
+       JOIN curso_post cp ON cte.post_id = cp.post_id
+       JOIN curso c ON cp.curso_id = c.curso_id
+       WHERE cte.entrega_id = $1`,
+      [submissionId]
+    );
+
+    if (checkJedi.rows.length === 0) {
+      res.status(404).json({ error: 'Entrega no encontrada' });
+      return;
+    }
+
+    if (checkJedi.rows[0].jedi_id !== userId) {
+      res.status(403).json({ error: 'Solo el mentor puede calificar' });
+      return;
+    }
+
+    const updated = await pool.query(
+      `UPDATE curso_tarea_entrega 
+       SET nota = $1, feedback_mentor = $2, fecha_calificacion = NOW()
+       WHERE entrega_id = $3 RETURNING *`,
+      [nota, feedback_mentor, submissionId]
+    );
+
+    res.json({ success: true, data: updated.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getCourseGrades = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  const { courseId } = req.params;
+  const userId = req.user?.userId;
+
+  try {
+    const { allowed, isJedi } = await verifyCourseAccess(courseId, userId!);
+    if (!allowed) {
+      res.status(403).json({ error: 'Acceso denegado' });
+      return;
+    }
+
+    let query = `
+      SELECT cte.entrega_id AS calificacion_id, 
+             u.usuario_id AS padawan_id, 
+             u.nombres AS padawan_nombres, 
+             u.apellidos AS padawan_apellidos,
+             cp.titulo AS evaluacion,
+             cte.nota, 
+             20 AS nota_maxima,
+             cte.feedback_mentor AS comentario, 
+             cte.fecha_calificacion
+      FROM curso_tarea_entrega cte
+      JOIN curso_post cp ON cte.post_id = cp.post_id
+      JOIN usuario u ON cte.padawan_id = u.usuario_id
+      WHERE cp.curso_id = $1 AND cte.nota IS NOT NULL
+    `;
+    const params: any[] = [courseId];
+
+    if (!isJedi) {
+      query += ` AND cte.padawan_id = $2`;
+      params.push(userId);
+    }
+
+    query += ` ORDER BY cte.fecha_entrega DESC`;
+
+    const result = await pool.query(query, params);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const exportCourseGrades = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  const { courseId } = req.params;
+  const userId = req.user?.userId;
+
+  try {
+    const { allowed, isJedi } = await verifyCourseAccess(courseId, userId!);
+    if (!allowed) {
+      res.status(403).json({ error: 'Acceso denegado' });
+      return;
+    }
+
+    let query = `
+      SELECT cp.titulo AS "Tarea",
+             u.nombres || ' ' || u.apellidos AS "Estudiante",
+             cte.nota AS "Calificacion",
+             cte.feedback_mentor AS "Feedback"
+      FROM curso_tarea_entrega cte
+      JOIN curso_post cp ON cte.post_id = cp.post_id
+      JOIN usuario u ON cte.padawan_id = u.usuario_id
+      WHERE cp.curso_id = $1
+    `;
+    const params: any[] = [courseId];
+
+    if (!isJedi) {
+      query += ` AND cte.padawan_id = $2`;
+      params.push(userId);
+    }
+
+    query += ` ORDER BY cp.fecha_creacion DESC, "Estudiante" ASC`;
+
+    const result = await pool.query(query, params);
+
+    // Formato CSV (Delimitado por comas)
+    const header = "Tarea,Estudiante,Calificacion,Feedback\n";
+    const csvRows = result.rows.map(row => {
+      const escapeCsv = (str: string) => `"${(str || '').toString().replace(/"/g, '""')}"`;
+      return [
+        escapeCsv(row.Tarea),
+        escapeCsv(row.Estudiante),
+        escapeCsv(row.Calificacion?.toString() || 'Sin calificar'),
+        escapeCsv(row.Feedback || '')
+      ].join(',');
+    });
+
+    const csvContent = header + csvRows.join('\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="notas_curso_${courseId}.csv"`);
+    // Add BOM for Excel UTF-8 compatibility
+    res.send(Buffer.concat([Buffer.from('\ufeff', 'utf8'), Buffer.from(csvContent, 'utf8')]));
+  } catch (err) {
+    next(err);
+  }
 };
 
