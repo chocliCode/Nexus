@@ -72,16 +72,16 @@ export const authService = {
 export const sessionService = {
   getMySessions: () => api.get('/sessions/my-sessions'),
   listByMatching: (matchingId: string) => api.get(`/matchings/${matchingId}/sessions`),
-  create: (matchingId: string, data: any) => api.post(`/matchings/${matchingId}/sessions`, data),
-  update: (sesionId: string, data: any) => api.put(`/sessions/${sesionId}`, data),
+  create: (matchingId: string, data: unknown) => api.post(`/matchings/${matchingId}/sessions`, data),
+  update: (sesionId: string, data: unknown) => api.put(`/sessions/${sesionId}`, data),
   delete: (sesionId: string) => api.delete(`/sessions/${sesionId}`),
 };
 
 // ============ OKR Service ============
 export const okrService = {
   listBySession: (sesionId: string) => api.get(`/sessions/${sesionId}/okrs`),
-  create: (sesionId: string, data: any) => api.post(`/sessions/${sesionId}/okrs`, data),
-  update: (okrId: string, data: any) => api.put(`/okrs/${okrId}`, data),
+  create: (sesionId: string, data: unknown) => api.post(`/sessions/${sesionId}/okrs`, data),
+  update: (okrId: string, data: unknown) => api.put(`/okrs/${okrId}`, data),
 
   delete: (okrId: string) => api.delete(`/okrs/${okrId}`),
 
@@ -175,8 +175,8 @@ export const chatService = {
 // ============ Membership Service ============
 export const membershipService = {
   list: () => api.get('/memberships'),
-  update: (id: string, data?: any) => api.put(`/memberships/${id}`, data || {}),
-  upgrade: (membresia_id: string, simulationData: any) =>
+  update: (id: string, data?: unknown) => api.put(`/memberships/${id}`, data || {}),
+  upgrade: (membresia_id: string, simulationData: unknown) =>
     api.post('/memberships/upgrade', { membresia_id, simulationData }),
 };
 
@@ -193,16 +193,16 @@ export const courseService = {
   list: () => api.get('/courses'),
   mine: () => api.get('/courses/mine'),
   getById: (courseId: string) => api.get(`/courses/${courseId}`),
-  create: (data: any) => api.post('/courses', data),
+  create: (data: unknown) => api.post('/courses', data),
   join: (courseId: string) => api.post(`/courses/${courseId}/join`),
   leave: (courseId: string) => api.post(`/courses/${courseId}/leave`),
   open: (courseId: string) => api.patch(`/courses/${courseId}/open`),
   close: (courseId: string) => api.patch(`/courses/${courseId}/close`),
-  createPost: (courseId: string, data: any) => api.post(`/courses/${courseId}/posts`, data),
+  createPost: (courseId: string, data: unknown) => api.post(`/courses/${courseId}/posts`, data),
   getPosts: (courseId: string) => api.get(`/courses/${courseId}/posts`),
   addComment: (postId: string, contenido: string) => api.post(`/courses/posts/${postId}/comments`, { contenido }),
   deletePost: (postId: string) => api.delete(`/courses/posts/${postId}`),
-  submitAssignment: (assignmentId: string, data: any) => api.post(`/courses/assignments/${assignmentId}/submit`, data),
+  submitAssignment: (assignmentId: string, data: unknown) => api.post(`/courses/assignments/${assignmentId}/submit`, data),
   exportGrades: (courseId: string) => api.get(`/courses/${courseId}/grades/export`, { responseType: 'blob' }),
   getAssignmentSubmissions: (assignmentId: string) => api.get(`/courses/assignments/${assignmentId}/submissions`),
   getFeed: (courseId: string) => api.get(`/courses/${courseId}/feed`),

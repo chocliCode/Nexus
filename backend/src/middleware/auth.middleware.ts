@@ -10,7 +10,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.split(' ')[1];
-  } else if (req.query.token && typeof req.query.token === 'string') {
+  } else if (req.query && req.query.token && typeof req.query.token === 'string') {
     // Fallback for SSE / WebSockets where headers can't be easily set
     token = req.query.token;
   }

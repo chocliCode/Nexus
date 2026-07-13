@@ -29,6 +29,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [memberships, setMemberships] = useState<any[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingRegistrationData, setPendingRegistrationData] = useState<RegisterForm | null>(null);
@@ -45,6 +46,7 @@ const RegisterPage = () => {
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const selectedRol = watch('rol');
+  const selectedMembresiaId = watch('membresia_id');
 
   const onSubmit = async (data: RegisterForm) => {
     if (data.rol === 'Padawan' && data.membresia_id) {
@@ -229,7 +231,7 @@ const RegisterPage = () => {
                 </label>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {memberships.map((m) => {
-                    const isSelected = watch('membresia_id') === m.membresia_id;
+                    const isSelected = selectedMembresiaId === m.membresia_id;
                     const priceNum = Number(m.precio);
                     return (
                       <div key={m.membresia_id} onClick={() => setValue('membresia_id', m.membresia_id)}

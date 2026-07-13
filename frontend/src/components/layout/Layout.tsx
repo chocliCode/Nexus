@@ -67,7 +67,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
 
     eventSource.addEventListener('NEW_NOTIFICATION_ROLE', (event) => {
       try {
-        const data = JSON.parse(event.data);
+        JSON.parse(event.data);
         // Since we don't have the full notification object (with UUID) matching this specific user,
         // we'll just trigger a refetch of the notifications list to get the real DB row for this user.
         void loadNotifications();

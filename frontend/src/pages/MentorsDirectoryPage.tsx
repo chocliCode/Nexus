@@ -25,20 +25,22 @@ export default function MentorsDirectoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadMentors();
-  }, []);
-
   const loadMentors = async () => {
     try {
       const res = await mentorsService.list();
       setMentors(res.data.data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al cargar mentores');
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Error al cargar mentores');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadMentors();
+  }, []);
 
   const handleRequest = async (mentorId: string) => {
     if (user?.rol !== 'Padawan') return;
@@ -49,8 +51,9 @@ export default function MentorsDirectoryPage() {
       await mentorsService.request(mentorId);
       setSuccess('Solicitud enviada correctamente. El mentor la revisará pronto.');
       setTimeout(() => navigate('/matching'), 2000);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al enviar la solicitud');
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Error al enviar la solicitud');
     } finally {
       setRequesting(null);
     }

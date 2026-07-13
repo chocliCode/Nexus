@@ -28,6 +28,7 @@ const ProfilePage = () => {
   const [selectedSkill, setSelectedSkill] = useState('');
   const [selectedNivel, setSelectedNivel] = useState<NivelHabilidad>('Basico');
   const [showMembershipModal, setShowMembershipModal] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [memberships, setMemberships] = useState<any[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingUpgradeId, setPendingUpgradeId] = useState<string | null>(null);
@@ -78,7 +79,13 @@ const ProfilePage = () => {
   }, []);
 
   useEffect(() => {
-    Promise.all([loadProfile(), loadSkills(), loadMemberships()]).finally(() => setLoading(false));
+    let mounted = true;
+    const loadAll = async () => {
+      await Promise.all([loadProfile(), loadSkills(), loadMemberships()]);
+      if (mounted) setLoading(false);
+    };
+    loadAll();
+    return () => { mounted = false; };
   }, [loadProfile, loadSkills, loadMemberships]);
 
   const handleSave = async () => {
@@ -112,8 +119,9 @@ const ProfilePage = () => {
       setMessage('Membresía actualizada con éxito');
       setShowMembershipModal(false);
       setShowPaymentModal(false);
-    } catch (err: any) {
-      setMessage(err.response?.data?.error || 'Error al actualizar membresía');
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setMessage(error.response?.data?.error || 'Error al actualizar membresía');
     }
   };
 
@@ -138,8 +146,9 @@ const ProfilePage = () => {
       setMessage(`¡Límite de ${buyExtraType}s expandido con éxito!`);
       setShowPaymentModal(false);
       setIsBuyingExtra(false);
-    } catch (err: any) {
-      setMessage(err.response?.data?.error || 'Error al comprar extras');
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setMessage(error.response?.data?.error || 'Error al comprar extras');
     }
   };
 

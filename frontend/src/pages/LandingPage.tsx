@@ -136,7 +136,7 @@ export default function LandingPage() {
             <div className="flex justify-center"><LoadingSpinner size="lg" /></div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {memberships.map((plan, index) => {
+              {memberships.map((plan) => {
                 const isPro = plan.nombre.toLowerCase().includes('caballero');
                 return (
                   <div key={plan.membresia_id} className={`relative p-8 rounded-3xl border transition-all hover:-translate-y-2 ${isPro ? 'bg-primary-900/20 border-primary-500/50 shadow-2xl shadow-primary-500/20' : 'bg-white/5 border-white/10'}`}>

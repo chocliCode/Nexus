@@ -88,6 +88,7 @@ export default function CoursesPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => { void loadData(); }, []);
 
   const handleJoin = async (courseId: string) => {

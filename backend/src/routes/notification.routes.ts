@@ -7,7 +7,7 @@ const router = Router();
 router.get('/notifications/stream', authMiddleware, streamNotifications);
 router.get('/notifications', authMiddleware, getNotifications);
 router.get('/notifications/unread-count', authMiddleware, getUnreadCount);
-router.post('/notifications/:notificationId/read', authMiddleware, markAsRead);
-router.post('/notifications/read-all', authMiddleware, markAllAsRead);
+router.patch('/notifications/:notificationId/read', authMiddleware, markAsRead);
+router.patch('/notifications/read-all', authMiddleware, markAllAsRead);
 
 export default router;

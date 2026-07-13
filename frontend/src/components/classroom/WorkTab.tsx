@@ -4,7 +4,7 @@ import { sessionService, API_URL } from '../../services/api';
 import { Modal } from '../ui';
 import { useState } from 'react';
 import type { Session } from '../../types';
-import { Calendar, CheckCircle2, FileEdit, Check, X, BookOpen, ArrowRight, Download, Image as ImageIcon } from 'lucide-react';
+import { Calendar, CheckCircle2, FileEdit, Check, X, BookOpen, ArrowRight, Download } from 'lucide-react';
 
 const ESTADO_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   Programada: { bg: 'var(--color-primary-100)', color: 'var(--color-primary-700)', label: '📅 Programada' },

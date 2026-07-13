@@ -16,7 +16,7 @@ interface CoursePost {
   autor_nombres?: string;
   autor_apellidos?: string;
   autor_rol?: string;
-  comentarios?: any[];
+  comentarios?: Comment[];
   url_enlace?: string;
   archivo_url?: string;
   archivo_nombre?: string;
@@ -93,7 +93,7 @@ const getGradient = (id: string) => {
   return BANNER_GRADIENTS[Math.abs(h) % BANNER_GRADIENTS.length];
 };
 
-const TIPO_ICONS: Record<string, any> = {
+const TIPO_ICONS: Record<string, React.ElementType> = {
   anuncio: Megaphone,
   material: FileText,
   tarea: ClipboardList,
@@ -108,14 +108,6 @@ const TIPO_LABELS: Record<string, string> = {
   examen: 'Examen',
   discusion: 'Discusión'
 };
-
-const TIPO_OPTIONS = [
-  { id: 'anuncio', label: 'Anuncio', icon: Megaphone },
-  { id: 'material', label: 'Material', icon: FileText },
-  { id: 'tarea', label: 'Tarea', icon: ClipboardList },
-  { id: 'examen', label: 'Examen', icon: ClipboardCheck },
-  { id: 'discusion', label: 'Discusión', icon: MessageSquare },
-];
 
 
 type Tab = 'novedades' | 'estudiantes' | 'calificaciones';
@@ -194,6 +186,7 @@ export default function CourseClassroomPage() {
     } catch { /* silent */ }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => { void loadData(); }, [courseId]);
 
   const handleCreatePost = async (e: React.FormEvent) => {

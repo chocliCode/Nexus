@@ -15,6 +15,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, amount, on
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStep('qr');
     }
   }, [isOpen]);
