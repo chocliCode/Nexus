@@ -23,7 +23,9 @@ beforeAll(async () => {
   // Cleanup
   await pool.query(`DELETE FROM curso_inscripcion WHERE curso_id IN (SELECT curso_id FROM curso WHERE titulo LIKE '%@coursetest%')`);
   await pool.query(`DELETE FROM curso WHERE titulo LIKE '%@coursetest%'`);
+  await pool.query(`DELETE FROM perfil_aprendiz WHERE usuario_id IN (SELECT usuario_id FROM usuario WHERE email LIKE '%@coursetest.com')`);
   await pool.query(`DELETE FROM usuario WHERE email LIKE '%@coursetest.com'`);
+  await pool.query(`DELETE FROM membresia WHERE nombre = 'Test Membresia'`);
 
   const hash = await bcrypt.hash('Test1234!', 10);
 
@@ -41,13 +43,23 @@ beforeAll(async () => {
      VALUES ('Alumno', 'Test', 'padawan@coursetest.com', $1, 'Padawan') RETURNING usuario_id`, [hash]
   );
   padawanUserId = padawan.rows[0].usuario_id;
+  
+  const mem = await pool.query(
+    `INSERT INTO membresia (nombre, precio, limite_mentores, limite_cursos, caracteristicas)
+     VALUES ('Test Membresia', 0, 999, 999, '[]') RETURNING membresia_id`
+  );
+  const membresiaId = mem.rows[0].membresia_id;
+  await pool.query(`INSERT INTO perfil_aprendiz (usuario_id, membresia_id) VALUES ($1, $2)`, [padawanUserId, membresiaId]);
+
   padawanToken = jwt.sign({ userId: padawanUserId, email: 'padawan@coursetest.com', rol: 'Padawan' }, JWT_SECRET, { expiresIn: '1h' });
 });
 
 afterAll(async () => {
   await pool.query(`DELETE FROM curso_inscripcion WHERE curso_id IN (SELECT curso_id FROM curso WHERE titulo LIKE '%@coursetest%')`);
   await pool.query(`DELETE FROM curso WHERE titulo LIKE '%@coursetest%'`);
+  await pool.query(`DELETE FROM perfil_aprendiz WHERE usuario_id IN (SELECT usuario_id FROM usuario WHERE email LIKE '%@coursetest.com')`);
   await pool.query(`DELETE FROM usuario WHERE email LIKE '%@coursetest.com'`);
+  await pool.query(`DELETE FROM membresia WHERE nombre = 'Test Membresia'`);
 });
 
 // ============================================================
@@ -296,6 +308,8 @@ describe('UC-30: Capacidad máxima del curso', () => {
       `INSERT INTO usuario (nombres, apellidos, email, contrasena_hash, rol)
        VALUES ('Otro', 'Alumno', 'padawan2@coursetest.com', $1, 'Padawan') RETURNING usuario_id`, [hash]
     );
+    const mem2 = await pool.query(`SELECT membresia_id FROM membresia WHERE nombre = 'Test Membresia' LIMIT 1`);
+    await pool.query(`INSERT INTO perfil_aprendiz (usuario_id, membresia_id) VALUES ($1, $2)`, [p2.rows[0].usuario_id, mem2.rows[0].membresia_id]);
     const p2Token = jwt.sign({ userId: p2.rows[0].usuario_id, email: 'padawan2@coursetest.com', rol: 'Padawan' }, JWT_SECRET, { expiresIn: '1h' });
 
     const res = await request(app)

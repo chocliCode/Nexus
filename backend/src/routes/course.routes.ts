@@ -38,8 +38,8 @@ router.get('/:courseId', getCourseDetail);
 
 // Jedi (teacher) actions
 router.post('/', createCourse);
-router.post('/:courseId/open', openCourse);
-router.post('/:courseId/close', closeCourse);
+router.patch('/:courseId/open', openCourse);
+router.patch('/:courseId/close', closeCourse);
 
 // Padawan (student) actions
 router.post('/:courseId/join', joinCourse);
