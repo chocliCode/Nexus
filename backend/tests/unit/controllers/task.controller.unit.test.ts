@@ -46,6 +46,8 @@ describe('Course Classroom Controller - Create Task (Unit Tests)', () => {
 
     // 3. Simular query de notificaciones (estudiantes inscritos)
     (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+    // 4. Simular query para titulo del curso
+    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ titulo: 'Curso de Prueba' }] });
 
     await createCoursePost(mockReq as AuthRequest, mockRes as Response, mockNext);
 
@@ -58,8 +60,6 @@ describe('Course Classroom Controller - Create Task (Unit Tests)', () => {
   it('UNIT-TSK-02: rechaza con 400 si la fecha de vencimiento falta en tipo TAREA', async () => {
     mockReq.body.fecha_vencimiento = undefined; // Falta la fecha
 
-    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ jedi_id: 'jedi123' }] });
-
     await createCoursePost(mockReq as AuthRequest, mockRes as Response, mockNext);
 
     expect(mockRes.status).toHaveBeenCalledWith(400);
@@ -70,14 +70,14 @@ describe('Course Classroom Controller - Create Task (Unit Tests)', () => {
   });
 
   it('UNIT-TSK-03: rechaza con 403 si el Jedi no es dueño del curso', async () => {
-    // El owner del curso es otro Jedi
-    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ jedi_id: 'otherJedi' }] });
+    // El owner del curso es otro Jedi, simulamos que está inscrito para que pase el primer filtro
+    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ jedi_id: 'otherJedi', is_student: true }] });
 
     await createCoursePost(mockReq as AuthRequest, mockRes as Response, mockNext);
 
     expect(mockRes.status).toHaveBeenCalledWith(403);
     expect(mockRes.json).toHaveBeenCalledWith({
-      error: 'Solo el Jedi del curso puede publicar anuncios o tareas',
+      error: 'Solo los profesores pueden publicar en el curso',
       code: 'FORBIDDEN'
     });
   });

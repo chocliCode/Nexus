@@ -25,7 +25,7 @@ describe('Course Classroom Controller - Calificaciones (Unit Tests)', () => {
     mockReq = {
       user: { userId: 'jedi123', email: 'jedi@nexus.test', rol: 'Jedi' },
       params: { submissionId: 'sub-1', courseId: 'curso1' },
-      body: { calificacion: 18, retroalimentacion: 'Buen trabajo' }
+      body: { nota: 18, feedback_mentor: 'Buen trabajo' }
     };
     mockRes = {
       status: jest.fn().mockReturnThis(),
@@ -55,10 +55,10 @@ describe('Course Classroom Controller - Calificaciones (Unit Tests)', () => {
 
     await exportCourseGrades(mockReq as AuthRequest, mockRes as Response, mockNext);
 
-    expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
+    expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv; charset=utf-8');
     expect(mockRes.setHeader).toHaveBeenCalledWith(
       'Content-Disposition',
-      expect.stringContaining('attachment; filename="calificaciones-curso1')
+      expect.stringContaining('attachment; filename="notas_curso_curso1.csv"')
     );
   });
 

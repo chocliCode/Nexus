@@ -28,7 +28,7 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     // pero demostramos la API de Playwright para subir archivos:
     try {
       await fileInput.setInputFiles(mockFilePath);
-    } catch (e) {
+    } catch {
       // Ignoramos si el test real en el entorno no tiene el archivo
       console.log('Dummy file path not found, skipping setInputFiles');
     }
@@ -56,7 +56,9 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     // Intentamos cargar un archivo gigante o invalido si existe
     try {
       await page.locator('input[type="file"]').setInputFiles(path.join(__dirname, 'upload.spec.ts')); // No es PDF
-    } catch (e) {}
+    } catch {
+      // Ignore error
+    }
 
     // El frontend deberia mostrar el Toast reactivo sin llegar a disparar la petición HTTP
     const toast = page.locator('text="Solo se permiten archivos PDF"');

@@ -60,6 +60,19 @@ export const createCoursePost = async (req: AuthRequest, res: Response, next: Ne
   const userId = req.user!.userId;
   const files = req.files as Express.Multer.File[];
 
+  if (tipo && !['tarea', 'anuncio', 'TAREA', 'ANUNCIO'].includes(tipo)) {
+    res.status(400).json({ error: 'Tipo inválido', code: 'VALIDATION_ERROR' }); return;
+  }
+  if ((tipo === 'tarea' || tipo === 'TAREA') && !req.body.fecha_vencimiento) {
+    res.status(400).json({ error: 'Las tareas deben tener una fecha de vencimiento', code: 'VALIDATION_ERROR' }); return;
+  }
+  if (req.body.fecha_vencimiento && req.body.fecha_vencimiento.length > 50) {
+    res.status(400).json({ error: 'Fecha inválida' }); return;
+  }
+  if (contenido && (contenido.includes('<script>') || contenido.includes('javascript:'))) {
+    res.status(400).json({ error: 'Contenido no permitido' }); return;
+  }
+
   try {
     const access = await verifyCourseAccess(courseId, userId);
     if (!access.allowed) {
@@ -68,7 +81,7 @@ export const createCoursePost = async (req: AuthRequest, res: Response, next: Ne
     
     // Solo Jedi puede publicar
     if (!access.isJedi) {
-      res.status(403).json({ error: 'Solo los profesores pueden publicar en el curso' }); return;
+      res.status(403).json({ error: 'Solo los profesores pueden publicar en el curso', code: 'FORBIDDEN' }); return;
     }
 
     let archivosData: any[] = [];
@@ -367,7 +380,7 @@ export const gradeSubmission = async (req: AuthRequest, res: Response, next: Nex
       [nota, feedback_mentor, submissionId]
     );
 
-    res.json({ success: true, data: updated.rows[0] });
+    res.status(200).json({ success: true, data: updated.rows[0] });
   } catch (err) {
     next(err);
   }
@@ -421,7 +434,7 @@ export const exportCourseGrades = async (req: AuthRequest, res: Response, next: 
 
   try {
     const { allowed, isJedi } = await verifyCourseAccess(courseId, userId!);
-    if (!allowed) {
+    if (!allowed || !isJedi) {
       res.status(403).json({ error: 'Acceso denegado' });
       return;
     }

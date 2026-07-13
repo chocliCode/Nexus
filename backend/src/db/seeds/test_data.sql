@@ -356,7 +356,7 @@ INSERT INTO curso_inscripcion (curso_id, padawan_id, estado)
 VALUES (
     'ff000000-0000-4000-a000-000000000001',
     'aa000000-0000-4000-a000-000000000001',
-    'Aprobado'
+    'Activo'
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO curso_post (post_id, curso_id, autor_id, tipo, titulo, contenido)

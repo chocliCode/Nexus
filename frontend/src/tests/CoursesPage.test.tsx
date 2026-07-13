@@ -39,8 +39,8 @@ describe('UI Component: CoursesPage (Crear Curso)', () => {
   });
 
   it('UI-CRS-01: Muestra el boton "Crear Curso" si el usuario es Jedi y lista vacia', async () => {
-    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as any);
-    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as any);
+    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as never);
+    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as never);
 
     renderWithRouter(<CoursesPage />);
 
@@ -53,8 +53,8 @@ describe('UI Component: CoursesPage (Crear Curso)', () => {
   });
 
   it('UI-CRS-02: Abre el modal y valida el formulario', async () => {
-    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as any);
-    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as any);
+    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as never);
+    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as never);
     renderWithRouter(<CoursesPage />);
 
     await waitFor(() => {
@@ -74,9 +74,9 @@ describe('UI Component: CoursesPage (Crear Curso)', () => {
   });
 
   it('UI-CRS-03: Permite enviar el formulario y llama a courseService.create', async () => {
-    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as any);
-    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as any);
-    vi.mocked(courseService.create).mockResolvedValue({ data: { success: true } } as any);
+    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as never);
+    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as never);
+    vi.mocked(courseService.create).mockResolvedValue({ data: { success: true } } as never);
 
     renderWithRouter(<CoursesPage />);
 

@@ -36,10 +36,12 @@ router.get('/', listCourses);
 router.get('/mine', getMyCourses);
 router.get('/:courseId', getCourseDetail);
 
+import { requireRole } from '../middleware/auth.middleware';
+
 // Jedi (teacher) actions
-router.post('/', createCourse);
-router.patch('/:courseId/open', openCourse);
-router.patch('/:courseId/close', closeCourse);
+router.post('/', requireRole('Jedi', 'Admin'), createCourse);
+router.patch('/:courseId/open', requireRole('Jedi', 'Admin'), openCourse);
+router.patch('/:courseId/close', requireRole('Jedi', 'Admin'), closeCourse);
 
 // Padawan (student) actions
 router.post('/:courseId/join', joinCourse);

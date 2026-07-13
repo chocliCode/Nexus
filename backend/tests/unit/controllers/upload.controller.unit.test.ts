@@ -33,11 +33,11 @@ describe('Course Classroom Controller - Submit Assignment PDF (Unit Tests)', () 
   });
 
   it('UNIT-PDF-01: Procesa el archivo y guarda en DB con status 201', async () => {
-    // Simular que Padawan está en el curso (query 1)
-    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ activo: true }] });
-    // Simular que el Post existe y es tipo TAREA (query 2)
-    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ tipo: 'TAREA' }] });
-    // Simular Insercion (query 3)
+    // 1. Simular que el Post existe y es tipo TAREA
+    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'curso1', tipo: 'tarea' }] });
+    // 2. Simular que Padawan está en el curso (verifyCourseAccess)
+    (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ jedi_id: 'jedi123', is_student: true }] });
+    // 3. Simular Insercion
     (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ entrega_id: 'entrega-1' }] });
 
     await submitAssignment(mockReq as AuthRequest, mockRes as Response, mockNext);
@@ -53,7 +53,7 @@ describe('Course Classroom Controller - Submit Assignment PDF (Unit Tests)', () 
 
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'El archivo es requerido' })
+      expect.objectContaining({ error: 'Debes subir un archivo PDF' })
     );
   });
 

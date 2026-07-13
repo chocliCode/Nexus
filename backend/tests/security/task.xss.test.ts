@@ -9,11 +9,11 @@ describe('Seguridad Avanzada: XSS en Asignación de Tareas', () => {
 
   // Asumimos que jedi123 es dueño de course123 en el seed o el test fallará por RBAC,
   // pero para pruebas de XSS puro, Zod/Express Validator debería atrapar la inyección antes de RBAC.
-  const jediToken = jwt.sign({ userId: 'jedi123', email: 'jedi@nexus.test', rol: 'Jedi' }, JWT_SECRET);
+  const jediToken = jwt.sign({ userId: 'b2222222-2222-2222-2222-222222222222', email: 'jedi@nexus.test', rol: 'Jedi' }, JWT_SECRET);
 
   it('SEC-TSK-01: Rechaza inyeccion HTML malicioso (XSS) en el contenido', async () => {
     const res = await request(app)
-      .post(`${API}/course123/posts`)
+      .post(`${API}/c0000001-0000-0000-0000-000000000001/posts`)
       .set('Authorization', `Bearer ${jediToken}`)
       .send({
         tipo: 'TAREA',
@@ -34,7 +34,7 @@ describe('Seguridad Avanzada: XSS en Asignación de Tareas', () => {
 
   it('SEC-TSK-02: Rechaza payloads malformados en tipo', async () => {
     const res = await request(app)
-      .post(`${API}/course123/posts`)
+      .post(`${API}/c0000001-0000-0000-0000-000000000001/posts`)
       .set('Authorization', `Bearer ${jediToken}`)
       .send({
         tipo: 'TAREA_DROP_TABLE_CURSO',
@@ -49,7 +49,7 @@ describe('Seguridad Avanzada: XSS en Asignación de Tareas', () => {
 
   it('SEC-TSK-03: Rechaza fechas excesivamente largas o invalidas (Buffer Overflow / DoS)', async () => {
     const res = await request(app)
-      .post(`${API}/course123/posts`)
+      .post(`${API}/c0000001-0000-0000-0000-000000000001/posts`)
       .set('Authorization', `Bearer ${jediToken}`)
       .send({
         tipo: 'TAREA',

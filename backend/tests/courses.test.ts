@@ -119,8 +119,8 @@ describe('UC-29: PATCH /api/v1/courses/:id/open — Abrir curso', () => {
       .patch(`${API}/${createdCourseId}/open`)
       .set('Authorization', `Bearer ${padawanToken}`);
 
-    // El controller retorna 404 si el jedi_id no coincide
-    expect(res.status).toBe(404);
+    // El middleware requireRole('Jedi', 'Admin') debe bloquear
+    expect(res.status).toBe(403);
   });
 });
 

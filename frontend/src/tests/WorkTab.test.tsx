@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WorkTab from '../components/classroom/WorkTab';
 import * as useAuthHook from '../hooks/useAuth';
@@ -48,7 +48,7 @@ describe('UI Component: WorkTab (Asignar Tarea / Sesiones)', () => {
   });
 
   it('UI-TSK-01: Muestra el formulario con selector de fecha para el rol Jedi', async () => {
-    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as any} reload={vi.fn()} />);
+    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as never} reload={vi.fn()} />);
     
     // El Jedi debe ver el botón para crear nueva sesión
     const newSessionBtn = screen.getByRole('button', { name: /\+ Nueva sesión/i });
@@ -61,7 +61,7 @@ describe('UI Component: WorkTab (Asignar Tarea / Sesiones)', () => {
   });
 
   it('UI-TSK-02: Previene inyeccion XSS visual en la descripcion', async () => {
-    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as any} reload={vi.fn()} />);
+    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as never} reload={vi.fn()} />);
     
     // React escapa automaticamente. Esperamos ver el texto literal con los tags de script
     const sessionTitle = await screen.findByText(/<script>alert\("xss"\)<\/script>/i);
@@ -73,7 +73,7 @@ describe('UI Component: WorkTab (Asignar Tarea / Sesiones)', () => {
   });
 
   it('UI-TSK-03: Bloquea envio si no se asigna fecha de vencimiento o titulo', async () => {
-    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as any} reload={vi.fn()} />);
+    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as never} reload={vi.fn()} />);
     
     fireEvent.click(screen.getByRole('button', { name: /\+ Nueva sesión/i }));
     
