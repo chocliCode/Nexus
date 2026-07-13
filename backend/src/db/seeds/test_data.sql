@@ -337,46 +337,42 @@ FROM vacante v JOIN empresa e ON v.empresa_id = e.empresa_id
 WHERE v.titulo = 'Junior React Developer' AND e.nombre = 'TechStartup Lima'
 ON CONFLICT DO NOTHING;
 
- - -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
- - -   C U R S O   \  
- A u l a  
- V i r t u a l \   P A R A   E 2 E 
- - -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
- 
- I N S E R T   I N T O   c u r s o   ( c u r s o _ i d ,   t i t u l o ,   d e s c r i p c i o n ,   c a t e g o r i a ,   e s t a d o ,   m a x _ e s t u d i a n t e s ,   j e d i _ i d ) 
- V A L U E S   ( 
-     ' f f 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 1 ' , 
-     ' A u l a   V i r t u a l ' , 
-     ' C u r s o   d e   p r u e b a   p a r a   E 2 E ' , 
-     ' F r o n t e n d ' , 
-     ' A b i e r t o ' , 
-     3 0 , 
-     ' a a 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 2 ' 
- )   O N   C O N F L I C T   D O   N O T H I N G ; 
- 
- I N S E R T   I N T O   c u r s o _ i n s c r i p c i o n   ( c u r s o _ i d ,   p a d a w a n _ i d ,   e s t a d o ) 
- V A L U E S   ( 
-     ' f f 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 1 ' , 
-     ' a a 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 1 ' , 
-     ' A p r o b a d o ' 
- )   O N   C O N F L I C T   D O   N O T H I N G ; 
- 
- I N S E R T   I N T O   c u r s o _ p o s t   ( p o s t _ i d ,   c u r s o _ i d ,   a u t o r _ i d ,   t i p o ,   t i t u l o ,   c o n t e n i d o ) 
- V A L U E S   ( 
-     ' f f 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 2 ' , 
-     ' f f 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 1 ' , 
-     ' a a 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 2 ' , 
-     ' t a r e a ' , 
-     ' T a r e a   1 ' , 
-     ' E n t r e g a r   l a   t a r e a ' 
- )   O N   C O N F L I C T   D O   N O T H I N G ; 
- 
- I N S E R T   I N T O   c u r s o _ t a r e a _ e n t r e g a   ( e n t r e g a _ i d ,   p o s t _ i d ,   p a d a w a n _ i d ,   a r c h i v o _ u r l ) 
- V A L U E S   ( 
-     ' f f 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 3 ' , 
-     ' f f 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 2 ' , 
-     ' a a 0 0 0 0 0 0 - 0 0 0 0 - 4 0 0 0 - a 0 0 0 - 0 0 0 0 0 0 0 0 0 0 0 1 ' , 
-     ' / u p l o a d s / a s s i g n m e n t s / d u m m y . p d f ' 
- )   O N   C O N F L I C T   D O   N O T H I N G ; 
-  
- 
+-- ============================================================
+-- CURSO / Aula Virtual PARA E2E
+-- ============================================================
+
+INSERT INTO curso (curso_id, titulo, descripcion, categoria, estado, max_estudiantes, jedi_id)
+VALUES (
+    'ff000000-0000-4000-a000-000000000001',
+    'Aula Virtual',
+    'Curso de prueba para E2E',
+    'Frontend',
+    'Abierto',
+    30,
+    'aa000000-0000-4000-a000-000000000002'
+) ON CONFLICT DO NOTHING;
+
+INSERT INTO curso_inscripcion (curso_id, padawan_id, estado)
+VALUES (
+    'ff000000-0000-4000-a000-000000000001',
+    'aa000000-0000-4000-a000-000000000001',
+    'Aprobado'
+) ON CONFLICT DO NOTHING;
+
+INSERT INTO curso_post (post_id, curso_id, autor_id, tipo, titulo, contenido)
+VALUES (
+    'ff000000-0000-4000-a000-000000000002',
+    'ff000000-0000-4000-a000-000000000001',
+    'aa000000-0000-4000-a000-000000000002',
+    'tarea',
+    'Tarea 1',
+    'Entregar la tarea'
+) ON CONFLICT DO NOTHING;
+
+INSERT INTO curso_tarea_entrega (entrega_id, post_id, padawan_id, archivo_url)
+VALUES (
+    'ff000000-0000-4000-a000-000000000003',
+    'ff000000-0000-4000-a000-000000000002',
+    'aa000000-0000-4000-a000-000000000001',
+    '/uploads/assignments/dummy.pdf'
+) ON CONFLICT DO NOTHING;
