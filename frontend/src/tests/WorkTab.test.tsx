@@ -2,85 +2,86 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WorkTab from '../components/classroom/WorkTab';
-import * as reactQuery from '@tanstack/react-query';
+import * as useAuthHook from '../hooks/useAuth';
+import { BrowserRouter } from 'react-router-dom';
 
-// Mocks
-vi.mock('@tanstack/react-query', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    useQuery: vi.fn(),
-    useQueryClient: vi.fn(() => ({ invalidateQueries: vi.fn() })),
-    useMutation: vi.fn(() => ({
-      mutate: vi.fn(),
-      isPending: false
-    })),
-  };
-});
+vi.mock('../hooks/useAuth', () => ({
+  useAuth: vi.fn(),
+}));
 
-describe('UI Component: WorkTab (Asignar Tarea)', () => {
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(<BrowserRouter>{ui}</BrowserRouter>);
+};
+
+const mockSessions = [
+  {
+    sesion_id: 's1',
+    titulo: 'Sesion de prueba Programada',
+    estado: 'Programada',
+    fecha_sesion: '2026-08-01T10:00:00Z',
+    duracion_min: 60,
+    notas: 'Notas de prueba',
+  },
+  {
+    sesion_id: 's2',
+    titulo: 'Sesion Completada con XSS <script>alert("xss")</script>',
+    estado: 'Realizada',
+    fecha_sesion: '2026-07-01T10:00:00Z',
+    duracion_min: 45,
+    notas: 'Notas completadas',
+    total_okrs: 5
+  }
+];
+
+describe('UI Component: WorkTab (Asignar Tarea / Sesiones)', () => {
   
   beforeEach(() => {
-    // Mock vacio para posts
-    vi.spyOn(reactQuery, 'useQuery').mockReturnValue({
-      data: [],
-      isLoading: false
-    } as any);
+    vi.spyOn(useAuthHook, 'useAuth').mockReturnValue({
+      user: { usuario_id: '1', rol: 'Jedi', email: 'jedi@test.com' },
+      token: 'mockToken',
+      login: vi.fn(),
+      logout: vi.fn(),
+      register: vi.fn(),
+      updateUser: vi.fn(),
+      loading: false,
+    });
   });
 
   it('UI-TSK-01: Muestra el formulario con selector de fecha para el rol Jedi', async () => {
-    render(<WorkTab courseId="c1" isJedi={true} />);
+    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as any} reload={vi.fn()} />);
     
-    // El Jedi debe ver el formulario
-    expect(screen.getByPlaceholderText(/Escribe una nueva tarea/i)).toBeInTheDocument();
+    // El Jedi debe ver el botón para crear nueva sesión
+    const newSessionBtn = screen.getByRole('button', { name: /\+ Nueva sesión/i });
+    expect(newSessionBtn).toBeInTheDocument();
     
-    // Al ser tab de Tareas, debe exigir Fecha de Vencimiento
-    expect(screen.getByText('Fecha de vencimiento')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Publicar Tarea/i })).toBeInTheDocument();
+    // Al hacer clic, se abre el modal que debe exigir Titulo y Fecha
+    fireEvent.click(newSessionBtn);
+    expect(screen.getByPlaceholderText(/Título de la sesión/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Programar/i })).toBeInTheDocument();
   });
 
   it('UI-TSK-02: Previene inyeccion XSS visual en la descripcion', async () => {
-    // Simulamos que el useQuery carga un post malicioso
-    vi.spyOn(reactQuery, 'useQuery').mockReturnValue({
-      data: [{
-        publicacion_id: 'p1',
-        tipo: 'TAREA',
-        contenido: '<script>alert("xss")</script> <b>Texto Seguro</b>',
-        fecha_creacion: new Date().toISOString(),
-        fecha_vencimiento: new Date(Date.now() + 86400000).toISOString(),
-        archivos: []
-      }],
-      isLoading: false
-    } as any);
-
-    render(<WorkTab courseId="c1" isJedi={false} />);
+    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as any} reload={vi.fn()} />);
     
-    // React escapa automaticamente. Esperamos ver el texto literal o el render seguro
-    const postContainer = await screen.findByText(/Texto Seguro/i);
-    expect(postContainer).toBeInTheDocument();
+    // React escapa automaticamente. Esperamos ver el texto literal con los tags de script
+    const sessionTitle = await screen.findByText(/<script>alert\("xss"\)<\/script>/i);
+    expect(sessionTitle).toBeInTheDocument();
     
-    // Verificamos que NO exista la etiqueta script en el DOM ejecutable (jsdom maneja esto o react lo escapa a literal)
+    // Verificamos que NO exista la etiqueta script en el DOM ejecutable
     const scripts = document.getElementsByTagName('script');
     expect(scripts.length).toBe(0); 
   });
 
-  it('UI-TSK-03: Bloquea envio si no se asigna fecha de vencimiento', async () => {
-    const mockMutate = vi.fn();
-    vi.spyOn(reactQuery, 'useMutation').mockReturnValue({ mutate: mockMutate, isPending: false } as any);
-
-    render(<WorkTab courseId="c1" isJedi={true} />);
+  it('UI-TSK-03: Bloquea envio si no se asigna fecha de vencimiento o titulo', async () => {
+    renderWithRouter(<WorkTab matchingId="m1" sessions={mockSessions as any} reload={vi.fn()} />);
     
-    const input = screen.getByPlaceholderText(/Escribe una nueva tarea/i);
+    fireEvent.click(screen.getByRole('button', { name: /\+ Nueva sesión/i }));
+    
+    const input = screen.getByPlaceholderText(/Título de la sesión/i);
     fireEvent.change(input, { target: { value: 'Tarea sin fecha' } });
 
-    // Clic sin elegir fecha
-    const submitBtn = screen.getByRole('button', { name: /Publicar Tarea/i });
-    fireEvent.click(submitBtn);
-
-    // Debe mostrar una alerta/toast en el UI pidiendo la fecha o no invocar la mutación
-    // Dado que dependemos de react-hook-form o validacion local:
-    await waitFor(() => {
-      expect(mockMutate).not.toHaveBeenCalled();
-    });
+    // El botón programar debería estar deshabilitado porque falta la fecha
+    const submitBtn = screen.getByRole('button', { name: /Programar/i });
+    expect(submitBtn).toBeDisabled();
   });
 });

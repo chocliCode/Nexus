@@ -1,28 +1,22 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import CoursesPage from '../pages/CoursesPage';
 import * as useAuthHook from '../hooks/useAuth';
-import * as reactQuery from '@tanstack/react-query';
+import { courseService } from '../services/api';
 
-// Mock dependencias
 vi.mock('../hooks/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('@tanstack/react-query', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    useQuery: vi.fn(),
-    useQueryClient: vi.fn(() => ({ invalidateQueries: vi.fn() })),
-    useMutation: vi.fn(() => ({
-      mutate: vi.fn(),
-      isPending: false
-    })),
-  };
-});
+vi.mock('../services/api', () => ({
+  courseService: {
+    list: vi.fn(),
+    mine: vi.fn(),
+    create: vi.fn(),
+  }
+}));
 
 const renderWithRouter = (ui: React.ReactElement) => {
   return render(<BrowserRouter>{ui}</BrowserRouter>);
@@ -31,9 +25,10 @@ const renderWithRouter = (ui: React.ReactElement) => {
 describe('UI Component: CoursesPage (Crear Curso)', () => {
 
   beforeEach(() => {
-    // Configuración base de mock: El usuario es un Jedi
+    vi.clearAllMocks();
+    
     vi.spyOn(useAuthHook, 'useAuth').mockReturnValue({
-      user: { userId: '1', rol: 'Jedi', email: 'jedi@test.com' },
+      user: { usuario_id: '1', rol: 'Jedi', email: 'jedi@test.com' },
       token: 'mockToken',
       login: vi.fn(),
       logout: vi.fn(),
@@ -43,61 +38,66 @@ describe('UI Component: CoursesPage (Crear Curso)', () => {
     });
   });
 
-  it('UI-CRS-01: Muestra el boton "Crear Curso" si el usuario es Jedi y lista vacia', () => {
-    // Mock useQuery para que retorne lista vacía
-    vi.spyOn(reactQuery, 'useQuery').mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    } as any);
+  it('UI-CRS-01: Muestra el boton "Crear Curso" si el usuario es Jedi y lista vacia', async () => {
+    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as any);
+    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as any);
 
     renderWithRouter(<CoursesPage />);
 
-    // El botón debe existir
-    expect(screen.getByRole('button', { name: /Crear Curso/i })).toBeInTheDocument();
-    // Mensaje de estado vacío
-    expect(screen.getByText('No has creado ningún curso todavía')).toBeInTheDocument();
+    await waitFor(() => {
+        expect(screen.getByText('No has creado ningún curso')).toBeInTheDocument();
+    });
+
+    const createBtns = screen.getAllByText(/Crear Curso/i);
+    expect(createBtns.length).toBeGreaterThan(0);
   });
 
-  it('UI-CRS-02: Abre el modal y valida formulario vacio', async () => {
-    vi.spyOn(reactQuery, 'useQuery').mockReturnValue({ data: [], isLoading: false } as any);
+  it('UI-CRS-02: Abre el modal y valida el formulario', async () => {
+    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as any);
+    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as any);
     renderWithRouter(<CoursesPage />);
+
+    await waitFor(() => {
+        expect(screen.getByText('No has creado ningún curso')).toBeInTheDocument();
+    });
 
     // Clic en crear curso
-    fireEvent.click(screen.getByRole('button', { name: /Crear Curso/i }));
+    const openModalBtn = document.getElementById('btn-create-course');
+    expect(openModalBtn).toBeInTheDocument();
+    fireEvent.click(openModalBtn!);
 
-    // Clic en el submit del modal sin llenar datos
-    const submitBtn = await screen.findByRole('button', { name: /Guardar Curso/i });
-    fireEvent.click(submitBtn);
-
-    // Debe mostrar error de titulo requerido (asumimos validación Zod en UI)
-    await waitFor(() => {
-      expect(screen.getByText(/El título es obligatorio/i)).toBeInTheDocument();
-    });
+    // Buscamos el boton de submit del modal
+    const submitBtn = await screen.findByText('Crear curso', { selector: 'button' });
+    
+    // El boton debe estar deshabilitado inicialmente
+    expect(submitBtn).toBeDisabled();
   });
 
-  it('UI-CRS-03: Permite enviar el formulario y llama a useMutation', async () => {
-    vi.spyOn(reactQuery, 'useQuery').mockReturnValue({ data: [], isLoading: false } as any);
-    
-    const mockMutate = vi.fn();
-    vi.spyOn(reactQuery, 'useMutation').mockReturnValue({
-      mutate: mockMutate,
-      isPending: false
-    } as any);
+  it('UI-CRS-03: Permite enviar el formulario y llama a courseService.create', async () => {
+    vi.mocked(courseService.list).mockResolvedValue({ data: { data: [] } } as any);
+    vi.mocked(courseService.mine).mockResolvedValue({ data: { data: [] } } as any);
+    vi.mocked(courseService.create).mockResolvedValue({ data: { success: true } } as any);
 
     renderWithRouter(<CoursesPage />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Crear Curso/i }));
+    await waitFor(() => {
+        expect(screen.getByText('No has creado ningún curso')).toBeInTheDocument();
+    });
 
-    const titleInput = await screen.findByLabelText(/Título/i);
+    const openModalBtn = document.getElementById('btn-create-course');
+    fireEvent.click(openModalBtn!);
+
+    const titleInput = await screen.findByLabelText(/Título del curso \*/i);
     fireEvent.change(titleInput, { target: { value: 'Nuevo Curso Testing' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Guardar Curso/i }));
+    const submitBtn = await screen.findByText('Crear curso', { selector: 'button' });
+    expect(submitBtn).not.toBeDisabled();
+    
+    fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(mockMutate).toHaveBeenCalledWith(
-        expect.objectContaining({ titulo: 'Nuevo Curso Testing' }),
-        expect.any(Object)
+      expect(courseService.create).toHaveBeenCalledWith(
+        expect.objectContaining({ titulo: 'Nuevo Curso Testing' })
       );
     });
   });

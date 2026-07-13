@@ -384,10 +384,11 @@ export default function CoursesPage() {
             {/* Modal body */}
             <form onSubmit={handleCreate} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                <label htmlFor="titulo" className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                   Título del curso *
                 </label>
                 <input
+                  id="titulo"
                   value={form.titulo}
                   onChange={(e) => setForm(f => ({ ...f, titulo: e.target.value }))}
                   placeholder="Ej: React Moderno con TypeScript"
@@ -398,10 +399,11 @@ export default function CoursesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                <label htmlFor="descripcion" className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                   Descripción
                 </label>
                 <textarea
+                  id="descripcion"
                   value={form.descripcion}
                   onChange={(e) => setForm(f => ({ ...f, descripcion: e.target.value }))}
                   placeholder="Describe el contenido, objetivos y a quién va dirigido…"
@@ -413,10 +415,11 @@ export default function CoursesPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <label htmlFor="categoria" className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                     Categoría
                   </label>
                   <select
+                    id="categoria"
                     value={form.categoria}
                     onChange={(e) => setForm(f => ({ ...f, categoria: e.target.value }))}
                     className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
@@ -425,10 +428,11 @@ export default function CoursesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <label htmlFor="max_estudiantes" className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                     Cupo máximo
                   </label>
                   <input
+                    id="max_estudiantes"
                     type="number" min={1} max={200}
                     value={form.max_estudiantes}
                     onChange={(e) => setForm(f => ({ ...f, max_estudiantes: parseInt(e.target.value) || 30 }))}
