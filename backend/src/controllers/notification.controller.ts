@@ -43,7 +43,7 @@ export const createNotificationForRole = async (
 ): Promise<void> => {
   try {
     // Insert for all users matching the role
-    const result = await pool.query(
+    await pool.query(
       `INSERT INTO notificacion (usuario_id, tipo, titulo, mensaje, referencia_id, referencia_tipo)
        SELECT usuario_id, $2, $3, $4, $5, $6
        FROM usuario WHERE rol = $1

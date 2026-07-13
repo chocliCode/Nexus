@@ -177,7 +177,7 @@ export const deleteOKR = async (req: AuthRequest, res: Response, next: NextFunct
  */
 export const completeOKR = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   const { okrId } = req.params;
-  const { valor_actual, nota_cierre } = req.body;
+  const { valor_actual } = req.body;
   const userId = req.user?.userId;
 
   const client = await pool.connect();

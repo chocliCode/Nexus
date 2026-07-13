@@ -137,6 +137,10 @@ jobs:
         working-directory: ./frontend
         run: npx playwright install --with-deps chromium
 
+      - name: "🗄️ Inicializar Base de Datos (E2E)"
+        working-directory: ./backend
+        run: npx ts-node tests/qa-scripts/seed_e2e.ts
+
       - name: "🚀 Levantar Backend"
         working-directory: ./backend
         run: |

@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => {
   // Ajusta estas credenciales según los usuarios de prueba en tu base de datos local
-  const MENTOR_EMAIL = 'jedi@gmail.com'; 
+  const MENTOR_EMAIL = 'jedi@nexus.test'; 
   const PASSWORD = 'Test1234!';
 
   test('El Mentor puede entrar al aula, asignar una nota y exportar el CSV con éxito', async ({ page }) => {

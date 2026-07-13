@@ -21,7 +21,7 @@ const TEST_PASSWORD = 'E2eTestPass123!';
 test.describe('E2E: Flujo de Login', () => {
 
   test('E2E-01: La pagina de login carga correctamente', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/login');
     await expect(page.getByText('NEXUS', { exact: true })).toBeVisible();
     await expect(page.getByText('Iniciar Sesión')).toBeVisible();
     await expect(page.getByPlaceholder('tu@email.com')).toBeVisible();
@@ -30,7 +30,7 @@ test.describe('E2E: Flujo de Login', () => {
   });
 
   test('E2E-02: Muestra error con credenciales invalidas', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByPlaceholder('tu@email.com').fill('wrong@email.com');
     await page.getByPlaceholder('••••••••').fill('WrongPassword');
     await page.getByRole('button', { name: /ingresar/i }).click();
@@ -39,7 +39,7 @@ test.describe('E2E: Flujo de Login', () => {
   });
 
   test('E2E-03: Login exitoso redirige al dashboard', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByPlaceholder('tu@email.com').fill(TEST_EMAIL);
     await page.getByPlaceholder('••••••••').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: /ingresar/i }).click();
@@ -48,7 +48,7 @@ test.describe('E2E: Flujo de Login', () => {
   });
 
   test('E2E-04: Validacion client-side rechaza email invalido', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByPlaceholder('tu@email.com').fill('not-an-email');
     await page.getByPlaceholder('••••••••').fill('somepassword');
     await page.getByRole('button', { name: /ingresar/i }).click();
@@ -64,7 +64,7 @@ test.describe('E2E: Flujo de Login', () => {
 test.describe('E2E: Flujo de Registro', () => {
 
   test('E2E-05: Navega de login a registro', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByText('Regístrate aquí').click();
     await expect(page).toHaveURL(/register/);
     await expect(page.getByRole('heading', { name: 'Crear Cuenta' })).toBeVisible();
@@ -88,7 +88,7 @@ test.describe('E2E: Dashboard', () => {
 
   test.beforeEach(async ({ page }) => {
     // Login before each test
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByPlaceholder('tu@email.com').fill(TEST_EMAIL);
     await page.getByPlaceholder('••••••••').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: /ingresar/i }).click();
@@ -153,7 +153,7 @@ test.describe('E2E: Vacantes', () => {
 
   test('E2E-14: La pagina de vacantes carga y muestra contenido', async ({ page }) => {
     // Login first
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByPlaceholder('tu@email.com').fill(TEST_EMAIL);
     await page.getByPlaceholder('••••••••').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: /ingresar/i }).click();
@@ -178,7 +178,7 @@ test.describe('E2E: Logout', () => {
 
   test('E2E-15: Logout redirige a la pagina de login', async ({ page }) => {
     // Login first
-    await page.goto('/');
+    await page.goto('/login');
     await page.getByPlaceholder('tu@email.com').fill(TEST_EMAIL);
     await page.getByPlaceholder('••••••••').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: /ingresar/i }).click();
