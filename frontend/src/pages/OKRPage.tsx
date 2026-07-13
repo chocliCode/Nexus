@@ -1,16 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { okrService } from '../services/api';
+import { okrService, API_URL } from '../services/api';
 import { LoadingSpinner, Modal, EmptyState, ProgressBar } from '../components/ui';
-import { ClipboardList, Upload, CheckCircle2, XCircle, FileEdit, BarChart2, AlertTriangle, Calendar, Target, Paperclip, MessageSquare, Clock, Pencil, Trash2 } from 'lucide-react';
-
-interface OKR {
-  okr_id: string; sesion_id: string; descripcion: string; indicador: string | null;
-  valor_meta: number; valor_actual: number;
-  estado: 'Pendiente' | 'EnProgreso' | 'Completado' | 'Cancelado';
-  fecha_limite: string | null; fecha_actualizacion: string; notas?: string | null;
-}
+import { ClipboardList, Upload, CheckCircle2, XCircle, FileEdit, BarChart2, AlertTriangle, Calendar, Target, Paperclip, MessageSquare, Clock, Pencil, Trash2, Link as LinkIcon, Download } from 'lucide-react';
+import type { OKR } from '../types';
 
 import type { ReactNode } from 'react';
 
@@ -39,12 +33,14 @@ const OKRPage = () => {
   const [showSubmit, setShowSubmit] = useState(false);
   const [submitOkr, setSubmitOkr] = useState<OKR | null>(null);
   const [submitText, setSubmitText] = useState('');
+  const [submitLink, setSubmitLink] = useState('');
+  const [submitFiles, setSubmitFiles] = useState<globalThis.File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   // Grade (mentor)
   const [showGrade, setShowGrade] = useState(false);
   const [gradeOkr, setGradeOkr] = useState<OKR | null>(null);
-  const [gradeScore, setGradeScore] = useState(0);
+  const [gradeScore, setGradeScore] = useState(20);
   const [gradeNote, setGradeNote] = useState('');
   const [grading, setGrading] = useState(false);
 
@@ -68,11 +64,17 @@ const OKRPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!submitOkr || !submitText.trim()) return;
+    if (!submitOkr) return;
     setSubmitting(true);
     try {
-      await okrService.update(submitOkr.okr_id, { indicador: submitText, estado: 'EnProgreso' });
-      setShowSubmit(false); setSubmitOkr(null); setSubmitText(''); loadOkrs();
+      const formData = new FormData();
+      formData.append('estado', 'EnProgreso');
+      if (submitText.trim()) formData.append('indicador', submitText.trim());
+      if (submitLink.trim()) formData.append('url_enlace', submitLink.trim());
+      submitFiles.forEach(f => formData.append('archivos', f));
+
+      await okrService.update(submitOkr.okr_id, formData);
+      setShowSubmit(false); setSubmitOkr(null); setSubmitText(''); setSubmitLink(''); setSubmitFiles([]); loadOkrs();
     } catch (e: unknown) { const err = e as { response?: { data?: { error?: string } } }; alert(err.response?.data?.error || 'Error'); } finally { setSubmitting(false); }
   };
 
@@ -164,10 +166,34 @@ const OKRPage = () => {
                 </div>
 
                 {/* Submission area */}
-                {okr.indicador && (
+                {(okr.indicador || okr.url_enlace || (okr.archivos && okr.archivos.length > 0)) && (
                   <div className="px-4 py-3 mx-4 mb-3 rounded-xl text-xs" style={{ backgroundColor: 'var(--surface-input)', border: '1px dashed var(--border-light)' }}>
-                    <p className="font-medium mb-1 flex items-center gap-1" style={{ color: 'var(--text-primary)' }}><Paperclip className="w-3.5 h-3.5" /> Entrega del estudiante:</p>
-                    <p style={{ color: 'var(--text-secondary)' }}>{okr.indicador}</p>
+                    <p className="font-medium mb-1.5 flex items-center gap-1" style={{ color: 'var(--text-primary)' }}><Paperclip className="w-3.5 h-3.5" /> Entrega del estudiante:</p>
+                    {okr.indicador && <p style={{ color: 'var(--text-secondary)' }} className="mb-2 whitespace-pre-wrap">{okr.indicador}</p>}
+                    
+                    {okr.url_enlace && (
+                      <a href={okr.url_enlace} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium hover:underline mb-2" style={{ color: 'var(--color-primary-600)' }}>
+                        <LinkIcon className="w-3 h-3" /> {okr.url_enlace}
+                      </a>
+                    )}
+
+                    {okr.archivos && okr.archivos.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {okr.archivos.map((archivo, idx) => {
+                          const isImage = archivo.url.match(/\.(jpeg|jpg|gif|png)$/i) != null;
+                          return isImage ? (
+                            <a key={idx} href={`${API_URL}${archivo.url}`} target="_blank" rel="noreferrer" className="block w-16 h-16 rounded-lg overflow-hidden border border-neutral-200 hover:opacity-90 transition-opacity">
+                              <img src={`${API_URL}${archivo.url}`} alt="adjunto" className="w-full h-full object-cover" />
+                            </a>
+                          ) : (
+                            <a key={idx} href={`${API_URL}${archivo.url}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors border border-neutral-200 text-[11px] font-medium text-neutral-700">
+                              <Download className="w-3.5 h-3.5" />
+                              <span className="max-w-[120px] truncate">{archivo.nombre}</span>
+                            </a>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -252,11 +278,25 @@ const OKRPage = () => {
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Tu entrega (texto o enlace)</label>
-            <textarea className="input-field" rows={4} placeholder="Describe lo que hiciste, pega un enlace a tu repositorio, etc..."
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Comentarios sobre tu entrega</label>
+            <textarea className="input-field" rows={3} placeholder="Describe lo que hiciste..."
               value={submitText} onChange={e => setSubmitText(e.target.value)} />
           </div>
-          <button onClick={handleSubmit} disabled={submitting || !submitText.trim()} className="btn-primary w-full flex items-center justify-center gap-2">
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Enlace (opcional)</label>
+            <input className="input-field" type="url" placeholder="Ej: https://github.com/..."
+              value={submitLink} onChange={e => setSubmitLink(e.target.value)} />
+          </div>
+          <div className="border border-dashed border-neutral-300 rounded-xl p-3 bg-neutral-50/50">
+            <label className="block text-xs font-semibold mb-2 text-neutral-600">Adjuntar archivos/imágenes (Máx. 5)</label>
+            <input type="file" multiple className="text-xs text-neutral-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 transition-colors" onChange={e => setSubmitFiles(Array.from(e.target.files || []))} />
+            {submitFiles.length > 0 && (
+              <div className="mt-2 text-xs text-primary-600 font-medium">
+                {submitFiles.length} archivo(s) seleccionado(s)
+              </div>
+            )}
+          </div>
+          <button onClick={handleSubmit} disabled={submitting || (!submitText.trim() && !submitLink.trim() && submitFiles.length === 0)} className="btn-primary w-full flex items-center justify-center gap-2">
             {submitting ? 'Enviando...' : <><Upload className="w-4 h-4" /> Entregar</>}
           </button>
         </div>
@@ -270,10 +310,34 @@ const OKRPage = () => {
               <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--surface-input)' }}>
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{gradeOkr.descripcion}</p>
               </div>
-              {gradeOkr.indicador && (
+              {(gradeOkr.indicador || gradeOkr.url_enlace || (gradeOkr.archivos && gradeOkr.archivos.length > 0)) && (
                 <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--color-primary-50)', border: '1px dashed var(--color-primary-200)' }}>
-                  <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: 'var(--color-primary-700)' }}><Paperclip className="w-3.5 h-3.5" /> Entrega del estudiante:</p>
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{gradeOkr.indicador}</p>
+                  <p className="text-xs font-medium mb-1.5 flex items-center gap-1" style={{ color: 'var(--color-primary-700)' }}><Paperclip className="w-3.5 h-3.5" /> Entrega del estudiante:</p>
+                  {gradeOkr.indicador && <p className="text-sm mb-2 whitespace-pre-wrap" style={{ color: 'var(--text-secondary)' }}>{gradeOkr.indicador}</p>}
+
+                  {gradeOkr.url_enlace && (
+                    <a href={gradeOkr.url_enlace} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium hover:underline mb-2" style={{ color: 'var(--color-primary-600)' }}>
+                      <LinkIcon className="w-3 h-3" /> {gradeOkr.url_enlace}
+                    </a>
+                  )}
+
+                  {gradeOkr.archivos && gradeOkr.archivos.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {gradeOkr.archivos.map((archivo, idx) => {
+                        const isImage = archivo.url.match(/\.(jpeg|jpg|gif|png)$/i) != null;
+                        return isImage ? (
+                          <a key={idx} href={`${API_URL}${archivo.url}`} target="_blank" rel="noreferrer" className="block w-16 h-16 rounded-lg overflow-hidden border border-neutral-200 hover:opacity-90 transition-opacity">
+                            <img src={`${API_URL}${archivo.url}`} alt="adjunto" className="w-full h-full object-cover" />
+                          </a>
+                        ) : (
+                          <a key={idx} href={`${API_URL}${archivo.url}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors border border-neutral-200 text-[11px] font-medium text-neutral-700">
+                            <Download className="w-3.5 h-3.5" />
+                            <span className="max-w-[120px] truncate">{archivo.nombre}</span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </>

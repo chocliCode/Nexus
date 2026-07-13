@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getMyProfile, updateMyProfile, listSkills, addSkill, removeSkill, getUserProfile } from '../controllers/profile.controller';
+import { getMyProfile, updateMyProfile, listSkills, addSkill, removeSkill, getUserProfile, buyExtra } from '../controllers/profile.controller';
 import { validate } from '../middleware/validate.middleware';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { updateProfileSchema, addSkillSchema } from '../schemas/profile.schema';
@@ -9,6 +9,7 @@ const router = Router();
 // UC-04 / UC-05: Mi perfil
 router.get('/profile/me', authMiddleware, getMyProfile);
 router.put('/profile/me', authMiddleware, validate(updateProfileSchema), updateMyProfile);
+router.post('/profile/me/buy-extra', authMiddleware, buyExtra);
 
 // UC-04: Habilidades
 router.get('/profile/skills', authMiddleware, listSkills);

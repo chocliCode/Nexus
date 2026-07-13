@@ -64,13 +64,23 @@ export const generateMatching = async (req: AuthRequest, res: Response, next: Ne
     }
     const perfilId = perfilResult.rows[0].perfil_id;
 
+    // Check membership limits
+    const limitCheck = await pool.query(
+      `SELECT m.limite_mentores 
+       FROM perfil_aprendiz pa 
+       JOIN membresia m ON pa.membresia_id = m.membresia_id 
+       WHERE pa.perfil_id = $1`,
+      [perfilId]
+    );
+    const limiteMentores = limitCheck.rows[0]?.limite_mentores || 1;
+
     // Verificar si ya tiene matching activo o pendiente
     const existing = await pool.query(
       "SELECT matching_id FROM matching WHERE padawan_id = $1 AND estado IN ('Pendiente','Activo')",
       [perfilId]
     );
-    if (existing.rows.length > 0) {
-      res.status(409).json({ error: 'Ya tienes un matching activo o pendiente', code: 'MATCHING_EXISTS' }); return;
+    if (existing.rows.length >= limiteMentores) {
+      res.status(409).json({ error: `Has alcanzado el límite de ${limiteMentores} mentores activos de tu membresía`, code: 'MATCHING_EXISTS' }); return;
     }
 
     // Obtener habilidades del Padawan
@@ -157,5 +167,87 @@ export const respondMatching = async (req: AuthRequest, res: Response, next: Nex
 
     console.log(`[MATCHING] ${accion}: ${matchingId} by ${req.user.email}`);
     res.json({ success: true, data: updated.rows[0] });
+  } catch (err) { next(err); }
+};
+
+/**
+ * GET /api/v1/matchings/mentors
+ * UC-10: Listar todos los mentores disponibles en el directorio
+ */
+export const listMentors = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const result = await pool.query(`
+      SELECT mt.mentor_id, mt.especialidades, mt.anios_experiencia, mt.calificacion_promedio, mt.bio_profesional,
+             u.nombres, u.apellidos, u.email, u.usuario_id
+      FROM mentor mt
+      JOIN usuario u ON mt.usuario_id = u.usuario_id
+      WHERE u.activo = true
+      ORDER BY mt.calificacion_promedio DESC, mt.anios_experiencia DESC
+    `);
+    res.json({ success: true, data: result.rows });
+  } catch (err) { next(err); }
+};
+
+/**
+ * POST /api/v1/matchings/mentors/:mentorId/request
+ * UC-10: Solicitar un mentor manualmente desde el directorio
+ */
+export const requestMentor = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) { res.status(401).json({ error: 'No autenticado' }); return; }
+    if (req.user.rol !== 'Padawan') {
+      res.status(403).json({ error: 'Solo los Padawans pueden solicitar mentor' }); return;
+    }
+
+    const { mentorId } = req.params;
+
+    // Obtener perfil del Padawan
+    const perfilResult = await pool.query(
+      'SELECT perfil_id FROM perfil_aprendiz WHERE usuario_id = $1', [req.user.userId]
+    );
+    if (perfilResult.rows.length === 0) {
+      res.status(404).json({ error: 'Perfil no encontrado' }); return;
+    }
+    const perfilId = perfilResult.rows[0].perfil_id;
+
+    // Check membership limits
+    const limitCheck = await pool.query(
+      `SELECT m.limite_mentores, pa.limite_mentores_extra 
+       FROM perfil_aprendiz pa 
+       JOIN membresia m ON pa.membresia_id = m.membresia_id 
+       WHERE pa.perfil_id = $1`,
+      [perfilId]
+    );
+    const baseLimit = limitCheck.rows[0]?.limite_mentores || 0;
+    const extraLimit = limitCheck.rows[0]?.limite_mentores_extra || 0;
+    const limiteMentores = baseLimit === 999 ? 999 : baseLimit + extraLimit;
+
+    // Verificar si ya tiene matching activo o pendiente
+    const existing = await pool.query(
+      "SELECT matching_id FROM matching WHERE padawan_id = $1 AND estado IN ('Pendiente','Activo')",
+      [perfilId]
+    );
+    if (existing.rows.length >= limiteMentores) {
+      res.status(403).json({ error: `Has alcanzado el límite de ${limiteMentores} mentores activos de tu membresía.`, code: 'LIMIT_EXCEEDED' }); 
+      return;
+    }
+
+    // Verificar si el mentor existe
+    const mentorResult = await pool.query(
+      'SELECT mentor_id FROM mentor WHERE mentor_id = $1', [mentorId]
+    );
+    if (mentorResult.rows.length === 0) {
+      res.status(404).json({ error: 'Mentor no encontrado' }); return;
+    }
+
+    // Crear matching con estado Pendiente (afinidad predeterminada de 1.0 ya que es manual)
+    const matchResult = await pool.query(
+      `INSERT INTO matching (padawan_id, mentor_id, score_afinidad, estado)
+       VALUES ($1, $2, $3, 'Pendiente') RETURNING *`,
+      [perfilId, mentorId, 1.0]
+    );
+
+    console.log(`[MATCHING] Manual Request: Padawan=${req.user.email}, MentorID=${mentorId}`);
+    res.status(201).json({ success: true, data: matchResult.rows[0] });
   } catch (err) { next(err); }
 };

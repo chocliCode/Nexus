@@ -125,4 +125,34 @@ describe('Pruebas de Humo (Smoke Tests)', () => {
     });
   });
 
+  // =========================================================
+  // 6. Endpoints de Cursos (UC-29, UC-30)
+  // =========================================================
+  describe('Endpoints de Cursos', () => {
+    test('SMOKE-16: La ruta GET /courses esta protegida', async () => {
+      const res = await request(app).get(`${API}/courses`);
+      expect(res.status).toBe(401);
+    });
+
+    test('SMOKE-17: La ruta POST /courses esta protegida', async () => {
+      const res = await request(app).post(`${API}/courses`).send({ titulo: 'test' });
+      expect(res.status).toBe(401);
+    });
+
+    test('SMOKE-18: La ruta GET /courses/mine esta protegida', async () => {
+      const res = await request(app).get(`${API}/courses/mine`);
+      expect(res.status).toBe(401);
+    });
+
+    test('SMOKE-19: La ruta POST /courses/:id/join esta protegida', async () => {
+      const res = await request(app).post(`${API}/courses/fake-id/join`);
+      expect(res.status).toBe(401);
+    });
+
+    test('SMOKE-20: La ruta PATCH /courses/:id/open esta protegida', async () => {
+      const res = await request(app).patch(`${API}/courses/fake-id/open`);
+      expect(res.status).toBe(401);
+    });
+  });
+
 });

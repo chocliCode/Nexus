@@ -18,6 +18,7 @@ export interface User {
   anios_experiencia?: number;
   calificacion_promedio?: number;
   bio_profesional?: string;
+  membresia_id?: string;
 }
 
 export interface AuthResponse {
@@ -40,6 +41,7 @@ export interface Session {
   estado: EstadoSesion;
   url_grabacion?: string;
   notas?: string;
+  archivos?: Array<{ url: string; nombre: string; tipo: string }>;
   total_okrs?: number;
   okrs_completados?: number;
   mentor_nombres?: string;
@@ -61,7 +63,10 @@ export interface OKR {
   valor_actual: number;
   estado: EstadoOKR;
   fecha_limite?: string;
-  fecha_actualizacion: string;
+  fecha_actualizacion?: string;
+  url_enlace?: string;
+  archivos?: Array<{ url: string; nombre: string; tipo: string }>;
+  notas?: string;
   nuevo_score?: number;
 }
 
@@ -99,6 +104,13 @@ export interface Skill {
 }
 
 export interface ProfileData extends User {
+  membresia_nombre?: string;
+  limite_mentores?: number;
+  limite_cursos?: number;
+  limite_cursos_extra?: number;
+  limite_mentores_extra?: number;
+  cursos_activos?: number;
+  mentores_activos?: number;
   habilidades: Skill[];
 }
 

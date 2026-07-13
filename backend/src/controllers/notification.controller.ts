@@ -2,6 +2,93 @@ import { Response, NextFunction } from 'express';
 import pool from '../db/pool';
 import { AuthRequest } from '../types';
 
+import { sendEvent, addClient, removeClient, broadcastToRole } from '../sse/manager';
+
+/**
+ * Internal helper — creates a notification row for a given user.
+ * Import and call this from any controller that triggers an event.
+ */
+export const createNotification = async (
+  userId: string,
+  tipo: string,
+  titulo: string,
+  mensaje: string,
+  referenciaId?: string,
+  referenciaTipo?: string
+): Promise<void> => {
+  try {
+    const result = await pool.query(
+      `INSERT INTO notificacion (usuario_id, tipo, titulo, mensaje, referencia_id, referencia_tipo)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [userId, tipo, titulo, mensaje, referenciaId || null, referenciaTipo || null]
+    );
+    
+    // Notify connected clients immediately
+    sendEvent(userId, 'NEW_NOTIFICATION', result.rows[0]);
+  } catch {
+    // Notifications are non-critical — never let them break the main flow
+  }
+};
+
+/**
+ * Creates a notification for all users of a specific role.
+ */
+export const createNotificationForRole = async (
+  rol: string,
+  tipo: string,
+  titulo: string,
+  mensaje: string,
+  referenciaId?: string,
+  referenciaTipo?: string
+): Promise<void> => {
+  try {
+    // Insert for all users matching the role
+    const result = await pool.query(
+      `INSERT INTO notificacion (usuario_id, tipo, titulo, mensaje, referencia_id, referencia_tipo)
+       SELECT usuario_id, $2, $3, $4, $5, $6
+       FROM usuario WHERE rol = $1
+       RETURNING *`,
+      [rol, tipo, titulo, mensaje, referenciaId || null, referenciaTipo || null]
+    );
+    
+    // We broadcast a general event to the role, the frontend might refetch or handle it
+    broadcastToRole(rol, 'NEW_NOTIFICATION_ROLE', { tipo, titulo, mensaje, referenciaId, referenciaTipo });
+  } catch {
+    // Non-critical
+  }
+};
+
+/**
+ * GET /api/v1/notifications/stream
+ * SSE endpoint for live notifications
+ */
+export const streamNotifications = (req: AuthRequest, res: Response): void => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    res.status(401).end();
+    return;
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  addClient(userId, res);
+
+  // Send an initial heartbeat
+  res.write(': heartbeat\n\n');
+
+  // Keep connection alive with a periodic comment
+  const interval = setInterval(() => {
+    res.write(': keepalive\n\n');
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(interval);
+    removeClient(userId, res);
+  });
+};
+
 /**
  * UC-26: Recibir notificaciones
  * GET /api/v1/notifications

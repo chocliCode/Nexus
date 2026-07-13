@@ -1,8 +1,12 @@
 import { Router } from 'express';
-import { getMyMatchings, generateMatching, respondMatching } from '../controllers/matching.controller';
+import { getMyMatchings, generateMatching, respondMatching, listMentors, requestMentor } from '../controllers/matching.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
+
+// UC-10: Directorio de Mentores y Solicitud manual
+router.get('/mentors', authMiddleware, listMentors);
+router.post('/mentors/:mentorId/request', authMiddleware, requestMentor);
 
 // UC-10: Ver mis matchings + generar matching
 router.get('/matchings/me', authMiddleware, getMyMatchings);

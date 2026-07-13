@@ -14,6 +14,10 @@ import SessionsPage from './pages/SessionsPage';
 import OKRPage from './pages/OKRPage';
 import ClassroomPage from './pages/ClassroomPage';
 import VacanciesPage from './pages/VacanciesPage';
+import MentorsDirectoryPage from './pages/MentorsDirectoryPage';
+import CoursesPage from './pages/CoursesPage';
+import CourseClassroomPage from './pages/CourseClassroomPage';
+import LandingPage from './pages/LandingPage';
 import type { ReactNode } from 'react';
 import './index.css';
 
@@ -39,9 +43,11 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
 
 const AppRoutes = () => (
   <Routes>
+    <Route path="/" element={<LandingPage />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
     <Route path="/vacancies" element={<Layout><VacanciesPage /></Layout>} />
+    <Route path="/mentors" element={<Layout><MentorsDirectoryPage /></Layout>} />
 
     <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
@@ -51,9 +57,10 @@ const AppRoutes = () => (
     <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
     <Route path="/classroom/:matchingId" element={<ProtectedRoute><ClassroomPage /></ProtectedRoute>} />
     <Route path="/sessions/:sesionId/okrs" element={<ProtectedRoute><OKRPage /></ProtectedRoute>} />
+    <Route path="/courses" element={<ProtectedRoute><CoursesPage /></ProtectedRoute>} />
+    <Route path="/courses/:courseId" element={<ProtectedRoute><CourseClassroomPage /></ProtectedRoute>} />
 
-    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );
 

@@ -38,10 +38,17 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
 
     // If Padawan, create apprentice profile
     if (rol === 'Padawan') {
-      await client.query(
-        `INSERT INTO perfil_aprendiz (usuario_id) VALUES ($1)`,
-        [user.usuario_id]
-      );
+      if (req.body.membresia_id) {
+        await client.query(
+          `INSERT INTO perfil_aprendiz (usuario_id, membresia_id) VALUES ($1, $2)`,
+          [user.usuario_id, req.body.membresia_id]
+        );
+      } else {
+        await client.query(
+          `INSERT INTO perfil_aprendiz (usuario_id) VALUES ($1)`,
+          [user.usuario_id]
+        );
+      }
     }
 
     // If Jedi, create mentor profile

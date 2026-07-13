@@ -1,0 +1,3 @@
+@echo off
+echo Iniciando Nexus con Docker Compose...
+docker compose up --build

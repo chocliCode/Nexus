@@ -12,10 +12,15 @@ export const getMyProfile = async (req: AuthRequest, res: Response, next: NextFu
 
     const userResult = await pool.query(
       `SELECT u.usuario_id, u.nombres, u.apellidos, u.email, u.rol, u.fecha_registro,
-              pa.perfil_id, pa.resumen_bio, pa.score_empleabilidad, pa.url_portafolio,
-              m.mentor_id, m.especialidades, m.anios_experiencia, m.calificacion_promedio, m.bio_profesional
+              pa.perfil_id, pa.resumen_bio, pa.score_empleabilidad, pa.url_portafolio, pa.membresia_id,
+              pa.limite_cursos_extra, pa.limite_mentores_extra,
+              m.mentor_id, m.especialidades, m.anios_experiencia, m.calificacion_promedio, m.bio_profesional,
+              memb.nombre AS membresia_nombre, memb.limite_mentores, memb.limite_cursos,
+              (SELECT COUNT(*) FROM curso_inscripcion ci WHERE ci.padawan_id = u.usuario_id AND ci.estado = 'Activo') AS cursos_activos,
+              (SELECT COUNT(*) FROM matching mt WHERE mt.padawan_id = pa.perfil_id AND mt.estado IN ('Pendiente','Activo')) AS mentores_activos
        FROM usuario u
        LEFT JOIN perfil_aprendiz pa ON u.usuario_id = pa.usuario_id
+       LEFT JOIN membresia memb ON pa.membresia_id = memb.membresia_id
        LEFT JOIN mentor m ON u.usuario_id = m.usuario_id
        WHERE u.usuario_id = $1 AND u.activo = true`,
       [req.user.userId]
@@ -134,6 +139,42 @@ export const listSkills = async (_req: AuthRequest, res: Response, next: NextFun
       'SELECT habilidad_id, nombre, categoria, descripcion FROM habilidad ORDER BY categoria, nombre'
     );
     res.json({ success: true, data: result.rows });
+  } catch (err) { next(err); }
+};
+
+/**
+ * POST /api/v1/profile/me/buy-extra
+ * Comprar límites extra de cursos o mentores
+ */
+export const buyExtra = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user || req.user.rol !== 'Padawan') {
+      res.status(403).json({ error: 'Solo los Padawans pueden comprar extras', code: 'FORBIDDEN' }); 
+      return;
+    }
+
+    const { type, amount } = req.body;
+    if (!['curso', 'mentor'].includes(type) || typeof amount !== 'number' || amount <= 0) {
+      res.status(400).json({ error: 'Payload inválido' });
+      return;
+    }
+
+    const column = type === 'curso' ? 'limite_cursos_extra' : 'limite_mentores_extra';
+    
+    const result = await pool.query(
+      `UPDATE perfil_aprendiz 
+       SET ${column} = COALESCE(${column}, 0) + $1 
+       WHERE usuario_id = $2 
+       RETURNING *`,
+      [amount, req.user.userId]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Perfil no encontrado' });
+      return;
+    }
+
+    res.json({ success: true, message: `Límite extra de ${type}s aumentado en ${amount}` });
   } catch (err) { next(err); }
 };
 

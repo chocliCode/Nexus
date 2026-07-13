@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 export { Dropdown } from './Dropdown';
 export { DatePicker } from './DatePicker';
 export { Portal } from './Portal';
+export { default as PaymentModal } from './PaymentModal';
 
 /* ── Modal ── */
 interface ModalProps {

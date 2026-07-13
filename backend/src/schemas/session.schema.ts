@@ -3,14 +3,14 @@ import { z } from 'zod';
 export const createSessionSchema = z.object({
   titulo: z.string().min(3, 'Título debe tener al menos 3 caracteres').max(200),
   fecha_sesion: z.string().refine((val) => !isNaN(Date.parse(val)), 'Fecha inválida'),
-  duracion_min: z.number().int().min(15).max(480).default(60),
+  duracion_min: z.coerce.number().int().min(15).max(480).default(60),
   notas: z.string().max(2000).optional(),
 });
 
 export const updateSessionSchema = z.object({
   titulo: z.string().min(3).max(200).optional(),
   fecha_sesion: z.string().refine((val) => !isNaN(Date.parse(val)), 'Fecha inválida').optional(),
-  duracion_min: z.number().int().min(15).max(480).optional(),
+  duracion_min: z.coerce.number().int().min(15).max(480).optional(),
   estado: z.enum(['Programada', 'Realizada', 'Cancelada']).optional(),
   url_grabacion: z.string().url().max(255).optional(),
   notas: z.string().max(2000).optional(),

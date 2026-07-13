@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import pool from '../db/pool';
 import { AuthRequest } from '../types';
+import { createNotification } from './notification.controller';
 
 /**
  * POST /api/v1/sessions/:sesionId/okrs
@@ -23,6 +24,25 @@ export const createOKR = async (req: AuthRequest, res: Response, next: NextFunct
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [sesionId, descripcion, indicador || null, valor_meta, fecha_limite || null]
     );
+
+    // Notify Padawan about the new task
+    const padawanRes = await pool.query(
+      `SELECT pa.usuario_id FROM sesion_mentoria sm
+       JOIN matching m ON sm.matching_id = m.matching_id
+       JOIN perfil_aprendiz pa ON m.padawan_id = pa.perfil_id
+       WHERE sm.sesion_id = $1`,
+      [sesionId]
+    );
+    if (padawanRes.rows.length > 0) {
+      await createNotification(
+        padawanRes.rows[0].usuario_id,
+        'okr_creado',
+        'Nueva tarea asignada',
+        `Tu mentor asignó la tarea: "${descripcion}".`,
+        result.rows[0].okr_id,
+        'okr'
+      );
+    }
 
     console.log(`[OKR] Created OKR for session ${sesionId}`);
     res.status(201).json({ success: true, data: result.rows[0] });
@@ -58,11 +78,23 @@ export const updateOKR = async (req: AuthRequest, res: Response, next: NextFunct
   const values: unknown[] = [];
   let idx = 1;
 
+  const files = req.files as Express.Multer.File[];
+
   for (const [key, val] of Object.entries(fields)) {
-    if (val !== undefined) {
+    if (val !== undefined && key !== 'archivos') { // ignore if accidentally sent
       updates.push(`${key} = $${idx++}`);
       values.push(val);
     }
+  }
+
+  if (files && files.length > 0) {
+    const archivosData = files.map(file => ({
+      url: `/uploads/posts/${file.filename}`,
+      nombre: file.originalname,
+      tipo: file.mimetype
+    }));
+    updates.push(`archivos = $${idx++}`);
+    values.push(JSON.stringify(archivosData));
   }
 
   if (updates.length === 0) {
@@ -84,7 +116,32 @@ export const updateOKR = async (req: AuthRequest, res: Response, next: NextFunct
       return;
     }
 
-    res.json({ success: true, data: result.rows[0] });
+    const updatedOkr = result.rows[0];
+
+    // If the padawan just submitted the task (estado → EnProgreso), notify the Jedi
+    if (fields.estado === 'EnProgreso') {
+      const jediRes = await pool.query(
+        `SELECT u_m.usuario_id, o.descripcion FROM okr o
+         JOIN sesion_mentoria sm ON o.sesion_id = sm.sesion_id
+         JOIN matching m ON sm.matching_id = m.matching_id
+         JOIN mentor mt ON m.mentor_id = mt.mentor_id
+         JOIN usuario u_m ON mt.usuario_id = u_m.usuario_id
+         WHERE o.okr_id = $1`,
+        [okrId]
+      );
+      if (jediRes.rows.length > 0) {
+        await createNotification(
+          jediRes.rows[0].usuario_id,
+          'okr_entregado',
+          'Tu alumno entregó una tarea',
+          `Un Padawan entregó la tarea: "${jediRes.rows[0].descripcion}". ¡Revísala!`,
+          okrId,
+          'okr'
+        );
+      }
+    }
+
+    res.json({ success: true, data: updatedOkr });
   } catch (err) {
     next(err);
   }
@@ -198,12 +255,15 @@ export const completeOKR = async (req: AuthRequest, res: Response, next: NextFun
     // RN-06: COMMIT
     await client.query('COMMIT');
 
-    // RN-07: Async notification (simulated for MVP)
-    setImmediate(() => {
-      console.log(
-        `[ASYNC] Notificar mentor del padawan ${userId} — OKR ${okrId} completado. Nota: ${nota_cierre}`
-      );
-    });
+    // Notify Padawan their task was graded
+    await createNotification(
+      okr.padawan_usuario_id,
+      'okr_completado',
+      '¡Tu tarea fue calificada!',
+      `Tu mentor calificó tu tarea. Nota final registrada.`,
+      okrId,
+      'okr'
+    );
 
     // Fetch updated data
     const { rows } = await client.query(

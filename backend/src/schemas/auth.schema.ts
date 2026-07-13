@@ -6,6 +6,7 @@ export const registerSchema = z.object({
   email: z.string().email('Email inválido').max(150),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres').max(100),
   rol: z.enum(['Padawan', 'Jedi'], { message: 'Rol debe ser Padawan o Jedi' }),
+  membresia_id: z.string().uuid().optional(),
 });
 
 export const loginSchema = z.object({

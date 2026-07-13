@@ -10,10 +10,11 @@ export const createOKRSchema = z.object({
 export const updateOKRSchema = z.object({
   descripcion: z.string().min(5).max(1000).optional(),
   indicador: z.string().max(500).optional(),
-  valor_meta: z.number().positive().optional(),
-  valor_actual: z.number().min(0).optional(),
+  valor_meta: z.coerce.number().positive().optional(),
+  valor_actual: z.coerce.number().min(0).optional(),
   estado: z.enum(['Pendiente', 'EnProgreso', 'Completado', 'Cancelado']).optional(),
   fecha_limite: z.string().refine((v) => !isNaN(Date.parse(v)), 'Fecha inválida').optional(),
+  url_enlace: z.string().url('URL inválida').max(255).optional().or(z.literal('')),
 });
 
 export const completeOKRSchema = z.object({

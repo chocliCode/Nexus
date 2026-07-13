@@ -2,13 +2,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { notificationService } from '../../services/api';
-import { BarChart2, User, Rocket, Link as LinkIcon, Target, Briefcase, XCircle, CheckCircle2, TrendingUp, Trophy, MessageSquare, AlertTriangle, Mail, Bell, Menu } from 'lucide-react';
+import { notificationService, API_URL } from '../../services/api';
+import { BarChart2, User, Rocket, Link as LinkIcon, Target, Briefcase, XCircle, CheckCircle2, TrendingUp, Trophy, MessageSquare, AlertTriangle, Mail, Bell, Menu, BookOpen, Users } from 'lucide-react';
 
 const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: BarChart2 },
   { path: '/profile', label: 'Mi Perfil', icon: User },
+  { path: '/courses', label: 'Cursos', icon: BookOpen },
   { path: '/onboarding', label: 'Onboarding', icon: Rocket },
+  { path: '/mentors', label: 'Mentores', icon: Users },
   { path: '/matching', label: 'Matching', icon: LinkIcon },
   { path: '/sessions', label: 'Sesiones', icon: Target },
   { path: '/vacancies', label: 'Vacantes', icon: Briefcase },
@@ -46,8 +48,35 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadNotifications();
-    const interval = setInterval(loadNotifications, 30000); // poll every 30s
-    return () => clearInterval(interval);
+    
+    // Set up SSE connection for live notifications
+    const token = localStorage.getItem('nexus_token');
+    if (!token) return;
+
+    const eventSource = new EventSource(`${API_URL}/api/v1/notifications/stream?token=${token}`);
+
+    eventSource.addEventListener('NEW_NOTIFICATION', (event) => {
+      try {
+        const newNotification = JSON.parse(event.data);
+        setNotifications((prev) => [newNotification, ...prev].slice(0, 50));
+        setUnreadCount((prev) => prev + 1);
+        
+        // Optional: you can show a toast here, or play a sound
+      } catch { /* silent */ }
+    });
+
+    eventSource.addEventListener('NEW_NOTIFICATION_ROLE', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // Since we don't have the full notification object (with UUID) matching this specific user,
+        // we'll just trigger a refetch of the notifications list to get the real DB row for this user.
+        void loadNotifications();
+      } catch { /* silent */ }
+    });
+
+    return () => {
+      eventSource.close();
+    };
   }, []);
 
   const handleMarkAllRead = async () => {
@@ -76,9 +105,11 @@ export const Layout = ({ children }: { children: ReactNode }) => {
 
   const TIPO_ICONS: Record<string, React.ElementType> = {
     nueva_sesion: Target, sesion_cancelada: XCircle, sesion_realizada: CheckCircle2,
-    okr_creado: TrendingUp, okr_completado: Trophy, okr_feedback: MessageSquare,
+    okr_creado: TrendingUp, okr_completado: Trophy, okr_feedback: MessageSquare, okr_entregado: TrendingUp,
     matching_nuevo: LinkIcon, matching_aceptado: CheckCircle2, matching_rechazado: XCircle,
     riesgo_abandono: AlertTriangle, vacante_nueva: Briefcase, postulacion_recibida: Mail,
+    curso_nuevo: BookOpen, curso_inscripcion: BookOpen, curso_post: MessageSquare,
+    curso_comentario: MessageSquare, curso_actividad: Target, curso_calificacion: Trophy,
     sistema: Bell,
   };
 

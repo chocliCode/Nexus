@@ -5,14 +5,20 @@ import { AuthRequest, JwtPayload } from '../types';
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization;
+  let token: string | undefined;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token && typeof req.query.token === 'string') {
+    // Fallback for SSE / WebSockets where headers can't be easily set
+    token = req.query.token;
+  }
+
+  if (!token) {
     res.status(401).json({ error: 'Token de autenticación requerido', code: 'AUTH_REQUIRED' });
     return;
   }
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;

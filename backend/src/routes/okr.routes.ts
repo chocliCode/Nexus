@@ -10,8 +10,10 @@ const router = Router();
 router.post('/sessions/:sesionId/okrs', authMiddleware, validate(sesionIdParamSchema, 'params'), validate(createOKRSchema), createOKR);
 router.get('/sessions/:sesionId/okrs', authMiddleware, validate(sesionIdParamSchema, 'params'), listOKRs);
 
+import { postUploadMiddleware } from '../middleware/upload.middleware';
+
 // OKR operations
-router.put('/okrs/:okrId', authMiddleware, validate(okrIdParamSchema, 'params'), validate(updateOKRSchema), updateOKR);
+router.put('/okrs/:okrId', authMiddleware, postUploadMiddleware.array('archivos', 5), validate(okrIdParamSchema, 'params'), validate(updateOKRSchema), updateOKR);
 router.delete('/okrs/:okrId', authMiddleware, validate(okrIdParamSchema, 'params'), deleteOKR);
 router.post('/okrs/:okrId/complete', authMiddleware, validate(okrIdParamSchema, 'params'), validate(completeOKRSchema), completeOKR);
 router.post('/okrs/:okrId/feedback', authMiddleware, validate(okrIdParamSchema, 'params'), validate(feedbackOKRSchema), feedbackOKR);

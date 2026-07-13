@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
 import { authRateLimiter, globalRateLimiter } from './middleware/rateLimiter.middleware';
 
 dotenv.config();
@@ -19,19 +20,26 @@ import iaRoutes from './routes/ia.routes';
 import notificationRoutes from './routes/notification.routes';
 import classroomRoutes from './routes/classroom.routes';
 import chatRoutes from './routes/chat.routes';
+import courseRoutes from './routes/course.routes';
+import membershipRoutes from './routes/membership.routes';
 
 const app = express();
 
 // ============================================================
 // Global Middleware
 // ============================================================
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.FRONTEND_URL
-    : 'http://localhost:5174',
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : true,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-}));
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Suppress request logs during automated tests to keep output clean
 if (process.env.NODE_ENV !== 'test') {
@@ -55,6 +63,8 @@ app.get('/api/v1/health', (_req, res) => {
 // ============================================================
 // Routes
 // ============================================================
+app.options('*', cors(corsOptions)); // Enable pre-flight for all routes explicitly
+
 // Security: Strict rate limiter on auth endpoints (10 req / 15 min per IP)
 app.use('/api/v1/auth', authRateLimiter, authRoutes);
 app.use('/api/v1', sessionRoutes);
@@ -68,6 +78,8 @@ app.use('/api/v1', iaRoutes);
 app.use('/api/v1', notificationRoutes);
 app.use('/api/v1', classroomRoutes);
 app.use('/api/v1', chatRoutes);
+app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1', membershipRoutes);
 
 // ============================================================
 // 404 Handler

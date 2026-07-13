@@ -8,9 +8,11 @@ CREATE TABLE IF NOT EXISTS notificacion (
   usuario_id UUID NOT NULL REFERENCES usuario(usuario_id) ON DELETE CASCADE,
   tipo VARCHAR(50) NOT NULL CHECK (tipo IN (
     'nueva_sesion', 'sesion_cancelada', 'sesion_realizada',
-    'okr_creado', 'okr_completado', 'okr_feedback',
+    'okr_creado', 'okr_completado', 'okr_feedback', 'okr_entregado',
     'matching_nuevo', 'matching_aceptado', 'matching_rechazado',
     'riesgo_abandono', 'vacante_nueva', 'postulacion_recibida',
+    'curso_nuevo', 'curso_inscripcion', 'curso_post', 'curso_comentario',
+    'curso_actividad', 'curso_calificacion',
     'sistema'
   )),
   titulo VARCHAR(200) NOT NULL,

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
@@ -48,29 +48,17 @@ export const authService = {
 // ============ Sessions Service ============
 export const sessionService = {
   getMySessions: () => api.get('/sessions/my-sessions'),
-
-  listByMatching: (matchingId: string) =>
-    api.get(`/matchings/${matchingId}/sessions`),
-
-  create: (matchingId: string, data: { titulo: string; fecha_sesion: string; duracion_min?: number; notas?: string }) =>
-    api.post(`/matchings/${matchingId}/sessions`, data),
-
-  update: (sesionId: string, data: Record<string, unknown>) =>
-    api.put(`/sessions/${sesionId}`, data),
-
+  listByMatching: (matchingId: string) => api.get(`/matchings/${matchingId}/sessions`),
+  create: (matchingId: string, data: any) => api.post(`/matchings/${matchingId}/sessions`, data),
+  update: (sesionId: string, data: any) => api.put(`/sessions/${sesionId}`, data),
   delete: (sesionId: string) => api.delete(`/sessions/${sesionId}`),
 };
 
 // ============ OKR Service ============
 export const okrService = {
-  listBySession: (sesionId: string) =>
-    api.get(`/sessions/${sesionId}/okrs`),
-
-  create: (sesionId: string, data: { descripcion: string; indicador?: string; valor_meta: number; fecha_limite?: string }) =>
-    api.post(`/sessions/${sesionId}/okrs`, data),
-
-  update: (okrId: string, data: Record<string, unknown>) =>
-    api.put(`/okrs/${okrId}`, data),
+  listBySession: (sesionId: string) => api.get(`/sessions/${sesionId}/okrs`),
+  create: (sesionId: string, data: any) => api.post(`/sessions/${sesionId}/okrs`, data),
+  update: (okrId: string, data: any) => api.put(`/okrs/${okrId}`, data),
 
   delete: (okrId: string) => api.delete(`/okrs/${okrId}`),
 
@@ -117,6 +105,9 @@ export const profileService = {
   removeSkill: (habilidadId: string) =>
     api.delete(`/profile/skills/${habilidadId}`),
 
+  buyExtra: (data: { type: 'curso' | 'mentor', amount: number }) =>
+    api.post('/profile/me/buy-extra', data),
+
   getUserProfile: (userId: string) =>
     api.get(`/profile/user/${userId}`),
 };
@@ -156,4 +147,46 @@ export const chatService = {
   sendMessage: (matchingId: string, contenido: string) =>
     api.post(`/chat/${matchingId}/messages`, { contenido }),
   getUnreadCount: (matchingId: string) => api.get(`/chat/${matchingId}/unread`),
+};
+
+// ============ Membership Service ============
+export const membershipService = {
+  list: () => api.get('/memberships'),
+  update: (id: string, data?: any) => api.put(`/memberships/${id}`, data || {}),
+  upgrade: (membresia_id: string, simulationData: any) =>
+    api.post('/memberships/upgrade', { membresia_id, simulationData }),
+};
+
+// ============ Mentors Service ============
+export const mentorsService = {
+  list: () => api.get('/matchings/mentors'),
+  request: (mentorId: string) => api.post(`/matchings/mentors/${mentorId}/request`),
+  requestMentor: (mentorId: string) => api.post(`/matchings/mentors/${mentorId}/request`),
+  generateMatching: () => api.post('/matchings/generate'),
+};
+
+// ============ Course Service ============
+export const courseService = {
+  list: () => api.get('/courses'),
+  mine: () => api.get('/courses/my-courses'),
+  getById: (courseId: string) => api.get(`/courses/${courseId}`),
+  create: (data: any) => api.post('/courses', data),
+  join: (courseId: string) => api.post(`/courses/${courseId}/join`),
+  leave: (courseId: string) => api.post(`/courses/${courseId}/leave`),
+  open: (courseId: string) => api.patch(`/courses/${courseId}/open`),
+  close: (courseId: string) => api.patch(`/courses/${courseId}/close`),
+  createPost: (courseId: string, data: any) => api.post(`/courses/${courseId}/posts`, data),
+  getPosts: (courseId: string) => api.get(`/courses/${courseId}/posts`),
+  addComment: (postId: string, contenido: string) => api.post(`/courses/posts/${postId}/comments`, { contenido }),
+  deletePost: (postId: string) => api.delete(`/courses/posts/${postId}`),
+  submitAssignment: (assignmentId: string, data: any) => api.post(`/courses/assignments/${assignmentId}/submit`, data),
+  exportGrades: (courseId: string) => api.get(`/courses/${courseId}/grades/export`, { responseType: 'blob' }),
+  getAssignmentSubmissions: (assignmentId: string) => api.get(`/courses/assignments/${assignmentId}/submissions`),
+  getFeed: (courseId: string) => api.get(`/courses/${courseId}/feed`),
+  getStudents: (courseId: string) => api.get(`/courses/${courseId}/students`),
+  getGrades: (courseId: string) => api.get(`/courses/${courseId}/grades`),
+  togglePin: (postId: string) => api.patch(`/courses/posts/${postId}/pin`),
+  deleteComment: (commentId: string) => api.delete(`/courses/comments/${commentId}`),
+  createGrade: (courseId: string, data: any) => api.post(`/courses/${courseId}/grades`, data),
+  deleteGrade: (gradeId: string) => api.delete(`/courses/grades/${gradeId}`),
 };

@@ -19,7 +19,15 @@ services:
       - ./backend/src/db/migrations/002_onboarding.sql:/docker-entrypoint-initdb.d/002_onboarding.sql
       - ./backend/src/db/migrations/003_notifications.sql:/docker-entrypoint-initdb.d/003_notifications.sql
       - ./backend/src/db/migrations/004_classroom.sql:/docker-entrypoint-initdb.d/004_classroom.sql
-      - ./backend/src/db/seeds/test_data.sql:/docker-entrypoint-initdb.d/010_test_data.sql
+      - ./backend/src/db/migrations/005_courses.sql:/docker-entrypoint-initdb.d/005_courses.sql
+      - ./backend/src/db/migrations/006_course_classroom.sql:/docker-entrypoint-initdb.d/006_course_classroom.sql
+      - ./backend/src/db/migrations/007_course_assignments.sql:/docker-entrypoint-initdb.d/007_course_assignments.sql
+      - ./backend/src/db/migrations/008_course_post_archivos.sql:/docker-entrypoint-initdb.d/008_course_post_archivos.sql
+      - ./backend/src/db/migrations/009_session_attachments.sql:/docker-entrypoint-initdb.d/009_session_attachments.sql
+      - ./backend/src/db/migrations/011_okr_attachments.sql:/docker-entrypoint-initdb.d/011_okr_attachments.sql
+      - ./backend/src/db/migrations/012_memberships.sql:/docker-entrypoint-initdb.d/012_memberships.sql
+      - ./backend/src/db/migrations/013_extra_limits.sql:/docker-entrypoint-initdb.d/013_extra_limits.sql
+      - ./backend/src/db/seeds/test_data.sql:/docker-entrypoint-initdb.d/013_test_data.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U nexus_user -d nexus_db"]
       interval: 5s
@@ -34,25 +42,21 @@ services:
       DATABASE_URL: postgresql://nexus_user:nexus_local_pass@db:5432/nexus_db
       JWT_SECRET: nexus_local_dev_secret_key_2026
       PORT: 3001
-      NODE_ENV: development
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:5174
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3001
     ports:
-      - "5174:5174"
-    environment:
-      VITE_API_URL: http://localhost:3001
+      - "5174:80"
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
 
 volumes:
   postgres_data:

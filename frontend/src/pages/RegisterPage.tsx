@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { membershipService } from '../services/api';
+import { PaymentModal } from '../components/ui';
 import type { AxiosError } from 'axios';
 
 const registerSchema = z.object({
@@ -12,6 +14,7 @@ const registerSchema = z.object({
   email: z.string().email('Email inválido'),
   contrasena: z.string().min(8, 'Mínimo 8 caracteres'),
   rol: z.enum(['Padawan', 'Jedi']),
+  membresia_id: z.string().optional(),
 });
 type RegisterForm = z.infer<typeof registerSchema>;
 
@@ -26,7 +29,16 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<RegisterForm>({
+  const [memberships, setMemberships] = useState<any[]>([]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingRegistrationData, setPendingRegistrationData] = useState<RegisterForm | null>(null);
+  const [selectedMembershipPrice, setSelectedMembershipPrice] = useState(0);
+
+  useEffect(() => {
+    membershipService.list().then(res => setMemberships(res.data)).catch(() => {});
+  }, []);
+
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: { rol: 'Padawan' },
   });
@@ -35,6 +47,19 @@ const RegisterPage = () => {
   const selectedRol = watch('rol');
 
   const onSubmit = async (data: RegisterForm) => {
+    if (data.rol === 'Padawan' && data.membresia_id) {
+      const selectedPlan = memberships.find(m => m.membresia_id === data.membresia_id);
+      if (selectedPlan && Number(selectedPlan.precio) > 0) {
+        setSelectedMembershipPrice(Number(selectedPlan.precio));
+        setPendingRegistrationData(data);
+        setShowPaymentModal(true);
+        return;
+      }
+    }
+    await processRegistration(data);
+  };
+
+  const processRegistration = async (data: RegisterForm) => {
     setIsLoading(true);
     setError('');
     try {
@@ -45,6 +70,13 @@ const RegisterPage = () => {
       setError(axiosErr.response?.data?.error || 'Error de conexión con el servidor');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePaymentConfirm = () => {
+    setShowPaymentModal(false);
+    if (pendingRegistrationData) {
+      processRegistration(pendingRegistrationData);
     }
   };
 
@@ -189,6 +221,31 @@ const RegisterPage = () => {
               )}
             </div>
 
+            {/* Membership Selection for Padawans */}
+            {selectedRol === 'Padawan' && memberships.length > 0 && (
+              <div className="pt-2 animate-fade-in">
+                <label className="block text-sm font-medium mb-2 text-primary-500">
+                  Selecciona tu Nivel de Membresía
+                </label>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {memberships.map((m) => {
+                    const isSelected = watch('membresia_id') === m.membresia_id;
+                    const priceNum = Number(m.precio);
+                    return (
+                      <div key={m.membresia_id} onClick={() => setValue('membresia_id', m.membresia_id)}
+                           className={`p-3 rounded-xl border cursor-pointer transition-colors ${isSelected ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-primary-300'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                          <h4 className="font-bold text-sm text-neutral-800">{m.nombre}</h4>
+                          <span className="font-bold text-sm text-primary-600">{priceNum === 0 ? 'Gratis' : `S/ ${priceNum.toFixed(2)}`}</span>
+                        </div>
+                        <p className="text-xs text-neutral-500">Cursos: {m.limite_cursos === 999 ? '∞' : m.limite_cursos} | Mentores: {m.limite_mentores === 999 ? '∞' : m.limite_mentores}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isLoading}
@@ -213,6 +270,14 @@ const RegisterPage = () => {
           </p>
         </div>
       </div>
+      
+      <PaymentModal 
+        isOpen={showPaymentModal} 
+        onClose={() => setShowPaymentModal(false)}
+        amount={selectedMembershipPrice}
+        onConfirm={handlePaymentConfirm}
+        title="Pago de Membresía"
+      />
     </div>
   );
 };

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { profileService } from '../services/api';
-import { LoadingSpinner, Modal } from '../components/ui';
+import { profileService, membershipService } from '../services/api';
+import { LoadingSpinner, Modal, PaymentModal } from '../components/ui';
 import type { Skill, ProfileData, NivelHabilidad } from '../types';
-import { Star, X } from 'lucide-react';
+import { Star, X, Crown, Activity, Zap } from 'lucide-react';
 
 const NIVELES: { value: NivelHabilidad; label: string }[] = [
   { value: 'Basico', label: 'Básico' },
@@ -27,6 +27,18 @@ const ProfilePage = () => {
   const [showSkillModal, setShowSkillModal] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState('');
   const [selectedNivel, setSelectedNivel] = useState<NivelHabilidad>('Basico');
+  const [showMembershipModal, setShowMembershipModal] = useState(false);
+  const [memberships, setMemberships] = useState<any[]>([]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingUpgradeId, setPendingUpgradeId] = useState<string | null>(null);
+  const [selectedMembershipPrice, setSelectedMembershipPrice] = useState(0);
+
+  // Buy Extra States
+  const [showBuyExtraModal, setShowBuyExtraModal] = useState(false);
+  const [buyExtraType, setBuyExtraType] = useState<'curso' | 'mentor'>('curso');
+  const [buyExtraAmount, setBuyExtraAmount] = useState(1);
+  const [buyExtraTotal, setBuyExtraTotal] = useState(0);
+  const [isBuyingExtra, setIsBuyingExtra] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -58,13 +70,16 @@ const ProfilePage = () => {
     } catch { /* handled */ }
   }, []);
 
+  const loadMemberships = useCallback(async () => {
+    try {
+      const res = await membershipService.list();
+      setMemberships(res.data);
+    } catch { /* handled */ }
+  }, []);
+
   useEffect(() => {
-    const init = async () => {
-      await Promise.all([loadProfile(), loadSkills()]);
-      setLoading(false);
-    };
-    void init();
-  }, [loadProfile, loadSkills]);
+    Promise.all([loadProfile(), loadSkills(), loadMemberships()]).finally(() => setLoading(false));
+  }, [loadProfile, loadSkills, loadMemberships]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -79,7 +94,64 @@ const ProfilePage = () => {
     finally { setSaving(false); }
   };
 
-  const handleAddSkill = async () => {
+  const initiateUpgrade = (membresia_id: string, price: number) => {
+    if (price > 0) {
+      setSelectedMembershipPrice(price);
+      setPendingUpgradeId(membresia_id);
+      setShowMembershipModal(false);
+      setShowPaymentModal(true);
+    } else {
+      processUpgrade(membresia_id);
+    }
+  };
+
+  const processUpgrade = async (membresia_id: string) => {
+    try {
+      await membershipService.update(membresia_id);
+      await loadProfile();
+      setMessage('Membresía actualizada con éxito');
+      setShowMembershipModal(false);
+      setShowPaymentModal(false);
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || 'Error al actualizar membresía');
+    }
+  };
+
+  const initiateBuyExtra = (type: 'curso' | 'mentor') => {
+    setBuyExtraType(type);
+    setBuyExtraAmount(1);
+    setBuyExtraTotal(type === 'curso' ? 2 : 5); // 2 soles per course, 5 per mentor
+    setShowBuyExtraModal(true);
+  };
+
+  const confirmBuyExtraSetup = () => {
+    setShowBuyExtraModal(false);
+    setIsBuyingExtra(true);
+    setSelectedMembershipPrice(buyExtraTotal);
+    setShowPaymentModal(true);
+  };
+
+  const processBuyExtra = async () => {
+    try {
+      await profileService.buyExtra({ type: buyExtraType, amount: buyExtraAmount });
+      await loadProfile();
+      setMessage(`¡Límite de ${buyExtraType}s expandido con éxito!`);
+      setShowPaymentModal(false);
+      setIsBuyingExtra(false);
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || 'Error al comprar extras');
+    }
+  };
+
+  const handlePaymentConfirm = () => {
+    if (isBuyingExtra) {
+      processBuyExtra();
+    } else if (pendingUpgradeId) {
+      processUpgrade(pendingUpgradeId);
+    }
+  };
+
+  const addSkill = async () => {
     if (!selectedSkill) return;
     try {
       await profileService.addSkill({ habilidad_id: selectedSkill, nivel: selectedNivel });
@@ -179,6 +251,82 @@ const ProfilePage = () => {
           </div>
         </div>
       )}
+
+      {/* Membresía (Padawan) */}
+      {isPadawan && profile?.membresia_nombre && (
+        <div className="card p-6 mb-6">
+          <div className="flex items-start justify-between mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Crown className="w-5 h-5 text-primary-500" /> Mi Membresía
+            </h2>
+            <button onClick={() => setShowMembershipModal(true)} className="btn-secondary text-xs py-1.5 px-3 rounded-lg">
+              Actualizar Plan
+            </button>
+          </div>
+          
+          <div className="p-4 rounded-xl mb-4 border border-primary-500/20 bg-primary-50">
+            <h3 className="text-xl font-bold text-primary-700 mb-1">{profile.membresia_nombre}</h3>
+            <p className="text-sm text-neutral-600 mb-4">Maneja tu capacidad de aprendizaje en Nexus.</p>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white p-3 rounded-lg border border-neutral-200">
+                <div className="flex justify-between items-start mb-1">
+                  <p className="text-xs text-neutral-500 font-medium">Mentores Activos</p>
+                  <button onClick={() => initiateBuyExtra('mentor')} className="text-[10px] bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full hover:bg-primary-200 transition-colors font-semibold">
+                    + Comprar
+                  </button>
+                </div>
+                <div className="flex items-end justify-between">
+                  <span className="text-lg font-bold text-neutral-800">
+                    {profile.mentores_activos} <span className="text-sm text-neutral-400 font-normal">/ {profile.limite_mentores === 999 ? '∞' : (profile.limite_mentores || 0) + (profile.limite_mentores_extra || 0)}</span>
+                  </span>
+                  <Activity className="w-4 h-4 text-primary-500 mb-1" />
+                </div>
+                {(profile.limite_mentores_extra || 0) > 0 && (
+                  <p className="text-[10px] text-primary-600 mt-1">Incluye +{profile.limite_mentores_extra} extra</p>
+                )}
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-neutral-200">
+                <div className="flex justify-between items-start mb-1">
+                  <p className="text-xs text-neutral-500 font-medium">Cursos Activos</p>
+                  <button onClick={() => initiateBuyExtra('curso')} className="text-[10px] bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full hover:bg-primary-200 transition-colors font-semibold">
+                    + Comprar
+                  </button>
+                </div>
+                <div className="flex items-end justify-between">
+                  <span className="text-lg font-bold text-neutral-800">
+                    {profile.cursos_activos} <span className="text-sm text-neutral-400 font-normal">/ {profile.limite_cursos === 999 ? '∞' : (profile.limite_cursos || 0) + (profile.limite_cursos_extra || 0)}</span>
+                  </span>
+                  <Zap className="w-4 h-4 text-primary-500 mb-1" />
+                </div>
+                {(profile.limite_cursos_extra || 0) > 0 && (
+                  <p className="text-[10px] text-primary-600 mt-1">Incluye +{profile.limite_cursos_extra} extra</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Buy Extra Modal */}
+      <Modal isOpen={showBuyExtraModal} onClose={() => setShowBuyExtraModal(false)} title={`Comprar ${buyExtraType === 'curso' ? 'Cursos' : 'Mentores'} Extra`}>
+        <div className="space-y-4">
+          <p className="text-sm text-neutral-600">
+            ¿Necesitas más capacidad? Compra espacios extra de forma vitalicia sin cambiar de plan de membresía.
+          </p>
+          <div className="flex justify-between items-center bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+            <div>
+              <p className="font-semibold text-neutral-800">+1 {buyExtraType === 'curso' ? 'Curso' : 'Mentor'} Extra</p>
+              <p className="text-xs text-neutral-500">Pago único, de por vida.</p>
+            </div>
+            <span className="font-bold text-primary-600">S/ {buyExtraType === 'curso' ? 2 : 5}.00</span>
+          </div>
+          
+          <button onClick={confirmBuyExtraSetup} className="btn-primary w-full py-3 mt-4 flex justify-center items-center gap-2">
+            Continuar con el Pago (S/ {buyExtraTotal}.00)
+          </button>
+        </div>
+      </Modal>
 
       {/* Datos de Mentor (Jedi) */}
       {isJedi && (
@@ -312,12 +460,44 @@ const ProfilePage = () => {
               ))}
             </div>
           </div>
-          <button onClick={handleAddSkill} disabled={!selectedSkill}
-                  className="btn-primary w-full">
-            Agregar habilidad
-          </button>
+          <button onClick={addSkill} className="btn-primary w-full mt-4">Agregar Habilidad</button>
         </div>
       </Modal>
+
+      {/* Upgrade Membership Modal */}
+      <Modal isOpen={showMembershipModal} onClose={() => setShowMembershipModal(false)} title="Actualizar Membresía">
+        <div className="space-y-4">
+          <p className="text-sm text-neutral-600">Mejora tu plan para acceder a más cursos y mentores simultáneos.</p>
+          <div className="grid grid-cols-1 gap-3 mt-4">
+            {memberships.map((m) => {
+              const isCurrent = m.nombre === profile?.membresia_nombre;
+              return (
+                <div key={m.membresia_id} className={`p-4 rounded-xl border ${isCurrent ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-primary-300 bg-white'} transition-colors cursor-pointer flex justify-between items-center`} onClick={() => !isCurrent && initiateUpgrade(m.membresia_id, Number(m.precio))}>
+                  <div>
+                    <h4 className="font-bold text-neutral-800 flex items-center gap-2">
+                      {m.nombre} {isCurrent && <span className="text-[10px] bg-primary-500 text-white px-2 py-0.5 rounded-full">Actual</span>}
+                    </h4>
+                    <p className="text-xs text-neutral-500 mt-1">Cursos: {m.limite_cursos === 999 ? '∞' : m.limite_cursos} | Mentores: {m.limite_mentores === 999 ? '∞' : m.limite_mentores}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-primary-600">{Number(m.precio) === 0 ? 'Gratis' : `S/ ${Number(m.precio).toFixed(2)}`}</span>
+                    {Number(m.precio) > 0 && <span className="text-xs text-neutral-400">/mes</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={selectedMembershipPrice}
+        onConfirm={handlePaymentConfirm}
+        title="Pago de Membresía"
+      />
     </div>
   );
 };
