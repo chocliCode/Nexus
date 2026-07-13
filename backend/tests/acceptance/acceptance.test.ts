@@ -291,12 +291,11 @@ defineFeature(feature, (test) => {
 
   // UAT-CRS-01
   test('UAT-CRS-01 Un Jedi crea un curso exitosamente', ({ given, when, then, and }) => {
-    let jediTokenLocal = adminToken; // Admin can create courses usually, or we use it as is
     given('que un Jedi ha iniciado sesion', () => {});
     when(/^el Jedi envia el formulario de creacion de curso con titulo "(.*)"$/, async (titulo) => {
       response = await request(app)
         .post('/api/v1/courses')
-        .set('Authorization', `Bearer ${jediTokenLocal}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({ titulo, max_estudiantes: 30 });
     });
     then('el sistema debe registrar el curso', () => {
