@@ -44,7 +44,7 @@ export const createOKR = async (req: AuthRequest, res: Response, next: NextFunct
       );
     }
 
-    console.log(`[OKR] Created OKR for session ${sesionId}`);
+    console.log('[OKR] Created OKR');
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     next(err);
@@ -335,7 +335,7 @@ export const feedbackOKR = async (req: AuthRequest, res: Response, next: NextFun
         [comentario || 'Aprobado ✓', okrId]
       );
 
-      console.log(`[OKR] Feedback approved: ${okrId} by ${req.user?.email}`);
+      console.log('[OKR] Feedback approved');
       res.json({ success: true, data: result.rows[0] });
     } else {
       // Revert to EnProgreso for revision
@@ -351,7 +351,7 @@ export const feedbackOKR = async (req: AuthRequest, res: Response, next: NextFun
         [comentario || 'Requiere revisión', okrId]
       );
 
-      console.log(`[OKR] Feedback revision requested: ${okrId} by ${req.user?.email}`);
+      console.log('[OKR] Feedback revision requested');
       res.json({ success: true, data: result.rows[0] });
     }
   } catch (err) {

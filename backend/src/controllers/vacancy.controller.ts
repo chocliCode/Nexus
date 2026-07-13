@@ -61,7 +61,7 @@ export const createVacancy = async (req: AuthRequest, res: Response, next: NextF
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [empresa_id, titulo, descripcion, salario_min, salario_max, modalidad]
     );
-    console.log(`[VACANCY] Created: ${titulo}`);
+    console.log('[VACANCY] Created vacancy');
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     next(err);
@@ -137,7 +137,7 @@ export const applyToVacancy = async (req: AuthRequest, res: Response, next: Next
       [vacancyId, userId, mensaje || null]
     );
 
-    console.log(`[VACANCY] User ${userId} applied to "${vacancy.rows[0].titulo}"`);
+    console.log('[VACANCY] User applied');
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     next(err);

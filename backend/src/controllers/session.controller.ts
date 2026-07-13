@@ -57,7 +57,7 @@ export const createSession = async (req: AuthRequest, res: Response, next: NextF
       'sesion'
     );
 
-    console.log(`[SESSION] Created session "${titulo}" for matching ${matchingId}`);
+    console.log('[SESSION] Created session');
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     next(err);
@@ -163,7 +163,7 @@ export const updateSession = async (req: AuthRequest, res: Response, next: NextF
       }
     }
 
-    console.log(`[SESSION] Updated session ${sesionId}`);
+    console.log('[SESSION] Updated session');
     res.json({ success: true, data: updated });
   } catch (err) {
     next(err);
@@ -206,7 +206,7 @@ export const deleteSession = async (req: AuthRequest, res: Response, next: NextF
       await createNotification(otroId, 'sesion_cancelada', 'Sesión cancelada', `La sesión "${result.rows[0].titulo}" fue cancelada.`, sesionId, 'sesion');
     }
 
-    console.log(`[SESSION] Cancelled session ${sesionId}`);
+    console.log('[SESSION] Cancelled session');
     res.json({ success: true, data: result.rows[0] });
   } catch (err) {
     next(err);

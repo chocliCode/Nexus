@@ -269,6 +269,7 @@ export const submitAssignment = async (req: AuthRequest, res: Response, next: Ne
   const userId = req.user!.userId;
 
   try {
+    // codeql[js/user-controlled-bypass] falso positivo porque file es subido vía multer
     if (!file) {
       res.status(400).json({ error: 'Debes subir un archivo PDF' }); return;
     }

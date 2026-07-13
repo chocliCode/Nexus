@@ -120,7 +120,7 @@ export const generateMatching = async (req: AuthRequest, res: Response, next: Ne
       [perfilId, bestMentor.mentor_id, score]
     );
 
-    console.log(`[MATCHING] Generated: Padawan=${req.user.email}, Mentor=${bestMentor.nombres} ${bestMentor.apellidos}, Score=${score}`);
+    console.log('[MATCHING] Generated');
     res.status(201).json({
       success: true,
       data: { ...matchResult.rows[0], mentor_nombres: bestMentor.nombres, mentor_apellidos: bestMentor.apellidos },
@@ -165,7 +165,7 @@ export const respondMatching = async (req: AuthRequest, res: Response, next: Nex
       [nuevoEstado, matchingId]
     );
 
-    console.log(`[MATCHING] ${accion}: ${matchingId} by ${req.user.email}`);
+    console.log('[MATCHING] Match action taken');
     res.json({ success: true, data: updated.rows[0] });
   } catch (err) { next(err); }
 };
@@ -247,7 +247,7 @@ export const requestMentor = async (req: AuthRequest, res: Response, next: NextF
       [perfilId, mentorId, 1.0]
     );
 
-    console.log(`[MATCHING] Manual Request: Padawan=${req.user.email}, MentorID=${mentorId}`);
+    console.log('[MATCHING] Manual Request');
     res.status(201).json({ success: true, data: matchResult.rows[0] });
   } catch (err) { next(err); }
 };

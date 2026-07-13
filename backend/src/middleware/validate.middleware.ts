@@ -20,7 +20,7 @@ export const validate = (schema: ZodSchema, target: ValidationTarget = 'body') =
           campo: e.path.join('.'),
           mensaje: e.message,
         }));
-        console.error(`[Validation Error] on ${req.method} ${req.originalUrl}:`, details);
+        console.error('[Validation Error] on %s %s:', req.method, req.originalUrl, details);
         res.status(400).json({
           error: 'Error de validación',
           code: 'VALIDATION_ERROR',

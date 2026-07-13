@@ -65,7 +65,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
     const payload: JwtPayload = { userId: user.usuario_id, email: user.email, rol: user.rol };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 
-    console.log(`[AUTH] New user registered: ${email} (${rol})`);
+    console.log('[AUTH] New user registered');
 
     res.status(201).json({
       success: true,
@@ -123,7 +123,7 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
     const payload: JwtPayload = { userId: user.usuario_id, email: user.email, rol: user.rol };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 
-    console.log(`[AUTH] User logged in: ${email}`);
+    console.log('[AUTH] User logged in');
 
     res.json({
       success: true,
