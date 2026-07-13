@@ -1,0 +1,69 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Ramp-up Padawans consultando muro"
+    - duration: 60
+      arrivalRate: 20
+      name: "Flujo activo de lectura y escritura de tareas"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "LOAD-TSK-01: Alta demanda de lectura del feed del curso"
+    weight: 5
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "padawan@nexus.test"
+            contrasena: "Test1234!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/v1/courses/course-seed-123/feed"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  - name: "LOAD-TSK-02: Carga sostenida de creacion de tareas por multiples Mentores"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "jedi@nexus.test"
+            contrasena: "Test1234!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - post:
+          url: "/api/v1/courses/course-seed-123/posts"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            tipo: "TAREA"
+            contenido: "Tarea automatica {{ $randomNumber(1, 1000) }}"
+            fecha_vencimiento: "2028-01-01"
+
+  - name: "LOAD-TSK-03: Insercion concurrente de comentarios en una misma tarea"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "padawan@nexus.test"
+            contrasena: "Test1234!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - post:
+          url: "/api/v1/courses/posts/post-seed-123/comments"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            contenido: "Tengo una duda con esta tarea"

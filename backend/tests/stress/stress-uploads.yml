@@ -1,0 +1,42 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 30
+      arrivalRate: 150
+      name: "DDoS de Uploads"
+  defaults:
+    headers:
+      Content-Type: "multipart/form-data"
+
+scenarios:
+  - name: "STRESS-PDF-01: Avalancha de Multipart/form-data pesados para ahogar RAM"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/courses/posts/post-uuid-123/submissions"
+          headers:
+            Authorization: "Bearer token_padawan"
+          formData:
+            archivo: "A".repeat(5000000) # 5MB string
+
+  - name: "STRESS-PDF-02: Peticiones incompletas sin archivo"
+    weight: 5
+    flow:
+      - post:
+          url: "/api/v1/courses/posts/post-uuid-123/submissions"
+          headers:
+            Authorization: "Bearer token_padawan"
+          formData:
+            notas: "Test incompleto"
+          expect:
+            - statusCode: 400
+
+  - name: "STRESS-PDF-03: Carga paralela extrema saturando workers"
+    weight: 1
+    flow:
+      - loop:
+          - get:
+              url: "/api/v1/courses/posts/post-uuid-123/submissions"
+              headers:
+                Authorization: "Bearer token_padawan"
+        count: 50

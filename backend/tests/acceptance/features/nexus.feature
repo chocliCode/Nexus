@@ -109,3 +109,86 @@ Feature: Validacion de Flujos de Negocio de NEXUS (Pruebas de Aceptacion)
     Given que un admin inicio sesion
     When el admin consulta el endpoint del dashboard
     Then el sistema devuelve estadisticas de usuarios y completitud
+
+  # =======================================================
+  # Modulo: Cursos
+  # =======================================================
+  Scenario: UAT-CRS-01 Un Jedi crea un curso exitosamente
+    Given que un Jedi ha iniciado sesion
+    When el Jedi envia el formulario de creacion de curso con titulo "Testing BDD"
+    Then el sistema debe registrar el curso
+    And el status de la creacion debe ser 201
+
+  Scenario: UAT-CRS-02 Validar que los campos obligatorios de curso son requeridos
+    Given que un Jedi ha iniciado sesion
+    When el Jedi envia el formulario de creacion de curso sin titulo
+    Then el sistema debe rechazar la peticion por validacion
+    And el status de la creacion debe ser 400
+
+  Scenario: UAT-CRS-03 El curso creado aparece en el dashboard del Jedi
+    Given que un Jedi ha iniciado sesion
+    When el Jedi consulta la lista de sus cursos
+    Then el sistema devuelve la lista que incluye el curso recien creado
+
+  # =======================================================
+  # Modulo: Tareas (Aula Virtual)
+  # =======================================================
+  Scenario: UAT-TSK-01 Un Mentor crea una tarea con fecha de cierre
+    Given que un Mentor ha iniciado sesion
+    And tiene un curso activo
+    When el Mentor publica una tarea con titulo "Entregable 1" y fecha de cierre
+    Then el sistema registra la tarea en el feed del curso
+    And el status de la tarea creada es 201
+
+  Scenario: UAT-TSK-02 Una tarea sin fecha es rechazada
+    Given que un Mentor ha iniciado sesion
+    And tiene un curso activo
+    When el Mentor publica una tarea sin fecha de cierre
+    Then el sistema rechaza la solicitud
+    And el status de la tarea creada es 400
+
+  Scenario: UAT-TSK-03 Un Padawan ve la tarea en su feed
+    Given que un Padawan esta inscrito en el curso
+    When el Padawan accede al feed del aula virtual
+    Then el sistema retorna un arreglo con las publicaciones
+    And el arreglo incluye la tarea publicada
+
+  # =======================================================
+  # Modulo: Resolucion de Tareas (Subir PDF)
+  # =======================================================
+  Scenario: UAT-PDF-01 Padawan sube su resolucion en PDF a tiempo
+    Given que un Padawan tiene una tarea pendiente
+    When el Padawan envia un archivo PDF como solucion
+    Then el sistema registra la entrega exitosamente
+    And el status de la entrega es 201
+
+  Scenario: UAT-PDF-02 Padawan intenta subir un archivo que no es PDF
+    Given que un Padawan tiene una tarea pendiente
+    When el Padawan envia un archivo bash malicioso
+    Then el sistema bloquea la carga del archivo
+    And el status de la entrega es 400
+
+  Scenario: UAT-PDF-03 El Mentor visualiza la tarea entregada
+    Given que el Padawan entrego su solucion
+    When el Mentor consulta las entregas de la tarea
+    Then la respuesta incluye el archivo PDF del Padawan
+
+  # =======================================================
+  # Modulo: Calificaciones y Reportes
+  # =======================================================
+  Scenario: UAT-GRD-01 Mentor califica la tarea de un alumno exitosamente
+    Given que hay una entrega pendiente de revision
+    When el Mentor envia la calificacion "18"
+    Then el sistema actualiza la entrega
+    And el status de la peticion es 200
+
+  Scenario: UAT-GRD-02 Mentor solicita exportar las notas del curso
+    Given que el curso tiene alumnos con calificaciones
+    When el Mentor solicita descargar el reporte CSV
+    Then el sistema genera y devuelve el archivo
+
+  Scenario: UAT-GRD-03 Validacion de rangos de calificacion
+    Given que hay una entrega pendiente de revision
+    When el Mentor intenta asignar una nota "25"
+    Then el sistema rechaza la calificacion
+    And el status de la peticion es 400

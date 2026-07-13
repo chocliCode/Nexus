@@ -1,0 +1,53 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 20
+      arrivalRate: 100
+      name: "Spike DDoS de Tareas"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "STRESS-TSK-01: Avalancha de envio de tareas malformadas"
+    weight: 1
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "jedi@nexus.test"
+            contrasena: "Test1234!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - post:
+          url: "/api/v1/courses/course-123/posts"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            tipo: "TAREA"
+            contenido: "Falta Fecha"
+  
+  - name: "STRESS-TSK-02: DDoS intentando eliminar tareas masivamente"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "padawan@nexus.test"
+            contrasena: "Test1234!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - delete:
+          url: "/api/v1/courses/posts/post-uuid-123"
+          headers:
+            Authorization: "Bearer {{ token }}"
+  
+  - name: "STRESS-TSK-03: Consulta paralela al feed estresando JOINS"
+    weight: 5
+    flow:
+      - get:
+          url: "/api/v1/courses/course-123/feed"
+          headers:
+            Authorization: "Bearer valid_token_fallback"

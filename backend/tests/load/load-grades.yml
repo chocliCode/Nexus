@@ -1,0 +1,37 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 30
+      arrivalRate: 50
+      name: "Concurrencia alta de lectura y exportacion"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "LOAD-GRD-01: Generacion simultanea de reportes CSV"
+    weight: 1
+    flow:
+      - get:
+          url: "/api/v1/courses/course-uuid-123/grades/export"
+          headers:
+            Authorization: "Bearer token_admin"
+
+  - name: "LOAD-GRD-02: Mentor calificando alumnos rapidamente (Batch Puts)"
+    weight: 3
+    flow:
+      - put:
+          url: "/api/v1/courses/submissions/sub-uuid-123/grade"
+          headers:
+            Authorization: "Bearer token_admin"
+          json:
+            calificacion: "{{ $randomNumber(0, 20) }}"
+            retroalimentacion: "Revisado por Artillery"
+
+  - name: "LOAD-GRD-03: Alumnos consultando sus notas compulsivamente"
+    weight: 5
+    flow:
+      - get:
+          url: "/api/v1/users/me/grades" # Asumiendo un endpoint de consulta personal
+          headers:
+            Authorization: "Bearer token_padawan"

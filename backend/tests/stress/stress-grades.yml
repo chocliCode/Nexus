@@ -1,0 +1,42 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 60
+      arrivalRate: 200
+      name: "Saturacion de Event Loop y Base de Datos"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "STRESS-GRD-01: Ataque masivo intentando provocar Deadlocks de calificacion"
+    weight: 3
+    flow:
+      - loop:
+          - put:
+              url: "/api/v1/courses/submissions/sub-id-123/grade"
+              headers:
+                Authorization: "Bearer admin_token"
+              json:
+                calificacion: 15
+        count: 20
+
+  - name: "STRESS-GRD-02: Exportacion DDoS de base de datos completa"
+    weight: 1
+    flow:
+      - get:
+          url: "/api/v1/courses/huge-course-id/grades/export"
+          headers:
+            Authorization: "Bearer admin_token"
+
+  - name: "STRESS-GRD-03: Spam de calificaciones vacias"
+    weight: 5
+    flow:
+      - put:
+          url: "/api/v1/courses/submissions/sub-id-123/grade"
+          headers:
+            Authorization: "Bearer admin_token"
+          json:
+            retroalimentacion: "Null grade spam"
+          expect:
+            - statusCode: 400

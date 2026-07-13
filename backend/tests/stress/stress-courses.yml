@@ -1,0 +1,46 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 10
+      arrivalRate: 20
+      name: "Spike Inicial"
+    - duration: 30
+      arrivalRate: 200
+      name: "Avalancha DDoS"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "STRESS-CRS-01: Pico absoluto en lectura del catalogo"
+    flow:
+      - get:
+          url: "/api/v1/courses"
+  
+  - name: "STRESS-CRS-02: Avalancha de inserciones hasta quebrar pool BD"
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "jedi@nexus.test"
+            contrasena: "Test1234!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - loop:
+          - post:
+              url: "/api/v1/courses"
+              headers:
+                Authorization: "Bearer {{ token }}"
+              json:
+                titulo: "Stress Test Course"
+        count: 10
+
+  - name: "STRESS-CRS-03: Multiples fallos de autorizacion (Fuerza Bruta 401)"
+    flow:
+      - post:
+          url: "/api/v1/courses"
+          headers:
+            Authorization: "Bearer fake_token_to_saturate_jwt"
+          json:
+            titulo: "Will fail"

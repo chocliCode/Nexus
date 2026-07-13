@@ -1,0 +1,50 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 60
+      arrivalRate: 20
+      name: "Entrega masiva en hora pico (11:59 PM)"
+  defaults:
+    headers:
+      Content-Type: "multipart/form-data"
+
+scenarios:
+  - name: "LOAD-PDF-01: 20 alumnos intentando subir PDFs al mismo tiempo"
+    weight: 2
+    flow:
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "padawan@nexus.test"
+            contrasena: "Test1234!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - post:
+          url: "/api/v1/courses/posts/post-uuid-123/submissions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          formData:
+            notas: "Adjunto mi resolucion final"
+            archivo: "buffer_binario_pdf_dummy"
+          expect:
+            - statusCode: 201
+
+  - name: "LOAD-PDF-02: Mentor consultando la lista de envios"
+    weight: 5
+    flow:
+      - get:
+          url: "/api/v1/courses/posts/post-uuid-123/submissions"
+          headers:
+            Authorization: "Bearer dummy_admin_token"
+
+  - name: "LOAD-PDF-03: Alumno actualizando su envio (Resubida)"
+    weight: 1
+    flow:
+      - put:
+          url: "/api/v1/courses/submissions/sub-uuid-123/grade"
+          headers:
+            Authorization: "Bearer dummy_admin_token"
+          json:
+            calificacion: 18
+            retroalimentacion: "Buen trabajo"
