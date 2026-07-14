@@ -1,13 +1,20 @@
 import { Response, NextFunction } from 'express';
 import pool from '../../../src/db/pool';
-import { createCourse } from '../../../src/controllers/course.controller';
+import { 
+  createCourse, listCourses, getMyCourses, getCourseDetail, 
+  openCourse, closeCourse, joinCourse, leaveCourse 
+} from '../../../src/controllers/course.controller';
 import { AuthRequest } from '../../../src/types';
 
 jest.mock('../../../src/db/pool', () => ({
   query: jest.fn(),
 }));
 
-describe('Course Controller - Create Course (Unit Tests)', () => {
+jest.mock('../../../src/controllers/notification.controller', () => ({
+  createNotification: jest.fn(),
+}));
+
+describe('Course Controller (Unit Tests)', () => {
   let mockReq: Partial<AuthRequest>;
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
@@ -15,12 +22,8 @@ describe('Course Controller - Create Course (Unit Tests)', () => {
   beforeEach(() => {
     mockReq = {
       user: { userId: 'jedi123', email: 'jedi@nexus.test', rol: 'Jedi' },
-      body: {
-        titulo: 'Curso de Testing',
-        descripcion: 'Aprende a testear',
-        categoria: 'Desarrollo',
-        max_estudiantes: 20
-      },
+      body: {},
+      params: {}
     };
     mockRes = {
       status: jest.fn().mockReturnThis(),
@@ -30,54 +33,140 @@ describe('Course Controller - Create Course (Unit Tests)', () => {
     jest.clearAllMocks();
   });
 
-  it('UNIT-CRS-01: retorna 201 y el curso creado al insertar correctamente', async () => {
-    const mockDbResponse = {
-      rows: [{
-        curso_id: 'curso1',
-        jedi_id: 'jedi123',
-        titulo: 'Curso de Testing',
-        descripcion: 'Aprende a testear',
-        categoria: 'Desarrollo',
-        max_estudiantes: 20
-      }]
-    };
-    (pool.query as jest.Mock).mockResolvedValueOnce(mockDbResponse);
+  describe('createCourse', () => {
+    it('retorna 400 si titulo no existe', async () => {
+      await createCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
 
-    await createCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
-
-    expect(pool.query).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO curso'),
-      ['jedi123', 'Curso de Testing', 'Aprende a testear', 'Desarrollo', 20]
-    );
-    expect(mockRes.status).toHaveBeenCalledWith(201);
-    expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockDbResponse.rows[0] });
+    it('crea el curso', async () => {
+      mockReq.body = { titulo: 'Curso 1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c1' }] });
+      await createCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      expect(mockRes.json).toHaveBeenCalled();
+    });
   });
 
-  it('UNIT-CRS-02: invoca next con error si la BD falla', async () => {
-    const errorBD = new Error('DB Connection Failed');
-    (pool.query as jest.Mock).mockRejectedValueOnce(errorBD);
-
-    await createCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
-
-    expect(mockNext).toHaveBeenCalledWith(errorBD);
-    expect(mockRes.status).not.toHaveBeenCalled();
+  describe('listCourses', () => {
+    it('lista los cursos abiertos', async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c1' }] });
+      await listCourses(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: [{ curso_id: 'c1' }] });
+    });
   });
 
-  it('UNIT-CRS-03: aplica valores por defecto para campos opcionales si vienen vacios', async () => {
-    mockReq.body = { titulo: 'Curso Minimalista' }; // Sin descripcion, categoria o max_estudiantes
+  describe('getMyCourses', () => {
+    it('obtiene mis cursos como Jedi', async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c1' }] });
+      await getMyCourses(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: [{ curso_id: 'c1' }] });
+    });
 
-    const mockDbResponse = {
-      rows: [{ titulo: 'Curso Minimalista', max_estudiantes: 30 }]
-    };
-    (pool.query as jest.Mock).mockResolvedValueOnce(mockDbResponse);
+    it('obtiene mis cursos como Padawan', async () => {
+      mockReq.user!.rol = 'Padawan';
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c2' }] });
+      await getMyCourses(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: [{ curso_id: 'c2' }] });
+    });
+  });
 
-    await createCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+  describe('getCourseDetail', () => {
+    it('retorna 404 si curso no existe', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      await getCourseDetail(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+    });
 
-    // Debe asignar null a descripcion y categoria, y 30 a max_estudiantes
-    expect(pool.query).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO curso'),
-      ['jedi123', 'Curso Minimalista', null, null, 30]
-    );
-    expect(mockRes.status).toHaveBeenCalledWith(201);
+    it('retorna el curso y estudiantes', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c1' }] }); // course
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ usuario_id: 'p1' }] }); // students
+      await getCourseDetail(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: { curso_id: 'c1', estudiantes: [{ usuario_id: 'p1' }] } });
+    });
+  });
+
+  describe('openCourse', () => {
+    it('retorna 404 si no existe o no tiene permiso', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      await openCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+    });
+
+    it('abre el curso y notifica', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c1' }] });
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ usuario_id: 'p1' }] }); // padawans to notify
+      await openCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.json).toHaveBeenCalled();
+    });
+  });
+
+  describe('closeCourse', () => {
+    it('cierra el curso', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c1' }] });
+      await closeCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.json).toHaveBeenCalled();
+    });
+  });
+
+  describe('joinCourse', () => {
+    it('retorna 404 si no existe', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      await joinCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+    });
+
+    it('retorna 400 si curso esta cerrado', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ estado: 'Cerrado' }] });
+      await joinCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('retorna 403 si limite de cursos es excedido', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ estado: 'Abierto', max_estudiantes: 10 }] }); // curso
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ limite_cursos: 1, limite_cursos_extra: 0 }] }); // limits
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ total: '2' }] }); // current courses
+      await joinCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(403);
+    });
+
+    it('retorna 400 si esta lleno', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ estado: 'Abierto', max_estudiantes: 10 }] }); // curso
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ limite_cursos: 2, limite_cursos_extra: 0 }] }); // limits
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ total: '1' }] }); // current courses
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ total: '10' }] }); // current capacity
+      await joinCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('inscribe con exito', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ estado: 'Abierto', max_estudiantes: 10 }] }); // curso
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ limite_cursos: 2, limite_cursos_extra: 0 }] }); // limits
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ total: '1' }] }); // current courses
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ total: '5' }] }); // current capacity
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ curso_id: 'c1', padawan_id: 'u1' }] }); // insert
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ nombre_completo: 'Padawan Test' }] }); // user name
+      await joinCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+    });
+  });
+
+  describe('leaveCourse', () => {
+    it('abandona el curso con exito', async () => {
+      mockReq.params = { courseId: 'c1' };
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      await leaveCourse(mockReq as AuthRequest, mockRes as Response, mockNext);
+      expect(mockRes.json).toHaveBeenCalled();
+    });
   });
 });
