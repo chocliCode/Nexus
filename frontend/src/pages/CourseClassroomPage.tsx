@@ -854,7 +854,7 @@ export default function CourseClassroomPage() {
               <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Calificar Estudiante</h2>
               <button onClick={() => setShowGradeModal(false)} className="p-1 rounded-lg hover:opacity-70">
                 <Trash2 className="w-5 h-5 opacity-0" /> {/* Spacer */}
-                <span className="text-xl leading-none absolute top-5 right-5 cursor-pointer" onClick={() => setShowGradeModal(false)}>×</span>
+                <span className="text-xl leading-none absolute top-5 right-5 cursor-pointer">×</span>
               </button>
             </div>
             <form onSubmit={handleCreateGrade} className="p-5 space-y-4">

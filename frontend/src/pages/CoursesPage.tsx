@@ -267,6 +267,7 @@ export default function CoursesPage() {
                   {/* Title */}
                   <h3 className="font-bold text-base leading-snug cursor-pointer hover:underline"
                       onClick={() => navigate(`/courses/${c.curso_id}`)}
+                      role="button" tabIndex={0} onKeyDown={(e) => { if(e.key === 'Enter') navigate(`/courses/${c.curso_id}`); }}
                       style={{ color: 'var(--text-primary)' }}>
                     {c.titulo}
                   </h3>

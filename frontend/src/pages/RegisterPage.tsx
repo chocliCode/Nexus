@@ -235,6 +235,7 @@ const RegisterPage = () => {
                     const priceNum = Number(m.precio);
                     return (
                       <div key={m.membresia_id} onClick={() => setValue('membresia_id', m.membresia_id)}
+                           role="button" tabIndex={0} onKeyDown={(e) => { if(e.key === 'Enter') setValue('membresia_id', m.membresia_id); }}
                            className={`p-3 rounded-xl border cursor-pointer transition-colors ${isSelected ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-primary-300'}`}>
                         <div className="flex justify-between items-center mb-1">
                           <h4 className="font-bold text-sm text-neutral-800">{m.nombre}</h4>

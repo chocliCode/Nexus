@@ -481,7 +481,7 @@ const ProfilePage = () => {
             {memberships.map((m) => {
               const isCurrent = m.nombre === profile?.membresia_nombre;
               return (
-                <div key={m.membresia_id} className={`p-4 rounded-xl border ${isCurrent ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-primary-300 bg-white'} transition-colors cursor-pointer flex justify-between items-center`} onClick={() => !isCurrent && initiateUpgrade(m.membresia_id, Number(m.precio))}>
+                <div key={m.membresia_id} className={`p-4 rounded-xl border ${isCurrent ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-primary-300 bg-white'} transition-colors cursor-pointer flex justify-between items-center`} onClick={() => !isCurrent && initiateUpgrade(m.membresia_id, Number(m.precio))} role="button" tabIndex={0} onKeyDown={(e) => { if(e.key === 'Enter' && !isCurrent) initiateUpgrade(m.membresia_id, Number(m.precio)); }}>
                   <div>
                     <h4 className="font-bold text-neutral-800 flex items-center gap-2">
                       {m.nombre} {isCurrent && <span className="text-[10px] bg-primary-500 text-white px-2 py-0.5 rounded-full">Actual</span>}

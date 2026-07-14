@@ -53,7 +53,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem('nexus_token');
     if (!token) return;
 
-    const eventSource = new EventSource(`${API_URL}/api/v1/notifications/stream?token=${token}`);
+    const eventSource = new EventSource(`${API_URL}/api/v1/notifications/stream?token=${encodeURIComponent(token)}`);
 
     eventSource.addEventListener('NEW_NOTIFICATION', (event) => {
       try {
