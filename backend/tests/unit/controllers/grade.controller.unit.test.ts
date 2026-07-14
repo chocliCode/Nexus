@@ -72,4 +72,24 @@ describe('Course Classroom Controller - Calificaciones (Unit Tests)', () => {
 
     expect(mockNext).toHaveBeenCalledWith(errorDB);
   });
+
+  it('UNIT-GRD-04: escapa valores para prevenir inyeccion CSV', async () => {
+    const sendMock = jest.fn();
+    mockRes.send = sendMock;
+    
+    (pool.query as jest.Mock)
+      .mockResolvedValueOnce({ rows: [{ jedi_id: 'jedi123' }] }) // verifyCourseAccess
+      .mockResolvedValueOnce({ rows: [
+        { Tarea: '=cmd|/c calc.exe!A0', Estudiante: '+Hack', Calificacion: 18, Feedback: '@sum' }
+      ] });
+
+    await exportCourseGrades(mockReq as AuthRequest, mockRes as Response, mockNext);
+
+    expect(sendMock).toHaveBeenCalled();
+    const csvContent = sendMock.mock.calls[0][0].toString();
+    // Debe haber un caracter de escape simple al principio
+    expect(csvContent).toContain(`"'=cmd|/c calc.exe!A0"`);
+    expect(csvContent).toContain(`"'+Hack"`);
+    expect(csvContent).toContain(`"'@sum"`);
+  });
 });

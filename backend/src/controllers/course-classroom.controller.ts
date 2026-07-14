@@ -60,16 +60,16 @@ export const createCoursePost = async (req: AuthRequest, res: Response, next: Ne
   const userId = req.user!.userId;
   const files = req.files as Express.Multer.File[];
 
-  if (tipo && !['tarea', 'anuncio', 'TAREA', 'ANUNCIO'].includes(tipo)) {
+  if (tipo && !['tarea', 'anuncio', 'TAREA', 'ANUNCIO'].includes(String(tipo))) {
     res.status(400).json({ error: 'Tipo inválido', code: 'VALIDATION_ERROR' }); return;
   }
   if ((tipo === 'tarea' || tipo === 'TAREA') && !req.body.fecha_vencimiento) {
     res.status(400).json({ error: 'Las tareas deben tener una fecha de vencimiento', code: 'VALIDATION_ERROR' }); return;
   }
-  if (req.body.fecha_vencimiento && req.body.fecha_vencimiento.length > 50) {
+  if (req.body.fecha_vencimiento && (typeof req.body.fecha_vencimiento !== 'string' || req.body.fecha_vencimiento.length > 50)) {
     res.status(400).json({ error: 'Fecha inválida' }); return;
   }
-  if (contenido && (contenido.includes('<script>') || contenido.includes('javascript:'))) {
+  if (typeof contenido === 'string' && (/<script/i.test(contenido) || /javascript:/i.test(contenido))) {
     res.status(400).json({ error: 'Contenido no permitido' }); return;
   }
 
@@ -463,7 +463,11 @@ export const exportCourseGrades = async (req: AuthRequest, res: Response, next: 
     // Formato CSV (Delimitado por comas)
     const header = "Tarea,Estudiante,Calificacion,Feedback\n";
     const csvRows = result.rows.map(row => {
-      const escapeCsv = (str: string) => `"${(str || '').toString().replace(/"/g, '""')}"`;
+      const escapeCsv = (str: string) => {
+        let clean = (str || '').toString().replace(/"/g, '""');
+        if (/^[=+\-@\t\r]/.test(clean)) clean = "'" + clean;
+        return `"${clean}"`;
+      };
       return [
         escapeCsv(row.Tarea),
         escapeCsv(row.Estudiante),

@@ -81,4 +81,29 @@ describe('Course Classroom Controller - Create Task (Unit Tests)', () => {
       code: 'FORBIDDEN'
     });
   });
+
+  it('UNIT-TSK-04: rechaza tipo invalido', async () => {
+    mockReq.body.tipo = 'INVALIDO';
+    await createCoursePost(mockReq as AuthRequest, mockRes as Response, mockNext);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Tipo inválido', code: 'VALIDATION_ERROR' });
+  });
+
+  it('UNIT-TSK-05: rechaza fecha invalida (> 50 chars o no string)', async () => {
+    mockReq.body.fecha_vencimiento = 'A'.repeat(51);
+    await createCoursePost(mockReq as AuthRequest, mockRes as Response, mockNext);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Fecha inválida' });
+
+    mockReq.body.fecha_vencimiento = 12345;
+    await createCoursePost(mockReq as AuthRequest, mockRes as Response, mockNext);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+  });
+
+  it('UNIT-TSK-06: rechaza contenido XSS', async () => {
+    mockReq.body.contenido = '<script>alert(1)</script>';
+    await createCoursePost(mockReq as AuthRequest, mockRes as Response, mockNext);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Contenido no permitido' });
+  });
 });
