@@ -40,7 +40,7 @@ jobs:
         working-directory: ./frontend
         run: |
           npm ci
-          npm test -- --coverage --watchAll=false
+          npm test -- --coverage
 
       - name: "🔍 Escaneo SonarCloud"
         uses: SonarSource/sonarqube-scan-action@v6.0.0
