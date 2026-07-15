@@ -11,44 +11,41 @@ test.describe('E2E: Asignacion de Tareas (Aula Virtual)', () => {
     
     // Go to first course
     await page.click('text="Cursos"');
-    await page.click('.course-card >> nth=0'); // Click the first course card
+    await page.locator('.course-card h3').first().click();
 
-    // Find the WorkTab (Asignar Tarea / Anuncios)
-    await page.click('text="Trabajo de Clase"');
+    // Click button to show form
+    await page.click('button:has-text("Publica algo en el curso")');
+
+    // Select type as 'tarea'
+    await page.selectOption('select', 'tarea');
 
     // Fill task
-    await page.fill('textarea[placeholder*="Escribe una nueva tarea"]', 'Resolver ejercicios de Playwright');
-    // For date input (depends on react-day-picker integration, using generic approach)
-    await page.click('input[type="date"]');
-    await page.fill('input[type="date"]', '2025-12-31');
+    await page.fill('textarea[placeholder="Escribe tu publicacion..."]', 'Resolver ejercicios de Playwright');
     
-    await page.click('button:has-text("Publicar Tarea")');
+    await page.click('button[type="submit"]:has-text("Publicar")');
     
     // Verify it appeared on feed
     await expect(page.locator('text="Resolver ejercicios de Playwright"').first()).toBeVisible();
-    await expect(page.locator('text="Vence:"').first()).toBeVisible();
+    await expect(page.locator('text="Entregable de la Tarea"').first()).toBeVisible();
   });
 
-  test('E2E-TSK-02: Validacion flotante cuando no se pone fecha a una tarea', async ({ page }) => {
+  test('E2E-TSK-02: Boton deshabilitado cuando no se pone contenido a una publicacion', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', 'jedi@nexus.test');
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
     await page.goto('/courses');
-    await page.click('.course-card >> nth=0');
-    await page.click('text="Trabajo de Clase"');
+    await page.locator('.course-card h3').first().click();
 
-    await page.fill('textarea', 'Tarea sin fecha');
-    
-    // Attempt to publish without selecting date
-    await page.click('button:has-text("Publicar Tarea")');
+    await page.click('button:has-text("Publica algo en el curso")');
 
-    // Should see Zod error or toast
-    await expect(page.locator('text="Fecha de vencimiento requerida"').first()).toBeVisible();
+    // El boton debe estar deshabilitado cuando no hay contenido
+    const btn = page.locator('button[type="submit"]:has-text("Publicar")');
+    await expect(btn).toBeDisabled();
   });
 
-  test('E2E-TSK-03: El Padawan visualiza el badge de tarea pendiente', async ({ page }) => {
+  test('E2E-TSK-03: El Padawan visualiza las tareas pero no puede publicar', async ({ page }) => {
     // Login as Padawan
     await page.goto('/login');
     await page.fill('input[type="email"]', 'padawan@nexus.test');
@@ -56,18 +53,12 @@ test.describe('E2E: Asignacion de Tareas (Aula Virtual)', () => {
     await page.click('button[type="submit"]');
     
     await page.goto('/courses');
-    // Asumiendo que el padawan ya esta en el curso
-    await page.click('.course-card >> nth=0');
-    
-    // Work tab should show task but NOT the input field
-    await page.click('text="Trabajo de Clase"');
+    await page.locator('.course-card h3').first().click();
 
     // Input field should not exist for padawan
-    await expect(page.locator('textarea[placeholder*="Escribe una nueva tarea"]')).toHaveCount(0);
+    await expect(page.locator('button:has-text("Publica algo en el curso")')).toHaveCount(0);
 
-    // Tarea published by Jedi should be there
-    const hasTask = await page.locator('.task-item').count() > 0;
-    expect(hasTask).toBeDefined(); // Depende del estado real, al menos validamos no-crash
+    // Any task item could be present (if previous tests created it)
   });
 
 });

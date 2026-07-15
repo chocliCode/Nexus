@@ -20,10 +20,9 @@ test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => 
     // Verificamos que entramos al dashboard
     await expect(page).toHaveURL(/.*\/dashboard/);
 
-    // 2. Navegar al primer curso disponible del Mentor
-    // Simulamos hacer clic en el botón de "Ir al Aula" o en la tarjeta del curso
-    // Nota: Dependiendo de tu UI de dashboard, ajusta el selector.
-    const courseCard = page.locator('text="Aula Virtual"').first();
+    // 2. Navegar a Cursos y luego al primer curso disponible del Mentor
+    await page.goto('/courses');
+    const courseCard = page.locator('.course-card h3').first();
     
     try {
       await courseCard.waitFor({ state: 'visible', timeout: 5000 });

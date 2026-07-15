@@ -19,7 +19,7 @@ test.describe('E2E: Creacion de Cursos (Jedi)', () => {
     // Form fill
     await page.fill('input#titulo', 'E2E Nuevo Curso Mágico');
     await page.fill('textarea#descripcion', 'Prueba E2E');
-    await page.click('button:has-text("Crear curso")');
+    await page.click('button[type="submit"]');
     
     // Verify success toast or appearance in the list
     await expect(page.locator('text="E2E Nuevo Curso Mágico"').first()).toBeVisible();
@@ -37,7 +37,7 @@ test.describe('E2E: Creacion de Cursos (Jedi)', () => {
     await page.click('button:has-text("Crear Curso")');
     
     // Submit without filling
-    await page.click('button:has-text("Crear curso")');
+    await page.click('button[type="submit"]');
 
     // Verify UI error message
     await expect(page.locator('text="El título es obligatorio"').first()).toBeVisible();

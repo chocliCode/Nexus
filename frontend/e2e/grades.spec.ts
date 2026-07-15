@@ -9,7 +9,7 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.click('button[type="submit"]');
     
     await page.click('text="Cursos"');
-    await page.click('.course-card >> nth=0');
+    await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
 
     // Esperar a que cargue la tabla
@@ -36,7 +36,7 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.click('button[type="submit"]');
     
     await page.goto('/courses');
-    await page.click('.course-card >> nth=0');
+    await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
 
     const firstRowInput = page.locator('input[type="number"]').first();
@@ -57,7 +57,7 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.click('button[type="submit"]');
     
     await page.goto('/courses');
-    await page.click('.course-card >> nth=0');
+    await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
 
     // Preparar a Playwright para interceptar el evento de descarga
