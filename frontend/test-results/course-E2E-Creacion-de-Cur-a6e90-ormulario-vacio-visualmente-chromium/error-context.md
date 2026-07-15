@@ -6,8 +6,8 @@
 
 # Test info
 
-- Name: course.spec.ts >> E2E: Creacion de Cursos (Jedi) >> E2E-CRS-01: El Jedi puede crear un curso exitosamente
-- Location: e2e\course.spec.ts:5:3
+- Name: course.spec.ts >> E2E: Creacion de Cursos (Jedi) >> E2E-CRS-02: Validacion Zod de Formulario vacio visualmente
+- Location: e2e\course.spec.ts:28:3
 
 # Error details
 
@@ -60,8 +60,7 @@ Call log:
   10 |     await page.click('button[type="submit"]');
   11 |     
   12 |     // Wait for Dashboard and navigate to Courses
-> 13 |     await expect(page).toHaveURL('/dashboard');
-     |                        ^ Error: expect(page).toHaveURL(expected) failed
+  13 |     await expect(page).toHaveURL('/dashboard');
   14 |     await page.click('text="Cursos"');
   15 | 
   16 |     // Click "Crear Curso" button
@@ -82,7 +81,8 @@ Call log:
   31 |     await page.fill('input[type="password"]', 'Test1234!');
   32 |     await page.click('button[type="submit"]');
   33 |     
-  34 |     await expect(page).toHaveURL('/dashboard');
+> 34 |     await expect(page).toHaveURL('/dashboard');
+     |                        ^ Error: expect(page).toHaveURL(expected) failed
   35 |     await page.click('text="Cursos"');
   36 | 
   37 |     await page.click('button:has-text("Crear Curso")');

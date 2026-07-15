@@ -36,11 +36,9 @@ test.describe('E2E: Creacion de Cursos (Jedi)', () => {
 
     await page.click('button:has-text("Crear Curso")');
     
-    // Submit without filling
-    await page.click('button[type="submit"]');
-
-    // Verify UI error message
-    await expect(page.locator('text="El título es obligatorio"').first()).toBeVisible();
+    // Verify button is disabled
+    const submitBtn = page.locator('button[type="submit"]:has-text("Crear curso")').first();
+    await expect(submitBtn).toBeDisabled();
   });
 
   test('E2E-CRS-03: Un Padawan no puede ver el boton Crear Curso', async ({ page }) => {

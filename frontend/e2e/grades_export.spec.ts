@@ -38,12 +38,15 @@ test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => 
     if (await btnCalificar.isVisible()) {
       await btnCalificar.click();
       
+      // Esperar modal
+      await expect(page.locator('text="Calificar Estudiante"').first()).toBeVisible();
+
       // Llenar el formulario de calificación
-      await page.getByPlaceholder('20').fill('18');
-      await page.getByPlaceholder('Opcional').fill('¡Excelente trabajo! Sigue así.');
+      await page.locator('input[type="number"]').first().fill('18');
+      await page.locator('textarea').first().fill('¡Excelente trabajo! Sigue así.');
       
       // Guardar nota
-      await page.getByRole('button', { name: /Guardar Calificación/i }).click();
+      await page.locator('button[type="submit"]:has-text("Guardar")').click();
       
       // Esperar a que el modal se cierre y la nota "18" aparezca en la tabla
       await expect(page.getByText('18')).toBeVisible({ timeout: 5000 });

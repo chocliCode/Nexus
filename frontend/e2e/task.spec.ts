@@ -23,6 +23,9 @@ test.describe('E2E: Asignacion de Tareas (Aula Virtual)', () => {
     // Fill task
     await page.fill('textarea[placeholder="Escribe tu publicacion..."]', 'Resolver ejercicios de Playwright');
     
+    // Fill date to pass validation
+    await page.fill('input[type="datetime-local"]', '2026-12-31T23:59');
+    
     await page.click('button[type="submit"]:has-text("Publicar")');
     
     // Verify it appeared on feed

@@ -16,15 +16,18 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     // Esperar a que cargue la tabla
     await page.waitForSelector('table');
     
+    // Buscar el boton de calificar de esa fila y abrir modal
+    const firstRowBtn = page.locator('button:has-text("Calificar")').first();
+    await firstRowBtn.click();
+    await expect(page.locator('text="Calificar Estudiante"').first()).toBeVisible();
+
     // Buscar la primera fila y poner una nota
     const firstRowInput = page.locator('input[type="number"]').first();
     // Playwright clear and type
     await firstRowInput.fill('');
     await firstRowInput.fill('18');
 
-    // Buscar el boton de calificar de esa fila
-    const firstRowBtn = page.locator('button:has-text("Calificar")').first();
-    await firstRowBtn.click();
+    await page.locator('button[type="submit"]:has-text("Guardar")').click();
 
     // Comprobar toast de exito
     await expect(page.locator('text="Calificacion guardada"').first()).toBeVisible();
@@ -41,12 +44,15 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
 
+    const firstRowBtn = page.locator('button:has-text("Calificar")').first();
+    await firstRowBtn.click();
+    await expect(page.locator('text="Calificar Estudiante"').first()).toBeVisible();
+
     const firstRowInput = page.locator('input[type="number"]').first();
     await firstRowInput.fill('');
     await firstRowInput.fill('25');
 
-    const firstRowBtn = page.locator('button:has-text("Calificar")').first();
-    await firstRowBtn.click();
+    await page.locator('button[type="submit"]:has-text("Guardar")').click();
 
     // Toast de error de Zod/ReactHookForm
     await expect(page.locator('text="La calificacion debe ser entre 0 y 20"').first()).toBeVisible();
@@ -72,8 +78,8 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     // Capturar descarga
     const download = await downloadPromise;
     
-    // Afirmar que el archivo sugerido contiene "calificaciones" y termina en .csv
-    expect(download.suggestedFilename()).toContain('calificaciones');
+    // Afirmar que el archivo sugerido contiene "notas_curso" y termina en .csv
+    expect(download.suggestedFilename()).toContain('notas_curso');
     expect(download.suggestedFilename()).toMatch(/\.csv$/);
   });
 

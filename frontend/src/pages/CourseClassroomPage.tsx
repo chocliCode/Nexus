@@ -126,7 +126,7 @@ export default function CourseClassroomPage() {
 
   // New post form
   const [showPostForm, setShowPostForm] = useState(false);
-  const [postForm, setPostForm] = useState({ tipo: 'anuncio', titulo: '', contenido: '', url_enlace: '' });
+  const [postForm, setPostForm] = useState({ tipo: 'anuncio', titulo: '', contenido: '', url_enlace: '', fecha_vencimiento: '' });
   const [postFiles, setPostFiles] = useState<globalThis.File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -199,13 +199,14 @@ export default function CourseClassroomPage() {
       formData.append('contenido', postForm.contenido);
       if (postForm.titulo.trim()) formData.append('titulo', postForm.titulo.trim());
       if (postForm.tipo === 'examen' && postForm.url_enlace.trim()) formData.append('url_enlace', postForm.url_enlace.trim());
+      if (postForm.tipo === 'tarea' && postForm.fecha_vencimiento.trim()) formData.append('fecha_vencimiento', postForm.fecha_vencimiento.trim());
       postFiles.forEach(file => {
         formData.append('archivos', file);
       });
       
       const res = await courseService.createPost(courseId, formData);
       setPosts([res.data.data, ...posts]);
-      setPostForm({ tipo: 'anuncio', titulo: '', contenido: '', url_enlace: '' });
+      setPostForm({ tipo: 'anuncio', titulo: '', contenido: '', url_enlace: '', fecha_vencimiento: '' });
       setPostFiles([]);
       setShowPostForm(false);
       await reloadFeed();
@@ -431,9 +432,15 @@ export default function CourseClassroomPage() {
                     {postForm.tipo === 'examen' && (
                       <input value={postForm.url_enlace}
                              onChange={e => setPostForm(f => ({ ...f, url_enlace: e.target.value }))}
-                             placeholder="Enlace del examen (ej. Google Forms, Typeform...)"
+                             placeholder="Enlace del formulario o examen"
                              className="w-full px-3 py-1.5 rounded-lg text-sm outline-none"
-                             style={{ backgroundColor: 'var(--surface-page)', border: '1px solid var(--border-light)', color: 'var(--text-primary)' }} />
+                              style={{ backgroundColor: 'var(--surface-page)', border: '1px solid var(--border-light)', color: 'var(--text-primary)' }} />
+                    )}
+                    {postForm.tipo === 'tarea' && (
+                      <input type="datetime-local" value={postForm.fecha_vencimiento}
+                             onChange={e => setPostForm(f => ({ ...f, fecha_vencimiento: e.target.value }))}
+                             className="w-full px-3 py-1.5 rounded-lg text-sm outline-none"
+                              style={{ backgroundColor: 'var(--surface-page)', border: '1px solid var(--border-light)', color: 'var(--text-primary)' }} />
                     )}
                     <textarea value={postForm.contenido}
                               onChange={e => setPostForm(f => ({ ...f, contenido: e.target.value }))}

@@ -20,7 +20,7 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     await page.click('button:has-text("Entregar Tarea")');
     const fileInput = page.locator('input[type="file"]');
     
-    const mockFilePath = path.join(__dirname, 'test-doc.pdf'); 
+    const mockFilePath = path.resolve('e2e', 'test-doc.pdf'); 
     
     try {
       await fileInput.setInputFiles(mockFilePath);
@@ -69,8 +69,8 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     await page.locator('.course-card h3').first().click();
 
     // Verificamos que exista el boton para entregar tarea
-    const botonEntregar = page.locator('button:has-text("Entregar Tarea")');
-    expect(await botonEntregar.count()).toBeGreaterThan(0);
+    const botonEntregar = page.locator('button:has-text("Entregar Tarea")').first();
+    await expect(botonEntregar).toBeVisible();
   });
 
 });

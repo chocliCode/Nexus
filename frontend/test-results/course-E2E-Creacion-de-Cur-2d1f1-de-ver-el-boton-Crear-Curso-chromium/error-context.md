@@ -6,8 +6,8 @@
 
 # Test info
 
-- Name: course.spec.ts >> E2E: Creacion de Cursos (Jedi) >> E2E-CRS-01: El Jedi puede crear un curso exitosamente
-- Location: e2e\course.spec.ts:5:3
+- Name: course.spec.ts >> E2E: Creacion de Cursos (Jedi) >> E2E-CRS-03: Un Padawan no puede ver el boton Crear Curso
+- Location: e2e\course.spec.ts:44:3
 
 # Error details
 
@@ -32,7 +32,7 @@ Call log:
 - text: Error de conexión con el servidor Email
 - textbox "Email":
   - /placeholder: tu@email.com
-  - text: jedi@nexus.test
+  - text: padawan@nexus.test
 - text: Contraseña
 - textbox "Contraseña":
   - /placeholder: ••••••••
@@ -60,8 +60,7 @@ Call log:
   10 |     await page.click('button[type="submit"]');
   11 |     
   12 |     // Wait for Dashboard and navigate to Courses
-> 13 |     await expect(page).toHaveURL('/dashboard');
-     |                        ^ Error: expect(page).toHaveURL(expected) failed
+  13 |     await expect(page).toHaveURL('/dashboard');
   14 |     await page.click('text="Cursos"');
   15 | 
   16 |     // Click "Crear Curso" button
@@ -99,7 +98,8 @@ Call log:
   48 |     await page.fill('input[type="password"]', 'Test1234!');
   49 |     await page.click('button[type="submit"]');
   50 |     
-  51 |     await expect(page).toHaveURL('/dashboard');
+> 51 |     await expect(page).toHaveURL('/dashboard');
+     |                        ^ Error: expect(page).toHaveURL(expected) failed
   52 |     await page.click('text="Cursos"');
   53 | 
   54 |     // Button should not exist
