@@ -17,7 +17,7 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.waitForSelector('table');
     
     // Buscar el boton de calificar de esa fila y abrir modal
-    const firstRowBtn = page.locator('button:has-text("Calificar")').first();
+    const firstRowBtn = page.locator('td button', { hasText: /^Calificar$/ }).first();
     await firstRowBtn.click();
     await expect(page.locator('text="Calificar Estudiante"').first()).toBeVisible();
 
@@ -44,7 +44,7 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
 
-    const firstRowBtn = page.locator('button:has-text("Calificar")').first();
+    const firstRowBtn = page.locator('td button', { hasText: /^Calificar$/ }).first();
     await firstRowBtn.click();
     await expect(page.locator('text="Calificar Estudiante"').first()).toBeVisible();
 
