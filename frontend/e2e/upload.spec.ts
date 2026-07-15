@@ -11,6 +11,7 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     await page.click('button[type="submit"]');
     
     // 2. Entrar al curso
+    await expect(page).toHaveURL(/.*\/dashboard/);
     await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
 
@@ -45,7 +46,8 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
-    await page.goto('/courses');
+    await expect(page).toHaveURL(/.*\/dashboard/);
+    await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
 
     // Abrir modal
@@ -62,7 +64,8 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
-    await page.goto('/courses');
+    await expect(page).toHaveURL(/.*\/dashboard/);
+    await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
 
     // Verificamos que exista el boton para entregar tarea

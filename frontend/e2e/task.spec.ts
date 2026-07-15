@@ -10,6 +10,7 @@ test.describe('E2E: Asignacion de Tareas (Aula Virtual)', () => {
     await page.click('button[type="submit"]');
     
     // Go to first course
+    await expect(page).toHaveURL(/.*\/dashboard/);
     await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
 
@@ -35,7 +36,8 @@ test.describe('E2E: Asignacion de Tareas (Aula Virtual)', () => {
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
-    await page.goto('/courses');
+    await expect(page).toHaveURL(/.*\/dashboard/);
+    await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
 
     await page.click('button:has-text("Publica algo en el curso")');
@@ -52,7 +54,8 @@ test.describe('E2E: Asignacion de Tareas (Aula Virtual)', () => {
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
-    await page.goto('/courses');
+    await expect(page).toHaveURL(/.*\/dashboard/);
+    await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
 
     // Input field should not exist for padawan

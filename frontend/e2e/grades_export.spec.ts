@@ -21,15 +21,8 @@ test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => 
     await expect(page).toHaveURL(/.*\/dashboard/);
 
     // 2. Navegar a Cursos y luego al primer curso disponible del Mentor
-    await page.goto('/courses');
-    const courseCard = page.locator('.course-card h3').first();
-    
-    try {
-      await courseCard.waitFor({ state: 'visible', timeout: 5000 });
-      await courseCard.click();
-    } catch {
-      console.log('Por favor asegúrate de que el usuario tenga un curso abierto');
-    }
+    await page.click('text="Cursos"');
+    await page.locator('.course-card h3').first().click();
 
     // 3. Cambiar a la pestaña "Notas" (Calificaciones)
     await page.getByRole('button', { name: /Calificaciones/i }).click();

@@ -8,6 +8,7 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
+    await expect(page).toHaveURL(/.*\/dashboard/);
     await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
@@ -35,7 +36,8 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
-    await page.goto('/courses');
+    await expect(page).toHaveURL(/.*\/dashboard/);
+    await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
 
@@ -56,7 +58,8 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await page.fill('input[type="password"]', 'Test1234!');
     await page.click('button[type="submit"]');
     
-    await page.goto('/courses');
+    await expect(page).toHaveURL(/.*\/dashboard/);
+    await page.click('text="Cursos"');
     await page.locator('.course-card h3').first().click();
     await page.click('text="Calificaciones"');
 

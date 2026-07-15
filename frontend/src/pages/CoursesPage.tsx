@@ -146,7 +146,10 @@ export default function CoursesPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.titulo.trim()) return;
+    if (!form.titulo.trim()) {
+      showToast('El título es obligatorio', 'err');
+      return;
+    }
     setSubmitting(true);
     try {
       await courseService.create(form);
