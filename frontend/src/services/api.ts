@@ -45,7 +45,7 @@ api.interceptors.response.use(
     // Emit to demo dashboard
     try {
       _demoChannel?.postMessage({ type: 'api-call', method: response.config.method?.toUpperCase(), url: response.config.url, status: response.status });
-    } catch {}
+    } catch { /* BroadcastChannel may not be available */ }
     return response;
   },
   (error) => {
@@ -58,7 +58,7 @@ api.interceptors.response.use(
     // Emit error to demo dashboard
     try {
       _demoChannel?.postMessage({ type: 'api-call', method: error.config?.method?.toUpperCase(), url: error.config?.url, status: error.response?.status || 0 });
-    } catch {}
+    } catch { /* BroadcastChannel may not be available */ }
     if (error.response?.status === 401) {
       const isLoginRoute = error.config?.url?.includes('/auth/login');
       if (!isLoginRoute) {
