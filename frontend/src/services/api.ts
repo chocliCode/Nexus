@@ -17,6 +17,11 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   
+  // Axios will set the correct boundary automatically if we remove the custom Content-Type
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+  
   if (import.meta.env.VITE_ENABLE_API_LOGS === 'true') {
     const metodo = config.method?.toUpperCase();
     console.group(`🚀 [API Request] ${metodo} ${config.url}`);
