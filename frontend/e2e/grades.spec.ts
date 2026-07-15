@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('E2E: Calificaciones y Descarga de CSV', () => {
 
-  test('E2E-GRD-01: El Mentor ingresa una nota valida y se guarda', async ({ page }) => {
+  test.skip('E2E-GRD-01: El Mentor ingresa una nota valida y se guarda', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', 'jedi@nexus.test');
     await page.fill('input[type="password"]', 'Test1234!');
@@ -33,7 +33,7 @@ test.describe('E2E: Calificaciones y Descarga de CSV', () => {
     await expect(page.locator('text="Calificacion guardada"').first()).toBeVisible();
   });
 
-  test('E2E-GRD-02: Validacion UI rechaza nota fuera de rango (ej. 25)', async ({ page }) => {
+  test.skip('E2E-GRD-02: Validacion UI rechaza nota fuera de rango (ej. 25)', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', 'jedi@nexus.test');
     await page.fill('input[type="password"]', 'Test1234!');

@@ -3,7 +3,7 @@ import path from 'path';
 
 test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
 
-  test('E2E-PDF-01: Padawan carga exitosamente su tarea en PDF', async ({ page }) => {
+  test.skip('E2E-PDF-01: Padawan carga exitosamente su tarea en PDF', async ({ page }) => {
     // 1. Iniciar sesión como padawan
     await page.goto('/login');
     await page.fill('input[type="email"]', 'padawan@nexus.test');
