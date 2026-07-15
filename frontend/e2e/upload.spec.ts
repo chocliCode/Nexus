@@ -18,15 +18,12 @@ test.describe('E2E: Subida de Resoluciones (Archivos PDF)', () => {
     // 3. Encontrar el boton de Adjuntar o input file
     // Hacemos clic en Entregar Tarea para abrir el modal
     await page.click('button:has-text("Entregar Tarea")');
-    const fileInput = page.locator('input[type="file"]');
+    // El selector debe ser exacto para evitar conflictos con el input de publicaciones
+    const fileInput = page.locator('input[type="file"][accept="application/pdf"]');
     
     const mockFilePath = path.resolve('e2e', 'test-doc.pdf'); 
     
-    try {
-      await fileInput.setInputFiles(mockFilePath);
-    } catch {
-      console.log('Dummy file path not found, skipping setInputFiles');
-    }
+    await fileInput.setInputFiles(mockFilePath);
 
     // 4. Enviar
     const submitBtn = page.locator('button[type="submit"]:has-text("Subir Entrega")');

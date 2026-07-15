@@ -900,7 +900,7 @@ export default function CourseClassroomPage() {
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowGradeModal(false)}
                         className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all" style={{ border: '1px solid var(--border-light)', color: 'var(--text-muted)' }}>Cancelar</button>
-                <button type="submit" disabled={submitting || !gradeForm.padawan_id || !gradeForm.titulo}
+                <button type="submit" disabled={submitting}
                         className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: 'var(--color-primary-500)' }}>
                   {submitting ? 'Guardando...' : 'Guardar'}
                 </button>
@@ -938,7 +938,7 @@ export default function CourseClassroomPage() {
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowSubmissionModal(false)}
                         className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all" style={{ border: '1px solid var(--border-light)', color: 'var(--text-muted)' }}>Cancelar</button>
-                <button type="submit" disabled={submitting || !submissionFile}
+                <button type="submit" disabled={submitting}
                         className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: 'var(--color-primary-500)' }}>
                   <Upload className="w-4 h-4" /> {submitting ? 'Subiendo...' : 'Subir Entrega'}
                 </button>
