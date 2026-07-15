@@ -32,7 +32,7 @@ test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => 
 
     // 4. Iniciar flujo de calificar a un alumno
     // Nota: Asumimos que hay al menos una entrega subida por un Padawan
-    const btnCalificar = page.locator('td button', { hasText: /^Calificar$/ }).first();
+    const btnCalificar = page.locator('td button:has-text("Calificar")').first();
     
     // Si el botón está visible, significa que hay entregas para calificar (o habilitado desde la cuadrícula)
     if (await btnCalificar.isVisible()) {
