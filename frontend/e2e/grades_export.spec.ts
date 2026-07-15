@@ -28,7 +28,7 @@ test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => 
     try {
       await courseCard.waitFor({ state: 'visible', timeout: 5000 });
       await courseCard.click();
-    } catch (e) {
+    } catch {
       console.log('Por favor asegúrate de que el usuario tenga un curso abierto');
     }
 
