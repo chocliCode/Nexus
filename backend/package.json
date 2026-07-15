@@ -19,8 +19,8 @@
     "test:stress:db": "artillery run tests/stress/stress-db.yml",
     "test:stress:spike": "artillery run tests/stress/stress-spike.yml",
     "test:stress:endurance": "artillery run tests/stress/stress-endurance.yml",
-    "test:security": "jest --testPathPattern=security --forceExit",
-    "test:smoke": "jest --testPathPattern=smoke --forceExit",
+    "test:security": "jest --config jest.security.config.js --forceExit",
+    "test:smoke": "jest --config jest.smoke.config.js --forceExit",
     "test:acceptance": "jest --testPathPattern=acceptance --runInBand --forceExit"
   },
   "dependencies": {
