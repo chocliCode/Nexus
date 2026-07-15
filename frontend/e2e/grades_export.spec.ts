@@ -24,11 +24,11 @@ test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => 
     // Simulamos hacer clic en el botón de "Ir al Aula" o en la tarjeta del curso
     // Nota: Dependiendo de tu UI de dashboard, ajusta el selector.
     const courseCard = page.locator('text="Aula Virtual"').first();
-    if (await courseCard.isVisible()) {
+    
+    try {
+      await courseCard.waitFor({ state: 'visible', timeout: 5000 });
       await courseCard.click();
-    } else {
-      // Navegación alternativa directa si sabemos el ID del curso de prueba
-      // await page.goto('/course/12345/classroom');
+    } catch (e) {
       console.log('Por favor asegúrate de que el usuario tenga un curso abierto');
     }
 

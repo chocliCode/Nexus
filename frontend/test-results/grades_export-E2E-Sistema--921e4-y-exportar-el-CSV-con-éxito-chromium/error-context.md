@@ -12,117 +12,37 @@
 # Error details
 
 ```
-Test timeout of 30000ms exceeded.
-```
+Error: expect(page).toHaveURL(expected) failed
 
-```
-Error: locator.click: Test timeout of 30000ms exceeded.
+Expected pattern: /.*\/dashboard/
+Received string:  "http://localhost:5174/login"
+Timeout: 5000ms
+
 Call log:
-  - waiting for getByRole('button', { name: /Calificaciones/i })
+  - Expect "toHaveURL" with timeout 5000ms
+    14 × unexpected value "http://localhost:5174/login"
 
 ```
-
-# Page snapshot
 
 ```yaml
-- generic [ref=e3]:
-  - complementary [ref=e4]:
-    - link "N NEXUS Talento Digital" [ref=e6] [cursor=pointer]:
-      - /url: /dashboard
-      - generic [ref=e8]: "N"
-      - generic [ref=e9]:
-        - heading "NEXUS" [level=1] [ref=e10]
-        - paragraph [ref=e11]: Talento Digital
-    - navigation [ref=e12]:
-      - link "Dashboard" [ref=e13] [cursor=pointer]:
-        - /url: /dashboard
-        - img [ref=e14]
-        - generic [ref=e15]: Dashboard
-      - link "Mi Perfil" [ref=e16] [cursor=pointer]:
-        - /url: /profile
-        - img [ref=e17]
-        - generic [ref=e20]: Mi Perfil
-      - link "Cursos" [ref=e21] [cursor=pointer]:
-        - /url: /courses
-        - img [ref=e22]
-        - generic [ref=e24]: Cursos
-      - link "Onboarding" [ref=e25] [cursor=pointer]:
-        - /url: /onboarding
-        - img [ref=e26]
-        - generic [ref=e31]: Onboarding
-      - link "Mentores" [ref=e32] [cursor=pointer]:
-        - /url: /mentors
-        - img [ref=e33]
-        - generic [ref=e38]: Mentores
-      - link "Matching" [ref=e39] [cursor=pointer]:
-        - /url: /matching
-        - img [ref=e40]
-        - generic [ref=e43]: Matching
-      - link "Sesiones" [ref=e44] [cursor=pointer]:
-        - /url: /sessions
-        - img [ref=e45]
-        - generic [ref=e49]: Sesiones
-      - link "Vacantes" [ref=e50] [cursor=pointer]:
-        - /url: /vacancies
-        - img [ref=e51]
-        - generic [ref=e54]: Vacantes
-    - generic [ref=e56]:
-      - generic [ref=e57]:
-        - generic [ref=e58]: CR
-        - generic [ref=e59]:
-          - paragraph [ref=e60]: Carlos Ramírez Torres
-          - paragraph [ref=e61]: Mentor Jedi
-      - button "Cerrar sesión" [ref=e62] [cursor=pointer]
-  - main [ref=e63]:
-    - button [ref=e65] [cursor=pointer]:
-      - img [ref=e66]
-    - generic [ref=e70]:
-      - generic [ref=e71]:
-        - heading "¡Bienvenido, Carlos!" [level=1] [ref=e72]
-        - paragraph [ref=e73]: Mentor Jedi
-      - link "Completa tu evaluación diagnóstica Responde un test rápido para generar tu ruta de aprendizaje personalizada." [ref=e74] [cursor=pointer]:
-        - /url: /onboarding
-        - generic [ref=e75]:
-          - img [ref=e76]
-          - generic [ref=e81]:
-            - paragraph [ref=e82]: Completa tu evaluación diagnóstica
-            - paragraph [ref=e83]: Responde un test rápido para generar tu ruta de aprendizaje personalizada.
-      - generic [ref=e84]:
-        - generic [ref=e85]:
-          - generic [ref=e86]:
-            - img [ref=e87]
-            - paragraph [ref=e89]: Score
-          - paragraph [ref=e90]: "0"
-          - paragraph [ref=e91]: Empleabilidad
-        - generic [ref=e92]:
-          - generic [ref=e93]:
-            - img [ref=e94]
-            - paragraph [ref=e97]: OKRs
-          - paragraph [ref=e98]: "0"
-          - paragraph [ref=e99]: Completados
-        - generic [ref=e100]:
-          - generic [ref=e101]:
-            - img [ref=e102]
-            - paragraph [ref=e106]: Sesiones
-          - paragraph [ref=e107]: "0"
-          - paragraph [ref=e108]: Realizadas
-        - generic [ref=e109]:
-          - generic [ref=e110]:
-            - img [ref=e111]
-            - paragraph [ref=e113]: Habilidades
-          - paragraph [ref=e114]: "0"
-          - paragraph [ref=e115]: Registradas
-      - generic [ref=e116]:
-        - generic [ref=e117]:
-          - heading "OKRs Activos" [level=2] [ref=e118]:
-            - img [ref=e119]
-            - text: OKRs Activos
-          - paragraph [ref=e122]: Sin OKRs activos
-        - generic [ref=e123]:
-          - heading "Próximas Sesiones" [level=2] [ref=e124]:
-            - img [ref=e125]
-            - text: Próximas Sesiones
-          - paragraph [ref=e127]: Sin sesiones programadas
+- text: "N"
+- heading "NEXUS" [level=1]
+- paragraph: Transformación del Talento
+- heading "Iniciar Sesión" [level=2]
+- text: Error de conexión con el servidor Email
+- textbox "Email":
+  - /placeholder: tu@email.com
+  - text: jedi@nexus.test
+- text: Contraseña
+- textbox "Contraseña":
+  - /placeholder: ••••••••
+  - text: Test1234!
+- button "Ingresar"
+- paragraph:
+  - text: ¿No tienes cuenta?
+  - link "Regístrate aquí":
+    - /url: /register
+- paragraph: NEXUS · ODS 4, ODS 8, ODS 17 · UNMSM
 ```
 
 # Test source
@@ -137,7 +57,7 @@ Call log:
   7  | 
   8  | test.describe('E2E: Sistema de Notas y Exportación CSV (Demostración)', () => {
   9  |   // Ajusta estas credenciales según los usuarios de prueba en tu base de datos local
-  10 |   const MENTOR_EMAIL = 'jedi@gmail.com'; 
+  10 |   const MENTOR_EMAIL = 'jedi@nexus.test'; 
   11 |   const PASSWORD = 'Test1234!';
   12 | 
   13 |   test('El Mentor puede entrar al aula, asignar una nota y exportar el CSV con éxito', async ({ page }) => {
@@ -148,23 +68,23 @@ Call log:
   18 |     await page.getByRole('button', { name: /ingresar/i }).click();
   19 | 
   20 |     // Verificamos que entramos al dashboard
-  21 |     await expect(page).toHaveURL(/.*\/dashboard/);
+> 21 |     await expect(page).toHaveURL(/.*\/dashboard/);
+     |                        ^ Error: expect(page).toHaveURL(expected) failed
   22 | 
   23 |     // 2. Navegar al primer curso disponible del Mentor
   24 |     // Simulamos hacer clic en el botón de "Ir al Aula" o en la tarjeta del curso
   25 |     // Nota: Dependiendo de tu UI de dashboard, ajusta el selector.
   26 |     const courseCard = page.locator('text="Aula Virtual"').first();
-  27 |     if (await courseCard.isVisible()) {
-  28 |       await courseCard.click();
-  29 |     } else {
-  30 |       // Navegación alternativa directa si sabemos el ID del curso de prueba
-  31 |       // await page.goto('/course/12345/classroom');
+  27 |     
+  28 |     try {
+  29 |       await courseCard.waitFor({ state: 'visible', timeout: 5000 });
+  30 |       await courseCard.click();
+  31 |     } catch (e) {
   32 |       console.log('Por favor asegúrate de que el usuario tenga un curso abierto');
   33 |     }
   34 | 
   35 |     // 3. Cambiar a la pestaña "Notas" (Calificaciones)
-> 36 |     await page.getByRole('button', { name: /Calificaciones/i }).click();
-     |                                                                 ^ Error: locator.click: Test timeout of 30000ms exceeded.
+  36 |     await page.getByRole('button', { name: /Calificaciones/i }).click();
   37 |     
   38 |     // Validar que vemos la interfaz del mentor
   39 |     await expect(page.getByText('Calificaciones de Estudiantes')).toBeVisible();

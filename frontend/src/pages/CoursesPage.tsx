@@ -244,7 +244,7 @@ export default function CoursesPage() {
 
             return (
               <div key={c.curso_id}
-                   className="rounded-2xl overflow-hidden flex flex-col transition-all hover:-translate-y-0.5"
+                   className="course-card rounded-2xl overflow-hidden flex flex-col transition-all hover:-translate-y-0.5"
                    style={{ backgroundColor: 'var(--surface-card)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
                 {/* Color banner */}
                 <div className="h-2 w-full" style={{ backgroundColor: catColor }} />
