@@ -20,6 +20,7 @@ import {
   getCourseStudents,
   getCourseGrades,
   exportCourseGrades,
+  addCourseGrade,
   submitAssignment,
   getAssignmentSubmissions,
   gradeSubmission,
@@ -63,6 +64,7 @@ router.put('/submissions/:submissionId/grade', gradeSubmission);
 
 // Course Grades (calificaciones)
 router.get('/:courseId/grades', getCourseGrades);
+router.post('/:courseId/grades/:padawanId', addCourseGrade);
 router.get('/:courseId/grades/export', exportCourseGrades);
 
 export default router;

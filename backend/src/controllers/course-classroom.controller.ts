@@ -386,6 +386,27 @@ export const gradeSubmission = async (req: AuthRequest, res: Response, next: Nex
   }
 };
 
+export const addCourseGrade = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  const { courseId, padawanId } = req.params;
+  const { titulo, nota, nota_maxima, comentario } = req.body;
+  
+  try {
+    const access = await verifyCourseAccess(courseId, req.user!.userId);
+    if (!access.allowed || req.user!.rol !== 'Jedi') {
+      res.status(403).json({ error: 'No tienes permiso para calificar', code: 'FORBIDDEN' }); return;
+    }
+
+    const result = await pool.query(
+      `INSERT INTO curso_nota (curso_id, padawan_id, evaluacion, nota, nota_maxima, feedback)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [courseId, padawanId, titulo, nota, nota_maxima || 20, comentario || '']
+    );
+
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (err) { next(err); }
+};
+
 export const getCourseGrades = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   const { courseId } = req.params;
   const userId = req.user?.userId;
