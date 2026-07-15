@@ -219,7 +219,7 @@ export const courseService = {
   getFeed: (courseId: string) => api.get(`/courses/${courseId}/feed`),
   getStudents: (courseId: string) => api.get(`/courses/${courseId}/students`),
   getGrades: (courseId: string) => api.get(`/courses/${courseId}/grades`),
-  togglePin: (postId: string) => api.patch(`/courses/posts/${postId}/pin`),
+  togglePin: (postId: string) => api.post(`/courses/posts/${postId}/pin`),
   deleteComment: (commentId: string) => api.delete(`/courses/comments/${commentId}`),
   gradeSubmission: (submissionId: string, data: { nota: number; feedback_mentor?: string }) => 
     api.put(`/courses/submissions/${submissionId}/grade`, data),

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { courseService } from '../services/api';
+import { courseService, API_URL } from '../services/api';
 import { BookOpen, Users, Megaphone, Send, Pin, Trash2, MessageSquare, GraduationCap, ArrowLeft, FileText, ClipboardList, ClipboardCheck, Download, Plus, Upload, File, Paperclip } from 'lucide-react';
 
 interface CoursePost {
@@ -567,7 +567,7 @@ export default function CourseClassroomPage() {
                           {post.archivos.map((archivo, i) => (
                             <div key={i} className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-light)' }}>
                               {archivo.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-                                <img src={`http://localhost:3001${archivo.url}`} alt={archivo.nombre} className="w-full h-auto object-cover" style={{ maxHeight: '500px', display: 'block' }} />
+                                <img src={`${API_URL}${archivo.url}`} alt={archivo.nombre} className="w-full h-auto object-cover" style={{ maxHeight: '500px', display: 'block' }} />
                               ) : (
                                 <div className="p-4 flex items-center justify-between" style={{ backgroundColor: 'var(--surface-page)' }}>
                                   <div className="flex items-center gap-3">
@@ -581,7 +581,7 @@ export default function CourseClassroomPage() {
                                       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Haz clic para descargar el archivo</p>
                                     </div>
                                   </div>
-                                  <a href={`http://localhost:3001${archivo.url}`} target="_blank" rel="noreferrer"
+                                  <a href={`${API_URL}${archivo.url}`} target="_blank" rel="noreferrer"
                                      className="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 whitespace-nowrap"
                                      style={{ backgroundColor: 'var(--color-primary-500)' }}>
                                     Descargar
@@ -594,7 +594,7 @@ export default function CourseClassroomPage() {
                       ) : post.archivo_url && (
                         <div className="mt-4 rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-light)' }}>
                           {post.archivo_url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-                            <img src={`http://localhost:3001${post.archivo_url}`} alt="Adjunto" className="w-full h-auto object-cover" style={{ maxHeight: '500px', display: 'block' }} />
+                            <img src={`${API_URL}${post.archivo_url}`} alt="Adjunto" className="w-full h-auto object-cover" style={{ maxHeight: '500px', display: 'block' }} />
                           ) : (
                             <div className="p-4 flex items-center justify-between" style={{ backgroundColor: 'var(--surface-page)' }}>
                               <div className="flex items-center gap-3">
@@ -608,7 +608,7 @@ export default function CourseClassroomPage() {
                                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Haz clic para descargar el archivo</p>
                                 </div>
                               </div>
-                              <a href={`http://localhost:3001${post.archivo_url}`} target="_blank" rel="noreferrer"
+                              <a href={`${API_URL}${post.archivo_url}`} target="_blank" rel="noreferrer"
                                  className="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 whitespace-nowrap"
                                  style={{ backgroundColor: 'var(--color-primary-500)' }}>
                                 Descargar
@@ -981,9 +981,22 @@ export default function CourseClassroomPage() {
                         {sub.comentarios && (
                           <p className="text-sm italic" style={{ color: 'var(--text-secondary)' }}>"{sub.comentarios}"</p>
                         )}
+                        {sub.archivo_url && (
+                          <div className="mt-2">
+                            {sub.archivo_url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                              <img src={`${API_URL}${sub.archivo_url}`} alt="Adjunto" className="max-w-xs rounded-lg border" />
+                            ) : (
+                              <a href={`${API_URL}${sub.archivo_url}`} target="_blank" rel="noreferrer"
+                                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors mt-2"
+                                 style={{ backgroundColor: 'var(--color-primary-50)', color: 'var(--color-primary-600)' }}>
+                                <FileText className="w-4 h-4" /> Ver documento
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                        <a href={`http://localhost:3001${sub.archivo_url}`} target="_blank" rel="noreferrer"
+                        <a href={`${API_URL}${sub.archivo_url}`} target="_blank" rel="noreferrer"
                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-all">
                           <Download className="w-3.5 h-3.5" /> Descargar PDF
                         </a>
