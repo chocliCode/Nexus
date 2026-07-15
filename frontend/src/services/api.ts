@@ -7,6 +7,9 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Demo Dashboard: BroadcastChannel for live API monitoring
+const _demoChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('nexus-api-monitor') : null;
+
 // Interceptor: attach JWT token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('nexus_token');
@@ -34,6 +37,10 @@ api.interceptors.response.use(
       console.log('📄 Datos recibidos:', response.data);
       console.groupEnd();
     }
+    // Emit to demo dashboard
+    try {
+      _demoChannel?.postMessage({ type: 'api-call', method: response.config.method?.toUpperCase(), url: response.config.url, status: response.status });
+    } catch {}
     return response;
   },
   (error) => {
@@ -43,6 +50,10 @@ api.interceptors.response.use(
       console.error('Detalles:', error.response?.data);
       console.groupEnd();
     }
+    // Emit error to demo dashboard
+    try {
+      _demoChannel?.postMessage({ type: 'api-call', method: error.config?.method?.toUpperCase(), url: error.config?.url, status: error.response?.status || 0 });
+    } catch {}
     if (error.response?.status === 401) {
       const isLoginRoute = error.config?.url?.includes('/auth/login');
       if (!isLoginRoute) {

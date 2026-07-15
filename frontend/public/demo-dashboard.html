@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXUS — Demo Dashboard (Pruebas de Software)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-main: #0a0e17;
+      --bg-card: #111827;
+      --bg-card-alt: #1a2235;
+      --bg-surface: #0f1729;
+      --border: #1e293b;
+      --border-accent: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+      --glow-blue: rgba(59, 130, 246, 0.15);
+      --glow-green: rgba(16, 185, 129, 0.15);
+      --glow-red: rgba(239, 68, 68, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08));
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-logo {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      border-left: 1px solid var(--border-accent);
+      padding-left: 16px;
+    }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-green);
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+    }
+    .counter-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .counter-box span { color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; }
+
+    /* Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 0;
+      height: calc(100vh - 65px);
+    }
+
+    /* Left Panel - Live Feed */
+    .feed-panel {
+      padding: 24px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+    .feed-panel::-webkit-scrollbar { width: 6px; }
+    .feed-panel::-webkit-scrollbar-track { background: transparent; }
+    .feed-panel::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title svg { width: 16px; height: 16px; }
+
+    .api-entry {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      animation: slideIn 0.3s ease-out;
+      transition: border-color 0.2s;
+    }
+    .api-entry:hover { border-color: var(--border-accent); }
+    .api-entry.fresh {
+      border-left: 3px solid var(--accent-green);
+      box-shadow: 0 0 20px var(--glow-green);
+    }
+    .api-entry.error {
+      border-left: 3px solid var(--accent-red);
+      box-shadow: 0 0 20px var(--glow-red);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .api-entry-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .method-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      letter-spacing: 0.5px;
+      min-width: 52px;
+      text-align: center;
+    }
+    .method-GET { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+    .method-POST { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+    .method-PUT { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+    .method-PATCH { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+    .method-DELETE { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+
+    .api-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+      word-break: break-all;
+    }
+    .api-timestamp {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+    .api-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .status-ok { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+    .status-created { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+    .status-error { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+
+    .api-entry-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .api-description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Test badges in API entries */
+    .test-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .test-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.3px;
+    }
+    .test-badge svg { width: 10px; height: 10px; }
+    .test-unit { background: rgba(139,92,246,0.15); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.25); }
+    .test-integration { background: rgba(59,130,246,0.15); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.25); }
+    .test-e2e { background: rgba(236,72,153,0.15); color: var(--accent-pink); border: 1px solid rgba(236,72,153,0.25); }
+    .test-security { background: rgba(239,68,68,0.15); color: var(--accent-red); border: 1px solid rgba(239,68,68,0.25); }
+    .test-load { background: rgba(245,158,11,0.15); color: var(--accent-amber); border: 1px solid rgba(245,158,11,0.25); }
+    .test-acceptance { background: rgba(16,185,129,0.15); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.25); }
+
+    /* Right Panel - Stats & Test Map */
+    .stats-panel {
+      padding: 24px;
+      overflow-y: auto;
+      background: var(--bg-surface);
+    }
+    .stats-panel::-webkit-scrollbar { width: 6px; }
+    .stats-panel::-webkit-scrollbar-track { background: transparent; }
+    .stats-panel::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .demo-step {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+    .demo-step.active {
+      border-color: var(--accent-blue);
+      background: rgba(59,130,246,0.05);
+      box-shadow: 0 0 15px var(--glow-blue);
+    }
+    .demo-step.done {
+      border-color: var(--accent-green);
+      opacity: 0.7;
+    }
+    .step-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      border: 2px solid var(--border-accent);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .demo-step.active .step-number {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: rgba(59,130,246,0.1);
+    }
+    .demo-step.done .step-number {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      background: rgba(16,185,129,0.1);
+    }
+    .step-content { flex: 1; }
+    .step-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .step-apis {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary); }
+    .empty-state p { font-size: 13px; line-height: 1.6; }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin: 20px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .clear-btn {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: var(--accent-red);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .clear-btn:hover { background: rgba(239,68,68,0.2); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">NEXUS</div>
+      <div class="header-subtitle">Dashboard de Demo en Vivo -- Pruebas de Software UNMSM 2026-I</div>
+    </div>
+    <div class="header-right">
+      <button class="clear-btn" onclick="clearFeed()">Limpiar Feed</button>
+      <div class="counter-box">Calls: <span id="callCount">0</span></div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        EN VIVO
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <!-- Left: Live API Feed -->
+    <div class="feed-panel" id="feedPanel">
+      <div class="panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        API Calls en Tiempo Real
+      </div>
+      <div id="feedContainer">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <h3>Esperando actividad...</h3>
+          <p>Interactua con la aplicacion NEXUS en la otra pestana.<br/>Las llamadas API apareceran aqui automaticamente.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Stats & Demo Flow -->
+    <div class="stats-panel">
+      <div class="panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Resumen
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">API Calls</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statEndpoints">0</div>
+          <div class="stat-label">Endpoints</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statSuccess">0</div>
+          <div class="stat-label">Exitosas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statErrors">0</div>
+          <div class="stat-label">Errores</div>
+        </div>
+      </div>
+
+      <div class="section-title">Flujo de la Demo</div>
+
+      <div class="demo-step" data-step="login" id="step-login">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <div class="step-title">Mentor inicia sesion</div>
+          <div class="step-apis">POST /auth/login<br/>GET /auth/me</div>
+        </div>
+      </div>
+
+      <div class="demo-step" data-step="create-course" id="step-create-course">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <div class="step-title">Mentor crea un curso</div>
+          <div class="step-apis">POST /courses</div>
+        </div>
+      </div>
+
+      <div class="demo-step" data-step="open-course" id="step-open-course">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <div class="step-title">Mentor publica el curso</div>
+          <div class="step-apis">PATCH /courses/:id/open</div>
+        </div>
+      </div>
+
+      <div class="demo-step" data-step="join-course" id="step-join-course">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <div class="step-title">Estudiante se une al curso</div>
+          <div class="step-apis">POST /courses/:id/join</div>
+        </div>
+      </div>
+
+      <div class="demo-step" data-step="create-task" id="step-create-task">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <div class="step-title">Mentor asigna tarea</div>
+          <div class="step-apis">POST /courses/:id/posts</div>
+        </div>
+      </div>
+
+      <div class="demo-step" data-step="submit-task" id="step-submit-task">
+        <div class="step-number">6</div>
+        <div class="step-content">
+          <div class="step-title">Estudiante sube tarea (PDF)</div>
+          <div class="step-apis">POST /courses/posts/:id/submissions</div>
+        </div>
+      </div>
+
+      <div class="demo-step" data-step="grade" id="step-grade">
+        <div class="step-number">7</div>
+        <div class="step-content">
+          <div class="step-title">Mentor califica</div>
+          <div class="step-apis">PUT /courses/submissions/:id/grade<br/>GET /courses/:id/grades</div>
+        </div>
+      </div>
+
+      <div class="demo-step" data-step="export" id="step-export">
+        <div class="step-number">8</div>
+        <div class="step-content">
+          <div class="step-title">Exportar CSV de notas</div>
+          <div class="step-apis">GET /courses/:id/grades/export</div>
+        </div>
+      </div>
+
+      <div class="section-title">Cobertura de Pruebas por Tipo</div>
+      <div class="stat-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:20px;background:linear-gradient(135deg,#8b5cf6,#a78bfa);-webkit-background-clip:text;" id="statUnit">0</div>
+          <div class="stat-label">Unit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:20px;background:linear-gradient(135deg,#3b82f6,#60a5fa);-webkit-background-clip:text;" id="statInteg">0</div>
+          <div class="stat-label">Integracion</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:20px;background:linear-gradient(135deg,#ec4899,#f472b6);-webkit-background-clip:text;" id="statE2E">0</div>
+          <div class="stat-label">E2E</div>
+        </div>
+      </div>
+      <div class="stat-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:20px;background:linear-gradient(135deg,#ef4444,#f87171);-webkit-background-clip:text;" id="statSec">0</div>
+          <div class="stat-label">Seguridad</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:20px;background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;" id="statLoad">0</div>
+          <div class="stat-label">Carga</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ================================================================
+    // TEST DATABASE: Maps API patterns to their test coverage
+    // ================================================================
+    const TEST_MAP = {
+      'POST /auth/register': {
+        description: 'Registro de usuario',
+        tests: [
+          { type: 'unit', file: 'auth.controller.unit.test.ts', name: 'registra un nuevo Padawan correctamente' },
+          { type: 'unit', file: 'auth.controller.unit.test.ts', name: 'retorna 409 email duplicado' },
+          { type: 'integration', file: 'auth.test.ts', name: 'registra un nuevo Padawan correctamente' },
+          { type: 'integration', file: 'auth.test.ts', name: 'retorna 400 con datos invalidos' },
+          { type: 'e2e', file: 'nexus.spec.ts', name: 'E2E-REG-01: Registro exitoso' },
+          { type: 'e2e', file: 'nexus.spec.ts', name: 'E2E-REG-02: Email duplicado' },
+          { type: 'security', file: 'auth.sqli.test.ts', name: 'SEC-SQLI-01: SQL Injection en registro' },
+          { type: 'security', file: 'security.test.ts', name: 'Rate limiting en auth' },
+        ]
+      },
+      'POST /auth/login': {
+        description: 'Login de usuario',
+        tests: [
+          { type: 'unit', file: 'auth.controller.unit.test.ts', name: 'retorna JWT valido' },
+          { type: 'unit', file: 'auth.controller.unit.test.ts', name: 'retorna 401 credenciales invalidas' },
+          { type: 'integration', file: 'auth.test.ts', name: 'retorna JWT con credenciales validas' },
+          { type: 'integration', file: 'auth.test.ts', name: 'retorna 401 contrasena incorrecta' },
+          { type: 'e2e', file: 'nexus.spec.ts', name: 'E2E-LOG-01: Login exitoso' },
+          { type: 'e2e', file: 'nexus.spec.ts', name: 'E2E-LOG-02: Login fallido' },
+          { type: 'security', file: 'auth.sqli.test.ts', name: 'SEC-SQLI-02: SQL Injection en login' },
+          { type: 'security', file: 'security.test.ts', name: 'Rate limiter bloquea brute-force' },
+        ]
+      },
+      'GET /auth/me': {
+        description: 'Obtener perfil autenticado',
+        tests: [
+          { type: 'unit', file: 'auth.controller.unit.test.ts', name: 'retorna datos del usuario' },
+          { type: 'integration', file: 'auth.test.ts', name: 'retorna datos del usuario autenticado' },
+          { type: 'integration', file: 'auth.test.ts', name: 'retorna 401 sin token' },
+          { type: 'security', file: 'security.test.ts', name: 'Rechaza token expirado' },
+        ]
+      },
+      'GET /courses': {
+        description: 'Listar catalogo de cursos',
+        tests: [
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'lista cursos correctamente' },
+          { type: 'integration', file: 'courses.test.ts', name: 'GET catalogo vacio inicialmente' },
+          { type: 'e2e', file: 'course.spec.ts', name: 'E2E-CRS-01: Navegar a Cursos' },
+        ]
+      },
+      'GET /courses/mine': {
+        description: 'Mis cursos',
+        tests: [
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'retorna cursos del usuario' },
+          { type: 'integration', file: 'courses.test.ts', name: 'GET /mine retorna cursos creados' },
+        ]
+      },
+      'POST /courses': {
+        description: 'Crear curso',
+        tests: [
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'crea el curso' },
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'retorna 400 si titulo no existe' },
+          { type: 'integration', file: 'courses.test.ts', name: 'Jedi crea curso con exito' },
+          { type: 'e2e', file: 'course.spec.ts', name: 'E2E-CRS-02: Formulario de creacion' },
+          { type: 'security', file: 'course.rbac.test.ts', name: 'SEC-CRS-01: Padawan no puede crear cursos' },
+          { type: 'security', file: 'course.rbac.test.ts', name: 'SEC-CRS-02: Token manipulado rechazado' },
+          { type: 'security', file: 'course.rbac.test.ts', name: 'SEC-CRS-03: Sin cabecera auth rechazado' },
+        ]
+      },
+      'PATCH /courses/:id/open': {
+        description: 'Abrir/publicar curso',
+        tests: [
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'abre un curso existente' },
+          { type: 'integration', file: 'courses.test.ts', name: 'Jedi abre su curso' },
+        ]
+      },
+      'PATCH /courses/:id/close': {
+        description: 'Cerrar curso',
+        tests: [
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'cierra un curso existente' },
+          { type: 'integration', file: 'courses.test.ts', name: 'Jedi cierra su curso' },
+        ]
+      },
+      'POST /courses/:id/join': {
+        description: 'Estudiante se une al curso',
+        tests: [
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'Padawan se une al curso' },
+          { type: 'integration', file: 'courses.test.ts', name: 'Padawan se une al curso abierto' },
+          { type: 'integration', file: 'courses.test.ts', name: 'Doble inscripcion retorna 409' },
+        ]
+      },
+      'GET /courses/:id': {
+        description: 'Detalle del curso',
+        tests: [
+          { type: 'unit', file: 'course.controller.unit.test.ts', name: 'retorna detalle del curso' },
+          { type: 'integration', file: 'courses.test.ts', name: 'GET detalle con conteo de inscritos' },
+        ]
+      },
+      'GET /courses/:id/feed': {
+        description: 'Feed del aula del curso',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'retorna posts si tiene acceso' },
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'retorna 403 sin acceso' },
+        ]
+      },
+      'GET /courses/:id/students': {
+        description: 'Listar estudiantes inscritos',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'retorna estudiantes del curso' },
+        ]
+      },
+      'POST /courses/:id/posts': {
+        description: 'Crear publicacion/tarea en el curso',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'crea post correctamente' },
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'retorna 403 sin acceso' },
+          { type: 'integration', file: 'courses.test.ts', name: 'Jedi crea post en su curso' },
+          { type: 'e2e', file: 'task.spec.ts', name: 'E2E-TSK-01: Mentor crea tarea' },
+          { type: 'security', file: 'task.xss.test.ts', name: 'XSS en titulo de post' },
+          { type: 'security', file: 'task.xss.test.ts', name: 'XSS en contenido de post' },
+        ]
+      },
+      'POST /courses/posts/:id/submissions': {
+        description: 'Estudiante sube tarea (PDF)',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'recibe archivo y guarda submission' },
+          { type: 'unit', file: 'upload.controller.unit.test.ts', name: 'valida tipo de archivo' },
+          { type: 'e2e', file: 'upload.spec.ts', name: 'E2E-PDF-02: Input PDF requerido' },
+          { type: 'e2e', file: 'upload.spec.ts', name: 'E2E-PDF-03: Boton Entregar visible' },
+          { type: 'security', file: 'upload.malware.test.ts', name: 'Rechaza archivos ejecutables' },
+          { type: 'security', file: 'upload.malware.test.ts', name: 'Rechaza archivos > limite' },
+        ]
+      },
+      'GET /courses/posts/:id/submissions': {
+        description: 'Ver entregas de una tarea',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'retorna lista de submissions' },
+        ]
+      },
+      'PUT /courses/submissions/:id/grade': {
+        description: 'Calificar una entrega',
+        tests: [
+          { type: 'unit', file: 'grade.controller.unit.test.ts', name: 'califica una submission' },
+          { type: 'unit', file: 'grade.controller.unit.test.ts', name: 'rechaza nota fuera de rango' },
+          { type: 'integration', file: 'grade.acid.test.ts', name: 'ACID: Calificaciones concurrentes' },
+          { type: 'security', file: 'grade.csv.test.ts', name: 'CSV Injection en feedback' },
+        ]
+      },
+      'GET /courses/:id/grades': {
+        description: 'Ver calificaciones del curso',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'retorna grades del curso' },
+          { type: 'e2e', file: 'grades.spec.ts', name: 'E2E-GRD-03: Exportar CSV' },
+        ]
+      },
+      'GET /courses/:id/grades/export': {
+        description: 'Exportar notas a CSV',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'genera CSV correctamente' },
+          { type: 'e2e', file: 'grades_export.spec.ts', name: 'Exportar CSV con exito' },
+          { type: 'security', file: 'grade.csv.test.ts', name: 'CSV Injection protegido' },
+        ]
+      },
+      'POST /courses/posts/:id/comments': {
+        description: 'Agregar comentario a post',
+        tests: [
+          { type: 'unit', file: 'course-classroom.controller.unit.test.ts', name: 'agrega comentario' },
+        ]
+      },
+      'GET /notifications': {
+        description: 'Listar notificaciones',
+        tests: [
+          { type: 'unit', file: 'notification.controller.unit.test.ts', name: 'retorna notificaciones' },
+          { type: 'integration', file: 'notifications.test.ts', name: 'lista notificaciones' },
+        ]
+      },
+      'GET /notifications/unread-count': {
+        description: 'Contador de no leidas',
+        tests: [
+          { type: 'unit', file: 'notification.controller.unit.test.ts', name: 'retorna unread count' },
+        ]
+      },
+      'GET /profile/me': {
+        description: 'Mi perfil',
+        tests: [
+          { type: 'unit', file: 'profile.controller.unit.test.ts', name: 'retorna perfil del usuario' },
+        ]
+      },
+      'GET /dashboard': {
+        description: 'Dashboard principal',
+        tests: [
+          { type: 'unit', file: 'dashboard.controller.unit.test.ts', name: 'retorna datos del dashboard' },
+          { type: 'e2e', file: 'nexus.spec.ts', name: 'E2E-DASH: Dashboard accesible' },
+        ]
+      },
+    };
+
+    // ================================================================
+    // DEMO STEP DETECTION: Maps API patterns to demo flow steps
+    // ================================================================
+    const STEP_TRIGGERS = {
+      'login': ['POST /auth/login'],
+      'create-course': ['POST /courses'],
+      'open-course': ['PATCH /courses/'],
+      'join-course': ['POST /courses/', '/join'],
+      'create-task': ['POST /courses/', '/posts'],
+      'submit-task': ['POST /courses/posts/', '/submissions'],
+      'grade': ['PUT /courses/submissions/', 'GET /courses/', '/grades'],
+      'export': ['GET /courses/', '/grades/export'],
+    };
+
+    // ================================================================
+    // STATE
+    // ================================================================
+    let callCount = 0;
+    let successCount = 0;
+    let errorCount = 0;
+    let seenEndpoints = new Set();
+    let testCounts = { unit: 0, integration: 0, e2e: 0, security: 0, load: 0 };
+    let seenTests = new Set();
+    let entries = [];
+
+    // ================================================================
+    // BROADCAST CHANNEL LISTENER
+    // ================================================================
+    const channel = new BroadcastChannel('nexus-api-monitor');
+    channel.onmessage = (event) => {
+      const data = event.data;
+      if (data.type === 'api-call') {
+        addApiEntry(data);
+      }
+    };
+
+    // Also listen on localStorage for broader compatibility
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'nexus-api-log' && e.newValue) {
+        try {
+          const data = JSON.parse(e.newValue);
+          addApiEntry(data);
+        } catch {}
+      }
+    });
+
+    // ================================================================
+    // FUNCTIONS
+    // ================================================================
+    function normalizeUrl(url) {
+      // Remove base URL and query params
+      let clean = url.replace(/^https?:\/\/[^/]+/, '').replace(/\/api\/v1/, '').replace(/\?.*$/, '');
+      return clean || url;
+    }
+
+    function matchEndpoint(method, url) {
+      const cleanUrl = normalizeUrl(url);
+      const key = `${method} ${cleanUrl}`;
+
+      // Direct match first
+      if (TEST_MAP[key]) return { key, ...TEST_MAP[key] };
+
+      // Pattern matching (replace UUIDs and IDs)
+      const genericUrl = cleanUrl.replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, '/:id')
+                                  .replace(/\/[0-9]+/g, '/:id');
+      const genericKey = `${method} ${genericUrl}`;
+      if (TEST_MAP[genericKey]) return { key: genericKey, ...TEST_MAP[genericKey] };
+
+      // Fuzzy match
+      for (const [pattern, info] of Object.entries(TEST_MAP)) {
+        const [pMethod, pUrl] = pattern.split(' ', 2);
+        if (pMethod !== method) continue;
+        const regex = new RegExp('^' + pUrl.replace(/:id/g, '[^/]+') + '$');
+        if (regex.test(cleanUrl)) return { key: pattern, ...info };
+      }
+
+      return null;
+    }
+
+    function detectStep(method, url) {
+      const cleanUrl = normalizeUrl(url);
+      const fullKey = `${method} ${cleanUrl}`;
+
+      for (const [step, patterns] of Object.entries(STEP_TRIGGERS)) {
+        for (const pattern of patterns) {
+          if (fullKey.includes(pattern.replace('/', '/')) || cleanUrl.includes(pattern.split(' ').pop())) {
+            // More specific matching
+            if (step === 'login' && method === 'POST' && cleanUrl.includes('/auth/login')) return step;
+            if (step === 'create-course' && method === 'POST' && cleanUrl === '/courses') return step;
+            if (step === 'open-course' && method === 'PATCH' && cleanUrl.includes('/open')) return step;
+            if (step === 'join-course' && method === 'POST' && cleanUrl.includes('/join')) return step;
+            if (step === 'create-task' && method === 'POST' && cleanUrl.match(/\/courses\/[^/]+\/posts$/)) return step;
+            if (step === 'submit-task' && method === 'POST' && cleanUrl.includes('/submissions')) return step;
+            if (step === 'grade' && method === 'PUT' && cleanUrl.includes('/grade')) return step;
+            if (step === 'export' && method === 'GET' && cleanUrl.includes('/grades/export')) return step;
+          }
+        }
+      }
+      return null;
+    }
+
+    function addApiEntry(data) {
+      const method = (data.method || 'GET').toUpperCase();
+      const url = data.url || '';
+      const status = data.status || 200;
+      const isError = status >= 400;
+      const time = new Date().toLocaleTimeString('es-PE', { hour12: false });
+
+      callCount++;
+      if (isError) errorCount++;
+      else successCount++;
+
+      const cleanUrl = normalizeUrl(url);
+      seenEndpoints.add(`${method} ${cleanUrl}`);
+
+      // Match tests
+      const match = matchEndpoint(method, url);
+      let testBadgesHtml = '';
+      if (match && match.tests) {
+        match.tests.forEach(t => {
+          const testKey = `${t.type}:${t.file}:${t.name}`;
+          if (!seenTests.has(testKey)) {
+            seenTests.add(testKey);
+            testCounts[t.type] = (testCounts[t.type] || 0) + 1;
+          }
+        });
+
+        testBadgesHtml = '<div class="test-badges">';
+        // Group by type
+        const grouped = {};
+        match.tests.forEach(t => {
+          if (!grouped[t.type]) grouped[t.type] = [];
+          grouped[t.type].push(t);
+        });
+        for (const [type, tests] of Object.entries(grouped)) {
+          const icon = type === 'unit' ? 'U' : type === 'integration' ? 'I' : type === 'e2e' ? 'E2E' : type === 'security' ? 'SEC' : 'LD';
+          testBadgesHtml += `<span class="test-badge test-${type}" title="${tests.map(t => t.name).join('\n')}">${icon}: ${tests.length} test${tests.length > 1 ? 's' : ''}</span>`;
+        }
+        testBadgesHtml += '</div>';
+      }
+
+      // Detect demo step
+      const step = detectStep(method, url);
+      if (step) {
+        activateStep(step);
+      }
+
+      const statusClass = isError ? 'status-error' : (status === 201 ? 'status-created' : 'status-ok');
+      const statusLabel = isError ? `${status} ERR` : (status === 201 ? '201 Created' : `${status} OK`);
+
+      const entryHtml = `
+        <div class="api-entry ${isError ? 'error' : 'fresh'}">
+          <div class="api-entry-header">
+            <span class="method-badge method-${method}">${method}</span>
+            <span class="api-url">${cleanUrl}</span>
+            <span class="api-status ${statusClass}">${statusLabel}</span>
+            <span class="api-timestamp">${time}</span>
+          </div>
+          ${match ? `<div class="api-entry-meta"><span class="api-description">${match.description}</span></div>` : ''}
+          ${testBadgesHtml}
+        </div>
+      `;
+
+      const container = document.getElementById('feedContainer');
+      // Remove empty state if present
+      const emptyState = container.querySelector('.empty-state');
+      if (emptyState) emptyState.remove();
+
+      container.insertAdjacentHTML('afterbegin', entryHtml);
+
+      // Remove 'fresh' class from previous entries
+      setTimeout(() => {
+        const freshEntries = container.querySelectorAll('.api-entry.fresh');
+        freshEntries.forEach((el, i) => {
+          if (i > 0) el.classList.remove('fresh');
+        });
+      }, 300);
+
+      // Limit to 50 entries
+      const allEntries = container.querySelectorAll('.api-entry');
+      if (allEntries.length > 50) {
+        allEntries[allEntries.length - 1].remove();
+      }
+
+      updateStats();
+    }
+
+    function activateStep(stepId) {
+      const stepEl = document.getElementById(`step-${stepId}`);
+      if (!stepEl || stepEl.classList.contains('done')) return;
+
+      // Mark previous steps as done
+      const allSteps = document.querySelectorAll('.demo-step');
+      let found = false;
+      allSteps.forEach(el => {
+        if (el.id === `step-${stepId}`) {
+          found = true;
+          el.classList.add('active');
+          el.classList.remove('done');
+        } else if (!found) {
+          el.classList.add('done');
+          el.classList.remove('active');
+        }
+      });
+    }
+
+    function updateStats() {
+      document.getElementById('callCount').textContent = callCount;
+      document.getElementById('statTotal').textContent = callCount;
+      document.getElementById('statEndpoints').textContent = seenEndpoints.size;
+      document.getElementById('statSuccess').textContent = successCount;
+      document.getElementById('statErrors').textContent = errorCount;
+      document.getElementById('statUnit').textContent = testCounts.unit || 0;
+      document.getElementById('statInteg').textContent = testCounts.integration || 0;
+      document.getElementById('statE2E').textContent = testCounts.e2e || 0;
+      document.getElementById('statSec').textContent = testCounts.security || 0;
+      document.getElementById('statLoad').textContent = testCounts.load || 0;
+    }
+
+    function clearFeed() {
+      callCount = 0;
+      successCount = 0;
+      errorCount = 0;
+      seenEndpoints = new Set();
+      testCounts = { unit: 0, integration: 0, e2e: 0, security: 0, load: 0 };
+      seenTests = new Set();
+      document.getElementById('feedContainer').innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <h3>Esperando actividad...</h3>
+          <p>Interactua con la aplicacion NEXUS en la otra pestana.<br/>Las llamadas API apareceran aqui automaticamente.</p>
+        </div>
+      `;
+      document.querySelectorAll('.demo-step').forEach(el => {
+        el.classList.remove('active', 'done');
+      });
+      updateStats();
+    }
+  </script>
+</body>
+</html>
