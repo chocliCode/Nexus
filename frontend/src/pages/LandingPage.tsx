@@ -70,7 +70,7 @@ export default function LandingPage() {
             <span className="text-sm font-medium text-neutral-300">Transformando el talento tecnológico</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
-            Acelera tu carrera con <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">Mentoría Élite</span>
+            Acelera tu carrera con nosotros <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">Mentoría Élite</span>
           </h1>
           <p className="text-xl text-neutral-400 mb-12 max-w-2xl mx-auto leading-relaxed">
             Nexus conecta a estudiantes ambiciosos (Padawans) con expertos de la industria (Jedis). Aprende en cursos interactivos y domina tus habilidades con acompañamiento personalizado 1-a-1.
